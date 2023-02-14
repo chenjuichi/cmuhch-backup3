@@ -277,6 +277,7 @@ export default {
     isSort: true,   //textfield輸入資材碼
     isOK: false,    //是否顯示入庫完成的按鍵
     isEmptyRecord: false,
+    emptyRecordReady: false,
 
     //selected: [2],
     model: 0,
@@ -551,6 +552,9 @@ export default {
         this.load_5thTable_ok=false;
         this.isOK=false;
         this.home_url=this.default_home_url;    //2023-1-12 add
+
+        if (this.emptyRecordReady)      //2023-02-14 add
+          this.isEmptyRecord = true;    //2023-02-14 add
       }
     },
   },
@@ -1098,7 +1102,8 @@ export default {
 
           this.items[this.model].active=true;
         } else {
-          this.isEmptyRecord=true;
+          this.emptyRecordReady=true; //2023-02-14 add
+          //this.isEmptyRecord=true;  //2023-02-14 mark
         }
       } else {
         this.items[this.model].stockInTag_cnt=this.items[this.model].stockInTag_cnt - this.stockInTag_cnt;

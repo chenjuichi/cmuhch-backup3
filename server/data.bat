@@ -1,0 +1,9 @@
+cd database
+python deleteManyTables.py
+python tables.py
+python insertDepAndPerm.py
+python insertUsers.py
+python insertReagAndSup.py
+python insertInTags.py
+python insertOutTags.py
+cd ..

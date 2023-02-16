@@ -21,7 +21,8 @@
                 style="position:relative; top: 15px;"
                 :value="stockIntTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
-                @focus="stockInTag_reagID=''"
+                @keyup.native.backspace="handleBackspace($event)"
+
               ></v-text-field>
 
               <!--<v-select
@@ -778,10 +779,15 @@ export default {
       });
     },
 
+    handleBackspace (e) {
+      console.log("press backspace...");
+      this.stockInTag_reagID='';
+    },
+
     handleUpdateItem (e) {
       console.log("press return...");
 
-      let matchResult = this.items.find(x => x.stockOutTag_reagID === this.stockOutTag_reagID);
+      let matchResult = this.items.find(x => x.stockInTag_reagID === this.stockInTag_reagID);
       if (typeof(matchResult) == 'undefined') {
         console.log("stockOutTag_reagID is undefined...");
 

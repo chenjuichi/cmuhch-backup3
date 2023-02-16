@@ -20,7 +20,8 @@
                 style="position:relative; top: 15px;"
                 :value="stockOutTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
-                @focus="stockOutTag_reagID=''"
+                @keyup.native.backspace="handleBackspace($event)"
+
               ></v-text-field>
 
               <!--<v-select
@@ -777,6 +778,11 @@ export default {
         //this.tosterOK = true;   //true: 顯示錯誤訊息畫面
         this.load_4thTable_ok = false;
       });
+    },
+
+    handleBackspace (e) {
+      console.log("press backspace...");
+      this.stockOutTag_reagID='';
     },
 
     handleUpdateItem (e) {

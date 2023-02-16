@@ -21,13 +21,13 @@ class User(BASE):
     emp_name = Column(String(10), nullable=False)
     password = Column(String(100), nullable=False)
     # password = Column(String(100), default='a12345678')
-    dep_id = Column(Integer, ForeignKey('department.id'))
-    perm_id = Column(Integer, ForeignKey('permission.id'))
-    setting_id = Column(Integer, ForeignKey('setting.id'))
+    dep_id = Column(Integer, ForeignKey('department.id'))   # 一對多中的 "多"
+    perm_id = Column(Integer, ForeignKey('permission.id'))  # 一對多中的 "多"
+    setting_id = Column(Integer, ForeignKey('setting.id'))  # 一對多中的 "多"
     isRemoved = Column(Boolean, default=True)  # false:已經刪除資料
     isOnline = Column(Boolean, default=False)  # false:user不再線上(logout)
-    _instocks = relationship('InTag', backref="user")  # 一對多中的 "一"
-    _outstocks = relationship('OutTag', backref="user")  # 一對多中的 "一"
+    _instocks = relationship('InTag', backref="user")     # 一對多中的 "一"
+    _outstocks = relationship('OutTag', backref="user")   # 一對多中的 "一"
     create_at = Column(DateTime, server_default=func.now())
     # instock_id = relationship('InStock', backref='user')
 

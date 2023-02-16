@@ -40,7 +40,7 @@
                 <v-card width="82vw">
                   <v-card-title>
                     <span class="text-h5">{{ formTitle }}</span>
-                <!-- -->
+                <!-- 進度條 -->
                     <ul class="list-unstyled multi-steps">
                       <li id="step-1" style="font-size: 16px; font-weight: 600;" :class="{'is-active': active1}">
                         領料日期
@@ -628,6 +628,7 @@ export default {
 
     selectSuppliers(newValue, oldValue) {
       console.log("hello....selectSuppliers: ", newValue, oldValue, newValue.length)
+      //console.log("2.check...", this.temp_suppliers);
 
       //if (newValue!=oldValue) {
         this.load_5thTable_ok=false;    //reset read_flag, false: ready to read, true: readed ok
@@ -670,8 +671,12 @@ export default {
 
       if (val) {
         this.load_3thTable_ok=false;
-        console.log("supplier: ", this.temp_suppliers)
+        console.log("b, load_3thTable_ok, supplier: ", this.suppliers)
         this.suppliers = this.temp_suppliers.map(item => Object.values(item)[4]); //從object中copy value至array
+
+        this.suppliers.unshift('全部');  //將'全部'push到陣列的第1個, //2023-02-15 add
+
+        console.log("a, load_3thTable_ok, supplier: ", this.suppliers)
       }
     },
 
@@ -955,7 +960,10 @@ export default {
       axios.get(path)
       .then((res) => {
         this.temp_suppliers = res.data.outputs;
-        console.log("GET ok, total records:", res.data.outputs.length);
+        console.log("GET ok, total temp_suppliers: ",this.temp_suppliers, res.data.outputs.length);
+
+        //this.temp_suppliers.unshift('全部');  //將'全部'push到陣列的第1個, //2023-02-15 add
+
         this.load_3thTable_ok=true;   //true: v-select的供應商資料ok
       })
       .catch((error) => {
@@ -982,10 +990,18 @@ export default {
       .then((res) => {
         this.temp_stock_desserts = res.data.outputs_for_stockOut;
 
+        //console.log("aa0.check...", this.temp_suppliers);
+
         this.temp_suppliers = res.data.outputs_for_supplier.filter(function(item, pos, self) {
           return self.indexOf(item) == pos;
         });
-        this.temp_suppliers.unshift('全部');
+
+        //console.log("aa1.check...", this.temp_suppliers);
+
+        this.temp_suppliers.unshift('全部');  //將'全部'push到陣列的第1個
+
+        //console.log("aa2.check...", this.temp_suppliers);
+
         console.log("POST ok, and return total records: (supplier)", res.data.outputs_for_supplier.length, " (stock)", res.data.outputs_for_stockOut.length);
         this.load_4thTable_ok=true;
       })
@@ -1003,12 +1019,15 @@ export default {
       for (let i=0; i<this.selectSuppliers.length; i++) {
         arr_for_suppliers.push(this.selectSuppliers[i])
       }
+      //console.log("3.check...", this.temp_suppliers);
 
       let arr_for_products=[]
       for (let i=0; i<this.selectedCatalogs.length; i++) {
         arr_for_products.push(this.products[this.selectedCatalogs[i]])
       }
       console.log("payload: ", arr_for_products, arr_for_suppliers)
+      //console.log("3-1.check...", this.temp_suppliers);
+
       var payload= {
         catalogs:  arr_for_products,
         suppliers: arr_for_suppliers,
@@ -1019,6 +1038,8 @@ export default {
         this.temp_stock_desserts = res.data.outputs_for_stockOut;
 
         console.log("output: ", res.data.outputs_for_stockOut)
+        //console.log("4.check...", this.temp_suppliers);
+
         /*
         this.temp_stock_desserts = res.data.outputs_for_stockOut.filter((value, index, self) =>
           index === self.findIndex((t) => (
@@ -1256,13 +1277,24 @@ export default {
       this.stock_selected=[];
       this.selectSuppliers=[];
       //this.products=[]
-      this.selectedCatalogs=[];
+      //this.selectedCatalogs=[]; //2023-02-15 mark
       //
+
+      this.active1 = true;
+      this.active2 = false;
+      this.active3 = false;
+      this.active4 = false;
+      this.step = 'step0';
+      this.step_trans = 0;
+
+
       this.dialog = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
       })
+
+      //console.log("1.check...", this.temp_suppliers);
     },
 
     closeDelete () {

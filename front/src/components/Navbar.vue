@@ -101,6 +101,17 @@
             </div>
 
         </b-dropdown-item>
+
+        <b-dropdown-item href="#">
+
+            <div>
+                <b-avatar variant="primary" style="width: 1.5rem; height: 1.5rem; margin-bottom: 3pt;"></b-avatar>
+                關於 build 0216
+            </div>
+
+        </b-dropdown-item>
+
+
       </b-nav-item-dropdown>
     </b-navbar-nav>
   </b-navbar>

@@ -21,6 +21,7 @@
                 style="position:relative; top: 15px;"
                 :value="stockIntTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
+                @focus="stockInTag_reagID=''"
               ></v-text-field>
 
               <!--<v-select

@@ -23,7 +23,7 @@
     </v-row>
 
     <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-      <v-card width="85vw" class="pa-md-4 mt-5 mx-lg-auto">
+      <v-card width="90vw" class="pa-md-4 mt-5 mx-lg-auto">
         <v-data-table
           :headers="headers"
           :items="desserts"
@@ -328,9 +328,9 @@ export default {
             return c1 >= cStart && c1 <= cEnd
           },
         },
-        { text: '領料人員', sortable: true, value: 'reqRecord_Employer', width: '9%',},
+        { text: '領料人員', sortable: true, value: 'reqRecord_Employer', width: '10%',},
         //{ text: '領用單位', sortable: false, value: 'reag_Out_unit', width: '15%' },
-        { text: '領料數量', sortable: false, value: 'reqRecord_cnt', width: '8%' },
+        { text: '領料數量', sortable: false, value: 'reqRecord_cnt', width: '10%' },
       ]
     },
 

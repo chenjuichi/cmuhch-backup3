@@ -415,16 +415,19 @@ export default {
     //資料表頭
     headers: [
       { text: 'ID', sortable: false, value: 'id', align: 'start', width: '4%' },
-      { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '6%' },
+      { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '8%' },
       { text: '品名', sortable: true, value: 'stockInTag_reagName', width: '12%' },
+
+      { text: '批次', sortable: false, value: 'stockInTag_stockInBatch', width: '8%', }, //2023-2-16 add
+
       { text: '效期', sortable: true, value: 'stockInTag_reagPeriod', width: '8%' },
       { text: '保存溫度', sortable: false, value: 'stockInTag_reagTemp', width: '8%' },
-      { text: '入庫日期', sortable: true, value: 'stockInTag_Date', width: '8%' },
-      { text: '入庫人員', sortable: true, value: 'stockInTag_Employer', width: '10%' },
+      { text: '入庫日期', sortable: true, value: 'stockInTag_Date', width: '10%' },
+      { text: '入庫人員', sortable: true, value: 'stockInTag_Employer', width: '8%' },
       { text: '格位', sortable: false, value: 'stockInTag_grid', width: '8%' },
-      { text: '在庫數', sortable: false, value: 'stockInTag_cnt', width: '8%' },
-      { text: '盤點數', sortable: false, value: 'stockInTag_cnt_inv_mdf', width: '8%' },
-      { text: '說明', sortable: false, value: 'stockInTag_comment', width: '20%' },
+      { text: '在庫數', sortable: false, value: 'stockInTag_cnt', width: '7%' },
+      { text: '盤點數', sortable: false, value: 'stockInTag_cnt_inv_mdf', width: '7%' },
+      { text: '說明', sortable: false, value: 'stockInTag_comment', width: '12%' },
     ],
 
     pagination: {

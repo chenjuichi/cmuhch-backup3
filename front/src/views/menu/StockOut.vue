@@ -20,6 +20,7 @@
                 style="position:relative; top: 15px;"
                 :value="stockOutTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
+                @focus="stockOutTag_reagID=''"
               ></v-text-field>
 
               <!--<v-select

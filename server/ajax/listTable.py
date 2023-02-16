@@ -1069,6 +1069,7 @@ def list_inventorys():
                 'id': temp_kk,
                 'stockInTag_reagID': _reagent.reag_id,          # 資材碼
                 'stockInTag_reagName': _reagent.reag_name,      # 品名
+                'stockInTag_stockInBatch': intag.batch,         #批次, # 2023-0216 add
                 'stockInTag_reagPeriod': intag.reag_period,     # 效期, 依2022-12-12操作教育訓練建議作修正
                 'stockInTag_reagTemp': k1,    # 保存溫度
                 'stockInTag_Date': intag.intag_date,    # 入庫日期

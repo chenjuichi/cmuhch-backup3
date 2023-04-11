@@ -388,11 +388,10 @@ class InTag(BASE):
     create_at = Column(DateTime, server_default=func.now())
 
     def __repr__(self):  # 定義變數輸出的內容
-        # return "id={}, user_id={}, reagent_id={}, count={}, unit={}, grid_id={}".format(self.id, self.user_id, self.reagent_id, self.count, self.unit, self.grid_id)
         return "id={}, user_id={}, reagent_id={}, count={}, reag_period={}, \
-                batch={}, intag_date={}, stockIn_alpha={}, count_inv_modify={}, comment={}, grid_id={}".format(
-            self.id, self.user_id, self.reagent_id, self.count, self.reag_period,
-            self.batch, self.intag_date, self.stockIn_alpha, self.count_inv_modify, self.comment,)
+                batch={}, intag_date={}, stockIn_alpha={}, count_inv_modify={}, comment={}"\
+                .format(self.id, self.user_id, self.reagent_id, self.count, self.reag_period,\
+                self.batch, self.intag_date, self.stockIn_alpha, self.count_inv_modify, self.comment)
 
     def get_dict(self):
         return {

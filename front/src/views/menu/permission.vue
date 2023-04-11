@@ -60,6 +60,13 @@
           <template v-slot:no-data>
             <v-btn color="primary" @click="initialize">Reset</v-btn>
           </template>
+
+          <!--
+          <template v-slot:no-data>
+            <strong><font color='red'>目前沒有資料</font></strong>
+          </template>
+          -->
+
         </v-data-table>
       </v-card>
     </v-row>

@@ -21,7 +21,7 @@
                 :value="stockOutTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
                 @keyup.native.backspace="handleBackspace($event)"
-
+                @paste="handlePaste"
               ></v-text-field>
 
               <!--<v-select
@@ -778,6 +778,12 @@ export default {
         //this.tosterOK = true;   //true: 顯示錯誤訊息畫面
         this.load_4thTable_ok = false;
       });
+    },
+
+    handlePaste (evt) {
+      console.log('on paste', evt.clipboardData.getData('text'))
+
+      //console.log('on paste', evt.clipboardData.getData('text/plain'))
     },
 
     handleBackspace (e) {

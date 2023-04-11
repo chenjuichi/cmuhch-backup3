@@ -182,6 +182,10 @@
             </v-edit-dialog>
           </template>
 
+          <template v-slot:no-data>
+            <strong><font color='red'>目前沒有資料</font></strong>
+          </template>
+
         </v-data-table>
       </v-card>
     </v-row>

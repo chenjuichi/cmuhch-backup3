@@ -17,35 +17,40 @@
             :options.sync="pagination"
             :footer-props="{itemsPerPageText: '每頁的資料筆數'}"
           >
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title style="height: 40px;">入庫標籤列印作業</v-toolbar-title>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" class="mb-2" @click="printSection" depressed :disabled="!check_selected">
-                <v-icon left dark>mdi-printer</v-icon>
-                預覽標籤
-              </v-btn>
-            </v-toolbar>
-            <!--bug, 待解決
-            <v-switch
-              v-model="singleSelect"
-              label="個別選項"
-              style="height: 40px; margin-top:0px; padding-top:0px;"
-            ></v-switch>
-            -->
-          </template>
-          <template v-slot:[`item.stockInTag_cnt`]="{ item }">
-            <v-text-field
-              v-model="item.stockInTag_cnt"
-              type="number"
-              min=1
-              max=20
-              oninput="if(Number(this.value) > Number(this.max)) this.value = this.max;"
-              @input="getdata(item)"
-              :disabled="currentUser.perm>2"
-            ></v-text-field>
-          </template>
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title style="height: 40px;">入庫標籤列印作業</v-toolbar-title>
+                <v-divider class="mx-4" inset vertical></v-divider>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" class="mb-2" @click="printSection" depressed :disabled="!check_selected">
+                  <v-icon left dark>mdi-printer</v-icon>
+                  預覽標籤
+                </v-btn>
+              </v-toolbar>
+              <!--bug, 待解決
+              <v-switch
+                v-model="singleSelect"
+                label="個別選項"
+                style="height: 40px; margin-top:0px; padding-top:0px;"
+              ></v-switch>
+              -->
+            </template>
+            <template v-slot:[`item.stockInTag_cnt`]="{ item }">
+              <v-text-field
+                v-model="item.stockInTag_cnt"
+                type="number"
+                min=1
+                max=20
+                oninput="if(Number(this.value) > Number(this.max)) this.value = this.max;"
+                @input="getdata(item)"
+                :disabled="currentUser.perm>2"
+              ></v-text-field>
+            </template>
+
+            <template v-slot:no-data>
+              <strong><font color='red'>目前沒有資料</font></strong>
+            </template>
+
           </v-data-table>
         </v-card>
       </v-row>

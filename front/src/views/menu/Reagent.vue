@@ -219,7 +219,7 @@
                             label="供應商"
                             dense
                             outlined
-
+                            no-data-text="目前沒有供應商資料!"
                             v-model="editedItem.reag_supplier"
                             @focus="fieldFocus"
                             @click="fieldCheck"
@@ -282,11 +282,11 @@
               mdi-delete
             </v-icon>
           </template>
-          <!--
+
           <template v-slot:no-data>
-            <v-btn color="primary" @click="initialize">Reset</v-btn>
+            <strong><font color='red'>目前沒有資料</font></strong>
           </template>
-          -->
+
         </v-data-table>
       </v-card>
     </v-row>
@@ -401,6 +401,9 @@ export default {
 
     products: [],         //slide-item的主要產品資料
     temp_products: [],
+
+    temp_departments: [],
+
     product_item: '',
     selectProduct: false,
 
@@ -449,6 +452,8 @@ export default {
     load_2thTable_ok: false,
     load_3thTable_ok: false,
     load_4thTable_ok: false,
+
+    load_5thTable_ok: false,      //20230406 add
   }),
 
   computed: {
@@ -574,6 +579,19 @@ export default {
       }
     },
 
+    load_5thTable_ok(val) {   //20230406 add
+      if (val) {
+        this.reagents = Object.assign([], this.temp_departments);
+        let temp_reagents = this.reagents.map(function(p) {  //
+          return p.dep_name;
+        });
+        this.reagents = [...new Set(temp_reagents)];  //去除重複項目
+
+        this.load_5thTable_ok=false;
+        this.listReagents();
+      }
+    },
+
     load_4thTable_ok(val) {
       if (val) {
         this.suppliers = Object.assign([], this.temp_suppliers);
@@ -603,12 +621,16 @@ export default {
     load_SingleTable_ok(val) {
       if (val) {
         this.desserts = Object.assign([], this.temp_desserts);
-        let temp_reagents = this.temp_desserts.map(function(p) {  //
-          return p.reag_catalog;
-        });
-        this.reagents = [...new Set(temp_reagents)];  //去除重複項目
-        //let obj= {reag_catalog: '其他',}
-        this.reagents.push('其他');
+
+        if (this.editedIndex != -1) {    //add
+          let temp_reagents = this.temp_desserts.map(function(p) {  //
+            return p.reag_catalog;
+          });
+          this.reagents = [...new Set(temp_reagents)];  //去除重複項目
+          //let obj= {reag_catalog: '其他',}
+        }
+
+        //this.reagents.push('其他');     //20230406 remove
 
         this.load_SingleTable_ok=false;
         this.listSuppliers();
@@ -627,14 +649,16 @@ export default {
 
     this.load_SingleTable_ok=false;
     this.initAxios();
-    this.listReagents();
+    this.listDepartment();    // 20230406  modify
+    //this.listReagents();    //
     //this.initialize()
   },
 
   methods: {
     initialize() {
       this.load_SingleTable_ok=false;
-      this.listReagents();
+      this.listDepartment();    // 20230406  modify
+      //this.listReagents();    //
     },
 
     listReagents() {
@@ -649,6 +673,21 @@ export default {
       .catch((error) => {
         console.error(error);
         this.load_SingleTable_ok=false;
+      });
+    },
+
+    listDepartment() {      //20230406 add
+      const path = '/listDepartments';
+      console.log("listDepartments, Axios get data...")
+      axios.get(path)
+      .then((res) => {
+        this.temp_departments = res.data.outputs;
+        console.log("GET ok, total records:", res.data.outputs);
+        this.load_5thTable_ok=true;
+      })
+      .catch((error) => {
+        console.error(error);
+        this.load_5thTable_ok=false;
       });
     },
 

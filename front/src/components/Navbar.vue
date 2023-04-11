@@ -210,6 +210,15 @@ export default {
     this.listStockInTagPrintCount();
   },
 
+  destoyed() {
+    clearInterval(this.myTimer);
+  },
+
+  beforeRouteLeave(to, from, next) {
+    clearInterval(this.myTimer);
+    next();
+  },
+
   mounted() {
     //this.navBar_in_drafTags=this.$route.params.in_drafTags;
     //if (typeof(this.navBar_in_drafTags) === 'undefined') {
@@ -232,6 +241,8 @@ export default {
     //this.navBar_in_drafTags=2;
 
     //====
+    this.myTimer = setInterval(this.checkConnection, 10000);  //每10秒check server連線概況
+
     this.$root.$on('bv::dropdown::show', bvEvent => {
       if (bvEvent.componentId === 'dropdown-1') {
         this.isDropdown1Visible = true;
@@ -317,6 +328,9 @@ export default {
       temp_count_in: 0,
       count_out: 0,
       temp_count_out: 0,
+
+      isOnline: true,
+      myTimer: '',            //在component內設定timer, timer的handle
 
       load_SingleTable_ok: false, //for get stockin table data
       load_2thTable_ok: false,    //for get reagent table data
@@ -413,7 +427,23 @@ export default {
 
     handleHover(e) {
       console.log("nav-dropdown key press: ", e);
-    }
+    },
+
+    async checkConnection() {
+      try {
+        let res = await this.fetchFunction();
+        this.isOnline = res.status >=200 && res.status < 300;
+      } catch (e) {
+        this.isOnline = false;
+        throw e;
+      };
+
+      console.log("Application is ", this.isOnline);
+    },
+
+    fetchFunction() {
+      return axios.get('/hello');
+    },
   },
 }
 </script>

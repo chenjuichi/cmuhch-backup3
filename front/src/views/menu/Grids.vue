@@ -69,6 +69,20 @@
                             label="品名"
                             readonly
                           ></v-text-field>
+                          <!--
+                          <v-autocomplete
+                            v-model="editedItem.grid_reagName"
+                            :items="autocomplete_items"
+                            :value="fromReagIdDisp"
+                            :loading="autocomplete_loading"
+                            :search-input.sync="autocomplete_search"
+                            hide-details
+                            hide-selected
+                            label="品名"
+                            solo
+                          >
+                          </v-autocomplete>
+                          -->
                         </v-col>
                       </v-row>
                       <!-- 第2列-->
@@ -191,7 +205,14 @@ export default {
     currentUser: {},
     permDialog: false,
     rightDialog: false,
-
+    //2023-05-03 add
+    autocomplete_loading: false,
+    autocomplete_items: [],
+    autocomplete_select: null,
+    autocomplete_search: null,
+    temp_autocomplete_items: [],
+    redirectTimeout: null,  //2023-05-04 add
+    //
     snackbar: false,
     snackbar_color: 'success',
     snackbar_right: true,
@@ -327,6 +348,8 @@ export default {
 
     load_SingleTable_ok: false, //for get grids table data
     load_2thTable_ok: false,    //for get reagent table data
+
+    load_4thTable_ok: false,    //2023-05-03 add
   }),
 
   computed: {
@@ -334,20 +357,20 @@ export default {
       return this.editedIndex === -1 ? '新增資料' : '編輯資料'
     },
 
-    fromReagIdDisp () {
+    fromReagIdDisp() {  //return reagent name
       if (this.editedItem.grid_reagID != '') {
-        console.log("result 1...");
+        console.log("fromReagIdDisp, result 1-1...", this.reagent_Desserts, this.editedItem.grid_reagID);
         const result = this.reagent_Desserts.find(x => x.reag_id === this.editedItem.grid_reagID);
         //this.reagent_Desserts.find(x => x.reag_id === this.editedItem.grid_reagID || { value: null }).value;
         //console.log("value: ", value, typeof(value));
-        console.log("result 1-2...", result);
+        console.log("fromReagIdDisp, result 1-2...", result);
 
         if (result != 'undefined' && result != null) {
-          console.log("result 2...", result);
+          console.log("fromReagIdDisp, result 2-1...", result);
           let val= Object.values(result);
           this.editedItem.grid_reagName=val[1];
           this.errorShow=false;
-          console.log("result: ", result, typeof(result), val[1]);
+          console.log("fromReagIdDisp, result 2-2: ", result, typeof(result), val[1]);
           return val[1];
         } else {
           this.editedItem.grid_reagName='';
@@ -356,7 +379,36 @@ export default {
         }
       }
     },
+    // 2023-05-03 add
+    fromReagNameDisp() {  //show reagent id, by name
+      if (this.autocomplete_search !=null)
+        this.editedItem.grid_reagName = this.autocomplete_search;
 
+      if (this.editedItem.grid_reagName != '') {
+
+        const result = this.reagent_Desserts.find(x => x.grid_reagName === this.editedItem.grid_reagName);
+
+        console.log("fromReagNameDisp, result 1...", this.reagent_Desserts, result, this.reagent_Desserts);
+
+        if (result != 'undefined' && result != null) {
+          console.log("fromReagNameDisp, result 2...", result, this.editedIndex);
+          if (this.editedIndex == -1) {
+            this.editedItem.grid_reagID = result.reag_id;
+          }
+          console.log("fromReagNameDisp, result 22...", result, this.editedIndex, this.editedItem);
+
+          this.errorShowForReagName=false;
+          return this.editedItem.grid_reagID;
+        } else {
+          console.log("fromReagNameDisp, result 3...", result);
+          this.editedItem.grid_reagID='';
+
+          this.errorShowForReagName=true;
+          return '';
+        }
+      }
+    },
+    //
     checkDataForSaveButton() {
       if (!!this.editedItem.grid_reagID && !!this.editedItem.grid_reagName) {
         return false;
@@ -394,7 +446,21 @@ export default {
         this.load_SingleTable_ok=false;
         this.listReagents();
       }
-    }
+    },
+    // 2023-05-03 add
+    load_4thTable_ok(val) {
+      console.log("load_4thTable_ok, val: ", val);
+
+      if (val) {
+        this.autocomplete_items = Object.assign([], this.temp_autocomplete_items);
+        this.load_4thTable_ok = false;
+      }
+    },
+
+    autocomplete_search(val) {
+      val && val !== this.autocomplete_select && this.querySelections(val)
+    },
+    //
   },
 
   created () {
@@ -459,7 +525,40 @@ export default {
         this.load_2thTable_ok=false;
       });
     },
+    // 2023-05-03 add
+    listGridForCheckByReagentName() {
+      console.log("listGridForCheckByReagentName, Axios post data...", this.editedItem.grid_reagName)
+      const path = '/listGridForCheckByReagentName';
 
+      var payload= {
+        reag_name:  this.editedItem.grid_reagName,
+      };
+      axios.post(path, payload)
+      .then((res) => {
+        console.log("GET ok, status: ", res.data.status);
+          this.temp_autocomplete_items=res.data.outputs;
+
+          this.load_4thTable_ok=true;
+      })
+      .catch((error) => {
+        console.error(error);
+        console.log("通訊錯誤!");
+
+        this.load_4thTable_ok=false;
+      });
+    },
+
+    querySelections (v) {
+      this.autocomplete_loading = true
+      // Simulated ajax query
+      this.redirectTimeout = setTimeout(() => {
+        this.autocomplete_items = this.temp_autocomplete_items.filter(e => {
+          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
+        })
+        this.autocomplete_loading = false;
+      }, 500)
+    },
+    //
     editItem (item) {
       if (this.currentUser.perm >2) {
         this.rightDialog = true;
@@ -618,6 +717,13 @@ export default {
       console.log("press permission Close Button...");
     },
   },
+
+  beforeDestroy() {
+    if (this.redirectTimeout) {
+      clearTimeout(this.redirectTimeout);
+    }
+  },
+
 }
 </script>
 

@@ -53,7 +53,11 @@ const routes = [
   { path: '/app1', name: 'App1', component: App1},
   { path: '/app2', name: 'App2', component: App2},
   { path: '/app4', name: 'App4', component: App4},
-  { path: '/navbar', name: 'Navbar', component: Navbar},
+  { path: '/navbar', name: 'Navbar', component: Navbar,
+    //children: [
+    //  { path: 'emp',   name: 'Employer', component: Employer},
+    //],
+  },
   { path: '/reqRec', name: 'ReqRecord', component: ReqRecord},
   { path: '/stockRec', name: 'StockRecord', component: StockRecord},
   { path: '/invent', name: 'Inventory', component: Inventory},

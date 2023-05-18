@@ -355,15 +355,17 @@ export default {
     },	//end 'empID': function()
 
     'registerUser.name': function () {
+      let len=this.registerUser.name.length
+      /*
       let isNameRule = /^[\u4e00-\u9fa5_a-zA-Z]+$/;
 
       this.nameErrMsg = '';
       let result = this.registerUser.name.search(isNameRule);
-      let len=this.registerUser.name.length
       console.log("result, len: ", result, len);
-
+      */
       this.nameErrMsg = '';
-      if (result==-1 || len>10) {
+      //if (result==-1 || len>10) {
+      if (len > 10) {
           this.nameErrMsg = '資料格式錯誤或資料長度太長!';
       }
     },	//end 'name': function()

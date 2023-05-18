@@ -274,7 +274,7 @@ export default {
       //console.log("desserts: ", matchResult);
 
       if (result != -1 || len==0) {
-        if (typeof(matchResult) != 'undefined') {
+        if (typeof(matchResult) != 'undefined' && this.editedIndex == -1) { //2023-04-18 MODIFY
           //console.log("typeof is undefined...");
           this.IDErrMsg = '員工編號與 ' + matchResult.emp_name + ' 重複!';
         } else {
@@ -284,17 +284,19 @@ export default {
         this.IDErrMsg = '員工編號資料格式錯誤!';
       }
     },	//end 'empID': function()
-
+    //2023-04-18 MODIFY
     'editedItem.emp_name': function () {
+      let len=this.editedItem.emp_name.length
+      /*
       let isNameRule = /^[\u4e00-\u9fa5_a-zA-Z]+$/;
 
       this.nameErrMsg = '';
       let result = this.editedItem.emp_name.search(isNameRule);
-      let len=this.editedItem.emp_name.length
       console.log("result, len: ", result, len);
-
+      */
       this.nameErrMsg = '';
-      if (result==-1 || len>10) {
+      //if (result==-1 || len>10) {
+      if (len > 10) {
           this.nameErrMsg = '資料格式錯誤或資料長度太長!';
       }
     },	//end 'name': function()
@@ -478,6 +480,8 @@ export default {
 
     save() { //確定 新增/編輯 user資料
       console.log("click save button, editedIndex: ", this.editedIndex);
+
+      this.editedItem.emp_id=this.editedItem.emp_id.trim();     //2023-05-13 add
 
       if (this.editedIndex == -1) {    //add
         this.createUser(this.editedItem);

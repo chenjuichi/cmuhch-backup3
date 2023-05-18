@@ -21,19 +21,21 @@ def modify_InTags_grid(_id, _station, _layout, _pos, _reagID):
     return_gridID = 0  # 相同儲位
 
     s = Session()
-    target_grid = s.query(Grid).filter_by(station=_station, layout=_layout, pos=_pos).first()
+    target_grid = s.query(Grid).filter_by(
+        station=_station, layout=_layout, pos=_pos).first()
 
     if not target_grid:
         # new grid, 建立新的儲位
         new_grid = Grid(station=_station, layout=_layout, pos=_pos)
         s.add(new_grid)
         s.flush()
-        current_reagent = s.query(Reagent).filter_by(reag_id = _reagID).first()
+        current_reagent = s.query(Reagent).filter_by(reag_id=_reagID).first()
         current_reagent.grid_id = new_grid.id
         s.commit()
         return_gridID = new_grid.id
     elif not (target_grid.id == _id):  # target grid不等於既有的儲位, 就是不同儲位
-        reagent_count = s.query(Reagent).filter_by(grid_id=target_grid.id).count()
+        reagent_count = s.query(Reagent).filter_by(
+            grid_id=target_grid.id).count()
 
         if reagent_count >= 1:  # 已經放其他試劑, 同一儲位不能放不同試劑
             print("hello, another same records...")
@@ -149,7 +151,7 @@ def update_reagent():
     _out_unit = _block['reag_Out_unit']
     _scale = _block['reag_scale']
     # _period = _block['reag_period']     #依2022-12-12操作教育訓練建議作修正
-    _stock = _block['reag_stock'] #在庫安全庫存量
+    _stock = _block['reag_stock']  # 在庫安全庫存量
     _temp = _block['reag_temp']
     _catalog = _block['reag_catalog']
     _catalog = _block['reag_catalog']
@@ -219,9 +221,10 @@ def update_supplier():
     _address = request_data['sup_address']
     _contact = request_data['sup_contact']
     _products = request_data['sup_products']
-
-    data_check = (True, False)[_id == "" or _name ==
-                               "" or _address == "" or _contact == "" or _phone == "" or len(_products) == 0]
+    # 2023-04-18 MODIFY
+    # data_check = (True, False)[_id == "" or _name == ""
+    #                           or _address == "" or _contact == "" or _phone == "" or len(_products) == 0]
+    data_check = (True, False)[_id == "" or _name == "" or _contact == ""]
 
     return_value = True       # true: update資料成功, false: update資料失敗
     if not data_check:  # false: 資料不完全
@@ -367,7 +370,8 @@ def update_grid():
             return_value = True
         elif not (target_grid.id == _id):  # target grid不等於既有的儲位
             # print("hello__0_1", _id, target_grid.id)
-            reagent_count = s.query(Reagent).filter_by(grid_id = target_grid.id).count()
+            reagent_count = s.query(Reagent).filter_by(
+                grid_id=target_grid.id).count()
             # print("hello__0_2", reagent_count)
             if reagent_count >= 2:
                 print("hello, another same records...")
@@ -382,7 +386,8 @@ def update_grid():
             # ---
             else:
                 # update current grid link
-                s.query(Reagent).filter(Reagent.reag_id == _reagID).update({"grid_id": target_grid.id})
+                s.query(Reagent).filter(Reagent.reag_id == _reagID).update(
+                    {"grid_id": target_grid.id})
 
                 # print("hello__3")
                 s.commit()
@@ -418,13 +423,21 @@ def update_grids_for_led():
 
         for j in range(5):
             for obj in _tab_segs_block[segs_index[j]]:  # 第i站第j層資料
-                # print("obj: ", i+1, j+1, obj)
+                print("obj: ", i+1, j+1, obj)
 
+                # _currentGrid = s.query(Grid).filter_by(
+                #    station=obj['grid_station'], layout=obj['grid_layout'], seg_id=obj['seg_id'],).first()
                 _currentGrid = s.query(Grid).filter_by(
-                    station=obj['grid_station'], layout=obj['grid_layout'], seg_id=obj['seg_id'],).first()
+                    station=i+1, layout=j+1, seg_id=obj['seg_id'],).first()
                 if not _currentGrid:
-                    _newGrid = Grid(station=obj['grid_station'],
-                                    layout=obj['grid_layout'],
+                    # _newGrid = Grid(station=obj['grid_station'],
+                    #                layout=obj['grid_layout'],
+                    #                seg_id=obj['seg_id'],
+                    #                pos=obj['seg_id'],
+                    #                range0=obj['range0'],
+                    #                range1=obj['range1'],)
+                    _newGrid = Grid(station=i+1,
+                                    layout=j+1,
                                     seg_id=obj['seg_id'],
                                     pos=obj['seg_id'],
                                     range0=obj['range0'],
@@ -496,7 +509,7 @@ def update_StockOut_and_StockIn_data():
     request_data = request.get_json()
 
     _data = request_data['stockOut_array']
-    _count = request_data['stockOut_count'] #筆數
+    _count = request_data['stockOut_count']  # 筆數
     print("_data, _count: ", _data, _count)
 
     return_value = True  # true: 資料正確
@@ -517,7 +530,7 @@ def update_StockOut_and_StockIn_data():
         OutTag.isRemoved == True)
     total = cursor.scalar()
 
-    #intag.stockOut_temp_count = total  # 修改入庫資料
+    # intag.stockOut_temp_count = total  # 修改入庫資料
     intag.stockOut_temp_count = total  # 修改入庫資料, 暫時為0
 
     s.commit()
@@ -603,20 +616,22 @@ def update_stockin_by_printFlag():
         s = Session()
 
         for obj in _blocks:
-            _user = s.query(User).filter_by(emp_name=obj['stockInTag_Employer']).first()
+            _user = s.query(User).filter_by(
+                emp_name=obj['stockInTag_Employer']).first()
             if not _user:
                 return_value = False  # if the user data does not exist
                 return_message = '資料錯誤!'
                 break
 
-            _reagent = s.query(Reagent).filter_by(reag_id=obj['stockInTag_reagID']).first()
+            _reagent = s.query(Reagent).filter_by(
+                reag_id=obj['stockInTag_reagID']).first()
             if not _reagent:
                 return_value = False  # if the reagent data  does not exist
                 return_message = '資料錯誤!'
                 break
 
             waitting_stockIn = s.query(InTag).filter_by(id=obj['id']).first()
-            waitting_stockIn.isPrinted=True
+            waitting_stockIn.isPrinted = True
             '''
             new_stockIn = InTag(user_id=_user.id,
                                 reagent_id=_reagent.id,
@@ -637,6 +652,7 @@ def update_stockin_by_printFlag():
         'status': return_value,
         'message': return_message,
     })
+
 
 '''
 @updateTable.route("/updateStockInByPrintFlag", methods=['POST'])
@@ -691,6 +707,7 @@ def update_stockin_by_printFlag():
     })
 '''
 
+
 @updateTable.route("/updateStockOutByPrintFlag", methods=['POST'])
 def update_stockout_by_printFlag():
     print("updateStockOutByPrintFlag....")
@@ -714,7 +731,8 @@ def update_stockout_by_printFlag():
         s = Session()
 
         for obj in _blocks:
-            _user = s.query(User).filter_by(emp_name=obj['stockOutTag_Employer']).first()
+            _user = s.query(User).filter_by(
+                emp_name=obj['stockOutTag_Employer']).first()
             #print("output barcode, step1...")
             if not _user:
                 return_value = False  # if the user data does not exist
@@ -742,6 +760,7 @@ def update_stockout_by_printFlag():
         'status': return_value,
         'message': return_message,
     })
+
 
 '''
 @updateTable.route("/updateStockOutByPrintFlag", methods=['POST'])
@@ -890,17 +909,18 @@ def update_StockIn_data_by_Inv():
                                             int(obj['stockInTag_grid_layout']), int(obj['stockInTag_grid_pos']), int(obj['stockInTag_reagID']))
                 print("return grid id: ", gridID)
                 intag = s.query(InTag).filter_by(id=obj['intag_id']).first()
-                reagent = s.query(Reagent).filter_by(id=intag.reagent_id).first() # 2023-01-13 add
-
+                reagent = s.query(Reagent).filter_by(
+                    id=intag.reagent_id).first()  # 2023-01-13 add
 
                 if gridID == -1:
                     return_value = False  # 已經放其他試劑, 儲位重複
                     return_message = '儲位重複.'
                 if gridID > 0:  # 新儲位或空儲位
-                    #intag.grid_id = gridID   # 2023-01-13 mark
+                    # intag.grid_id = gridID   # 2023-01-13 mark
                     reagent.grid_id = gridID  # 2023-01-13 add
-                #intag.count = int(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料
-                intag.count = float(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料, 2023-02-13 update
+                # intag.count = int(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料
+                # 修改在庫數資料, 2023-02-13 update
+                intag.count = float(obj['stockInTag_cnt_inv_mdf'])
                 # 修改盤點數資料
                 # intag.count_inv_modify = int(obj['stockInTag_cnt_inv_mdf'])  #2023-01-05 mark
                 intag.count_inv_modify = 0

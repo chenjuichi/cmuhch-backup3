@@ -99,48 +99,31 @@
                       <!-- 第2列-->
                       <v-row>
                         <v-col cols="12" md="2">
-                          <!--<v-tooltip v-model="errorShowForReagName" top color="error">-->
-                            <!--<template v-slot:activator="{ on, attrs }">-->
-
-                              <v-text-field
-                                v-model="editedItem.stockInTag_reagID"
-                                label="資材碼"
-                                @blur="listGridForCheck"
-                              ></v-text-field>
-                              <small class="msgErr" v-text= "IDErrMsg"></small>
-                              <!--
-                              <v-select
-                                :items="reagentForSelect"
-                                label="資材碼"
-                                style="position:relative; top: 10px;"
-                                dense
-                                outlined
-                                v-model="editedItem.stockInTag_reagID"
-                              ></v-select>
-                              -->
-                            <!--</template>-->
-                            <!--<span>資材碼錯誤!</span>-->
-                          <!--</v-tooltip>-->
-                        </v-col>
-                        <v-col cols="12" md="3">
                           <v-text-field
-                            v-model="editedItem.stockInTag_reagName"
+                            v-model="editedItem.stockInTag_reagID"
                             :value="fromReagIdDisp"
+                            label="資材碼"
+                            @blur="listGridForCheck"
+                          ></v-text-field>
+                          <small class="msgErr" v-text= "IDErrMsg"></small>
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                          <v-autocomplete
+                            v-model="editedItem.stockInTag_reagName"
+                            :items="autocomplete_items"
+                            :value="fromReagNameDisp"
+                            :loading="autocomplete_loading"
+                            :search-input.sync="autocomplete_search"
+
+                            color="blue"
                             label="品名"
-                            readonly
-                          ></v-text-field>
+                            solo
+                          >
+                          </v-autocomplete>
                         </v-col>
-                        <!--
+
                         <v-col cols="12" md="2">
-                          <v-text-field
-                            v-model="editedItem.stockInTag_reagPeriod"
-                            :value="editedItem.stockInTag_reagPeriod"
-                            label="效期"
-                            readonly
-                          ></v-text-field>
-                        </v-col>
-                        -->
-                        <v-col cols="12" md="3">
                           <v-menu
                             v-model="fromDateMenuP"
                             :close-on-content-click="false"
@@ -305,10 +288,18 @@ import Common from '../../mixin/common.js'
 
 import { Calendar }  from '../../mixin/calendar.js';
 
+//import TypeaheadAutocomplete from "typeahead-autocomplete";
+//import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+
 export default {
   name: 'StockInTag',
 
   mixins: [Common],
+
+  components: {
+  //  TypeaheadAutocomplete,
+  //VueBootstrapTypeahead,
+  },
 
   mounted() {
     // if back button is pressed
@@ -325,7 +316,17 @@ export default {
     currentUser: {},
     permDialog: false,
     rightDialog: false,
+    //2023-04-14 add
+    autocomplete_loading: false,
+    autocomplete_items: [],
+    autocomplete_select: null,
+    autocomplete_search: null,
+    redirectTimeout: null, //2023-05-04 add
+    //isOpen: false,
+    //arrowCounter: -1,
 
+    temp_autocomplete_items: [],
+    //
     snackbar: false,
     snackbar_color: 'success',
     snackbar_right: true,
@@ -603,6 +604,8 @@ export default {
     load_SingleTable_ok: false,
     load_2thTable_ok: false,
     load_3thTable_ok: false,
+
+    load_4thTable_ok: false,  //2023-04-14 add
   }),
 
   computed: {
@@ -626,14 +629,14 @@ export default {
       }
     },
 
-    fromReagIdDisp() {
+    fromReagIdDisp() {  //show reagent name, by id
       if (this.editedItem.stockInTag_reagID != '') {
         //console.log("result 0...", this.editedItem.stockInTag_reagID, this.reagent_Desserts);
 
         const result = this.reagent_Desserts.find(x => x.reag_id === this.editedItem.stockInTag_reagID);
         //const result = this.temp_desserts.find(x => x.reag_id === this.editedItem.stockInTag_reagID);
 
-        console.log("result 1...", result);
+        console.log("fromReagIdDisp, result 1...", result);
 
         if (result != 'undefined' && result != null) {
           console.log("result 2...", result, this.editedIndex);
@@ -644,11 +647,49 @@ export default {
           //this.editedItem.stockInTag_reagPeriod='';
           this.errorShowForReagName=false;
           console.log("result 22...", result, this.editedIndex, this.editedItem);
-
+          this.autocomplete_search=this.editedItem.stockInTag_reagName;
           return this.editedItem.stockInTag_reagName;
         } else {
           console.log("result 3...", result);
           this.editedItem.stockInTag_reagName='';
+          this.editedItem.stockInTag_reagPeriod='';
+          this.editedItem.stockInTag_reagTemp='';
+          this.errorShowForReagName=true;
+          this.autocomplete_search=null;
+          return '';
+        }
+      } else {
+          this.editedItem.stockInTag_reagName='';
+          this.editedItem.stockInTag_reagPeriod='';
+          this.editedItem.stockInTag_reagTemp='';
+          this.errorShowForReagName=true;
+          this.autocomplete_search=null;
+          return '';
+      }
+    },
+
+    fromReagNameDisp() {  //show reagent id, by name
+      //if (this.autocomplete_search !=null)
+      //  this.editedItem.stockInTag_reagName = this.autocomplete_search;
+      this.autocomplete_search = this.editedItem.stockInTag_reagName;
+      if (this.editedItem.stockInTag_reagName != '' || this.editedItem.stockInTag_reagName != null) {
+        const result = this.reagent_Desserts.find(x => x.reag_name === this.editedItem.stockInTag_reagName);
+        console.log("fromReagNameDisp, result 1...", this.autocomplete_search, result);
+
+        if (result != 'undefined' && result != null) {
+          console.log("fromReagNameDisp, result 2-1...", result, this.editedIndex);
+          if (this.editedIndex == -1) {
+            this.editedItem.stockInTag_reagID=result.reag_id;
+            this.editedItem.stockInTag_reagTemp=result.reag_temp;
+          }
+          //this.editedItem.stockInTag_reagPeriod='';
+          this.errorShowForReagName=false;
+          console.log("fromReagNameDisp, result 2-2...", result, this.editedIndex, this.editedItem);
+
+          return this.editedItem.stockInTag_reagID;
+        } else {
+          console.log("fromReagNameDisp, result 3...", result);
+          this.editedItem.stockInTag_reagID='';
           this.editedItem.stockInTag_reagPeriod='';
           this.editedItem.stockInTag_reagTemp='';
           this.errorShowForReagName=true;
@@ -761,6 +802,16 @@ export default {
   },
 
   watch: {
+    /*
+    'editedItem.stockInTag_reagName': function () {
+      if (this.editedItem.stockInTag_reagName !== "") {
+        this.filterResults();
+        this.isOpen = true;
+      } else {
+        this.isOpen = false;
+      }
+    },
+    */
     'editedItem.stockInTag_reagID': function () {
       //let isEmpIDRule = /^\w{1,9}$/;
       let isEmpIDRule = /^[A-Za-z0-9.]{1,9}$/;
@@ -859,8 +910,10 @@ export default {
       if (val) {
         this.reagent_Desserts = Object.assign([], this.temp_reagent_Desserts);
         this.load_2thTable_ok=false;
+        this.listGridForCheckByReagentName(); // 2023-05-03 add
       }
     },
+
     load_3thTable_ok(val) {
       console.log("load_3thTable_ok, val: ", val, this.temp_editedItem);
 
@@ -872,6 +925,20 @@ export default {
         this.load_2thTable_ok=false;
       }
     },
+    // 2023-04-14 add
+    load_4thTable_ok(val) {
+      console.log("load_4thTable_ok, val: ", val);
+
+      if (val) {
+        this.autocomplete_items = Object.assign([], this.temp_autocomplete_items);
+        this.load_4thTable_ok = false;
+      }
+    },
+
+    autocomplete_search(val) {
+      val && val !== this.autocomplete_select && this.querySelections(val)
+    },
+    //
   },
 
   created () {
@@ -895,179 +962,7 @@ export default {
     initialize () {
       this.load_SingleTable_ok=false;
       this.listStockInData();
-      /*
-      this.desserts = [
-        {
-          //id: 1,
-          stockInTag_reagID: '123456789',
-          stockInTag_reagName: 'ABC',
-          stockInTag_reagPeriod: '111/10/31',
-          stockInTag_reagTemp: '2~8度C',
-          stockInTag_Date: '111/06/01',
-          stockInTag_EmpID: 'N12345',
-          stockInTag_Employer: '陳健南',
-          stockInTag_batch: '1110012345B123400066',
-          stockInTag_cnt: '1',
 
-        },
-        {
-          //id: 2,
-          stockInTag_reagID: '234567891',
-          stockInTag_reagName: 'ABCD',
-          stockInTag_reagPeriod: '111/12/31',
-          stockInTag_reagTemp: '2~8度C',
-          stockInTag_Date: '111/06/01',
-          stockInTag_EmpID: 'N12345',
-          stockInTag_Employer: '陳健南',
-          stockInTag_batch: '1110012345C123400055',
-          stockInTag_cnt: '2',
-        },
-        {
-          //id: 3,
-          stockInTag_reagID: '234567892',
-          stockInTag_reagName: 'A11',
-          stockInTag_reagPeriod: '111/12/31',
-          stockInTag_reagTemp: '2~8度C',
-          stockInTag_Date: '111/06/01',
-          stockInTag_EmpID: 'N12345',
-          stockInTag_Employer: '陳健南',
-          stockInTag_batch: '1110012345B123400033',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 4,
-          stockInTag_reagID: '234567893',
-          stockInTag_reagName: 'A12',
-          stockInTag_reagPeriod: '112/6/30',
-          stockInTag_reagTemp: '2~8度C',
-          stockInTag_Date: '111/06/01',
-          stockInTag_EmpID: 'N12345',
-          stockInTag_Employer: '陳健南',
-          stockInTag_batch: '1110012345B123400033',
-          stockInTag_cnt: '5',
-        },
-        {
-          //id: 5,
-          stockInTag_reagID: '234567894',
-          stockInTag_reagName: 'B2233',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '2~8度C',
-          stockInTag_Date: '111/06/01',
-          stockInTag_EmpID: 'N12345',
-          stockInTag_Employer: '陳健南',
-          stockInTag_batch: '1110012345B123400022',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 6,
-          stockInTag_reagID: '234567897',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/03/10',
-          stockInTag_EmpID: 'T12345',
-          stockInTag_Employer: '林成興',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 7,
-          stockInTag_reagID: '234567898',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/03/10',
-          stockInTag_EmpID: 'T12345',
-          stockInTag_Employer: '林成興',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 8,
-          stockInTag_reagID: '234567899',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/03/10',
-          stockInTag_EmpID: 'T12345',
-          stockInTag_Employer: '林成興',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 9,
-          stockInTag_reagID: '214567897',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/03/10',
-          stockInTag_EmpID: 'T12345',
-          stockInTag_Employer: '林成興',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '2',
-        },
-        {
-          //id: 10,
-          stockInTag_reagID: '214567898',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/03/10',
-          stockInTag_EmpID: 'T12345',
-          stockInTag_Employer: '林成興',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '10',
-        },
-        {
-          //id: 11,
-          stockInTag_reagID: '214567899',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/06/25',
-          stockInTag_EmpID: 'T87654',
-          stockInTag_Employer: '吳仲偉',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 12,
-          stockInTag_reagID: '224567897',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/06/25',
-          stockInTag_EmpID: 'T87654',
-          stockInTag_Employer: '吳仲偉',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '5',
-        },
-        {
-          //id: 13,
-          stockInTag_reagID: '224567898',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/06/25',
-          stockInTag_EmpID: 'T87654',
-          stockInTag_Employer: '吳仲偉',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-        {
-          //id: 14,
-          stockInTag_reagID: '224567899',
-          stockInTag_reagName: 'B3344',
-          stockInTag_reagPeriod: '111/8/31',
-          stockInTag_reagTemp: '常溫',
-          stockInTag_Date: '111/06/25',
-          stockInTag_EmpID: 'T87654',
-          stockInTag_Employer: '吳仲偉',
-          stockInTag_batch: '1110012345A123400001',
-          stockInTag_cnt: '1',
-        },
-      ];
-      */
     },
 
     listStockInData() {
@@ -1140,7 +1035,53 @@ export default {
         this.snackbar_icon_color= '#adadad';
       });
     },
+    //2023-04-14 add
+    listGridForCheckByReagentName() {
+      console.log("listGridForCheckByReagentName, Axios post data...", this.editedItem.stockInTag_reagName)
+      const path = '/listGridForCheckByReagentName';
 
+      var payload= {
+        reag_name:  this.editedItem.stockInTag_reagName,
+      };
+      axios.post(path, payload)
+      .then((res) => {
+        console.log("GET ok, status: ", res.data.status);
+        //if (res.data.status) {
+          this.temp_autocomplete_items=res.data.outputs;
+          this.load_4thTable_ok=true;
+        //} else {
+        //  this.snackbar_color='red accent-2';
+        //  this.snackbar=true;
+        //  this.snackbar_info= '無資材資料!';
+        //  this.snackbar_icon_color= '#adadad';
+        //
+        //  this.load_2thTable_ok=false;
+        //}
+      })
+      .catch((error) => {
+        console.error(error);
+        console.log("通訊錯誤!");
+
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+
+        this.load_4thTable_ok=false;
+      });
+    },
+    //2023-04-14 add
+    querySelections (v) {
+      this.autocomplete_loading = true
+      // Simulated ajax query
+      this.redirectTimeout = setTimeout(() => {
+        this.autocomplete_items = this.temp_autocomplete_items.filter(e => {
+          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
+        })
+        this.autocomplete_loading = false;
+      }, 500)
+    },
+    //
     setRowStyle(item) {
       return 'style-1';
     },
@@ -1395,6 +1336,12 @@ export default {
       console.log("press permission Close Button...");
     },
   },
+
+  beforeDestroy() {
+    if (this.redirectTimeout) {
+      clearTimeout(this.redirectTimeout);
+    }
+  },
 }
 </script>
 
@@ -1447,5 +1394,9 @@ small.msgErr {
 
 ::v-deep .v-data-table-header th:nth-last-child(2) span {
   color: #1f4788 !important;
+}
+/*  2023-04-18 add  */
+::v-deep span.v-list-item__mask {
+  background: #87CEFA !important;
 }
 </style>

@@ -785,7 +785,7 @@ export default {
     },
 
 
-    save () {
+    save() {
       //this.snack = true
       //this.snackColor = 'success'
       //this.snackText = 'Data saved'

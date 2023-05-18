@@ -10,7 +10,7 @@
       </template>
     </v-snackbar>
     <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-      <v-card class="overflow-hidden mx-auto mt-3" width="88vw">
+      <v-card class="overflow-hidden mx-auto mt-3" width="95vw">
         <v-toolbar flat color="#7DA79D" height="90vw" >
           <v-row dense style="margin-bottom: -36px; margin-top: -12x;">
             <v-col cols="12" md="2" class="mr-1" style="position: relative; top: -15px;">
@@ -42,7 +42,7 @@
                 label="品名"
                 :value="stockInTag_reagName"
                 readonly
-                style="width: 370px !important; max-width: 270px !important;"
+                style="width: 300px !important; max-width: 270px !important;"
               ></v-text-field>
             </v-col>
 
@@ -266,6 +266,8 @@ export default {
     currentLedRange_begin: 1,
     currentLedRange_end: 2,
 
+    current_unit: '',   //add
+
     pre_topic: 0,
 
     pagination: {
@@ -284,192 +286,7 @@ export default {
     //selected: [2],
     model: 0,
 
-    items: [
-      /*
-      {
-        //id: 1,
-        stockInTag_reagID: '123456789',
-        stockInTag_reagName: 'ABC',
-        stockInTag_reagPeriod: '111/10/31',
-        stockInTag_reagTemp: '2~8度C',
-        stockInTag_Date: '111/06/01',
-        stockInTag_EmpID: 'N12345',
-        stockInTag_Employer: '陳健南',
-        stockInTag_batch: '1110012345B123400066',
-        stockInTag_cnt: 4,
-        active: false,
-      },
-      {
-        //id: 2,
-        stockInTag_reagID: '234567891',
-        stockInTag_reagName: 'ABCD1',
-        stockInTag_reagPeriod: '111/12/31',
-        stockInTag_reagTemp: '2~8度C',
-        stockInTag_Date: '111/06/01',
-        stockInTag_EmpID: 'N12345',
-        stockInTag_Employer: '陳健南',
-        stockInTag_batch: '1110012345C123400055',
-        stockInTag_cnt: 2,
-        active: false,
-      },
-      {
-        //id: 3,
-        stockInTag_reagID: '234567892',
-        stockInTag_reagName: 'A11',
-        stockInTag_reagPeriod: '111/12/31',
-        stockInTag_reagTemp: '2~8度C',
-        stockInTag_Date: '111/06/01',
-        stockInTag_EmpID: 'N12345',
-        stockInTag_Employer: '陳健南',
-        stockInTag_batch: '1110012345B123400033',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 4,
-        stockInTag_reagID: '234567893',
-        stockInTag_reagName: 'A12',
-        stockInTag_reagPeriod: '112/6/30',
-        stockInTag_reagTemp: '2~8度C',
-        stockInTag_Date: '111/06/01',
-        stockInTag_EmpID: 'N12345',
-        stockInTag_Employer: '陳健南',
-        stockInTag_batch: '1110012345B123400033',
-        stockInTag_cnt: 1,
-        active: false,
-      },
-      {
-        //id: 5,
-        stockInTag_reagID: '234567894',
-        stockInTag_reagName: 'B2233',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '2~8度C',
-        stockInTag_Date: '111/06/01',
-        stockInTag_EmpID: 'N12345',
-        stockInTag_Employer: '陳健南',
-        stockInTag_batch: '1110012345B123400022',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 6,
-        stockInTag_reagID: '234567897',
-        stockInTag_reagName: 'B3344',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/03/10',
-        stockInTag_EmpID: 'T12345',
-        stockInTag_Employer: '林成興',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 1,
-        active: false,
-      },
-      {
-        //id: 7,
-        stockInTag_reagID: '234567898',
-        stockInTag_reagName: 'B3341',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/03/10',
-        stockInTag_EmpID: 'T12345',
-        stockInTag_Employer: '林成興',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 8,
-        stockInTag_reagID: '234567899',
-        stockInTag_reagName: 'B3342',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/03/10',
-        stockInTag_EmpID: 'T12345',
-        stockInTag_Employer: '林成興',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 5,
-        active: false,
-      },
-      {
-        //id: 9,
-        stockInTag_reagID: '214567897',
-        stockInTag_reagName: 'B3343',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/03/10',
-        stockInTag_EmpID: 'T12345',
-        stockInTag_Employer: '林成興',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 10,
-        stockInTag_reagID: '214567898',
-        stockInTag_reagName: 'B3345',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/03/10',
-        stockInTag_EmpID: 'T12345',
-        stockInTag_Employer: '林成興',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 2,
-        active: false,
-      },
-      {
-        //id: 11,
-        stockInTag_reagID: '214567899',
-        stockInTag_reagName: 'B3346',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/06/25',
-        stockInTag_EmpID: 'T87654',
-        stockInTag_Employer: '吳仲偉',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 12,
-        stockInTag_reagID: '224567897',
-        stockInTag_reagName: 'B3347',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/06/25',
-        stockInTag_EmpID: 'T87654',
-        stockInTag_Employer: '吳仲偉',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 20,
-        active: false,
-      },
-      {
-        //id: 13,
-        stockInTag_reagID: '224567898',
-        stockInTag_reagName: 'B3348',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/06/25',
-        stockInTag_EmpID: 'T87654',
-        stockInTag_Employer: '吳仲偉',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 14,
-        stockInTag_reagID: '224567899',
-        stockInTag_reagName: 'B3349',
-        stockInTag_reagPeriod: '111/8/31',
-        stockInTag_reagTemp: '常溫',
-        stockInTag_Date: '111/06/25',
-        stockInTag_EmpID: 'T87654',
-        stockInTag_Employer: '吳仲偉',
-        stockInTag_batch: '1110012345A123400001',
-        stockInTag_cnt: 10,
-        active: false,
-      },
-      */
-    ],
+    items: [],
     temp_items : [],
 
     reagentForSelect: [],
@@ -553,6 +370,7 @@ export default {
       if (val) {
         this.load_5thTable_ok=false;
         this.isOK=false;
+        console.log("StockIn, load_5thTable_ok, isOk: ", this.isOK);
         this.home_url=this.default_home_url;    //2023-1-12 add
 
         if (this.emptyRecordReady)      //2023-02-14 add
@@ -582,124 +400,6 @@ export default {
     initialize () {
       this.load_SingleTable_ok=false;
       this.listStockInItems();
-      //this.listStockInGrids();
-      /*
-      this.grids = [
-        {
-          //id: 1,
-          grid_reagID: '123456789',
-          grid_reagName: 'ABC',
-          grid_station: 1,
-          grid_layout: 4,
-          grid_pos: 4,
-        },
-        {
-          //id: 2,
-          grid_reagID: '234567891',
-          grid_reagName: 'ABCD',
-          grid_station: 1,
-          grid_layout: 4,
-          grid_pos: 5,
-        },
-        {
-          //id: 3,
-          grid_reagID: '234567892',
-          grid_reagName: 'A11',
-          grid_station: 2,
-          grid_layout: 1,
-          grid_pos: 6,
-        },
-        {
-          //id: 4,
-          grid_reagID: '234567893',
-          grid_reagName: 'A12',
-          grid_station: 2,
-          grid_layout: 3,
-          grid_pos: 5,
-        },
-        {
-          //id: 5,
-          grid_reagID: '234567894',
-          grid_reagName: 'B2233',
-          grid_station: 3,
-          grid_layout: 2,
-          grid_pos: 2,
-        },
-        {
-          //id: 6,
-          grid_reagID: '234567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 1,
-          grid_pos: 6,
-        },
-        {
-          //id: 7,
-          grid_reagID: '234567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 2,
-          grid_pos: 6,
-        },
-        {
-          //id: 8,
-          grid_reagID: '234567899',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 3,
-          grid_pos: 6,
-        },
-        {
-          //id: 9,
-          grid_reagID: '214567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 4,
-          grid_pos: 6,
-        },
-        {
-          //id: 10,
-          grid_reagID: '214567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 6,
-        },
-        {
-          //id: 11,
-          grid_reagID: '214567899',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 7,
-        },
-        {
-          //id: 13,
-          grid_reagID: '224567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-        {
-          //id: 14,
-          grid_reagID: '224567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-        {
-          //id: 15,
-          grid_reagID: '224567899',
-          grid_reagName: 'B3344',
-          grid_station: 1,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-
-      ];
-      */
     },
 
     listStockInItems() {
@@ -762,6 +462,7 @@ export default {
       let object = Object.assign({}, this.stockin_record);
       console.log("InTagID: ", object, this.stockInTag_cnt)
       let cnt = object.stockInTag_cnt!=this.stockInTag_cnt ? Math.abs(object.stockInTag_cnt-this.stockInTag_cnt):this.stockInTag_cnt;
+
       var payload= {
         InTagID: object.id,
         InTagCount: object.stockInTag_cnt,
@@ -782,7 +483,7 @@ export default {
     handlePaste (evt) {
       console.log('on paste', evt.clipboardData.getData('text'))
 
-      console.log('on paste', evt.clipboardData.getData('text/plain'))
+      //console.log('on paste', evt.clipboardData.getData('text/plain'))
     },
 
     handleBackspace (e) {
@@ -809,6 +510,8 @@ export default {
     },
 
     async mqttForStation() {
+      console.log("mqttForStation...");
+
       let path='/mqtt/station';
       let temp_layout=this.currentLedLayout;
       let range_begin=this.currentLedRange_begin;
@@ -899,6 +602,8 @@ export default {
         this.currentLedRange_begin=this.items[index].range0;
         this.currentLedRange_end=this.items[index].range1;
 
+        this.current_unit=this.items[index].stockInTag_unit; //2023-04-27 add
+
         console.log("id, current: ",this.items[index].id, this.currentIndex, this.currentLedStation, this.currentLedLayout, this.currentLedPos, this.currentLedRange_begin, this.currentLedRange_end)
 
         this.isSort=false;
@@ -917,56 +622,7 @@ export default {
         this.stockInTag_pos=this.items[index].grid_pos;
       }
     },
-    /*
-    listActionClick(index, active) {
-      console.log("list action: ", index, active);
 
-      this.currentIndex=index;
-      this.currentLedStation=this.items[index].grid_station;
-      this.currentLedLayout=this.items[index].grid_layout;
-      this.currentLedPos=this.items[index].grid_pos;
-      this.currentLedRange_begin=this.items[index].range0;
-      this.currentLedRange_end=this.items[index].range1;
-
-      this.isSort=false;
-      if (active) {
-        this.stockInTag_cnt=0;
-        this.stockInTag_max_cnt=0;
-        this.stockInTag_min_cnt=0;
-
-        this.stockInTag_reagID='';
-        this.stockInTag_reagName='';
-
-        this.stockInTag_station='';
-        this.stockInTag_layout='';
-        this.stockInTag_pos='';
-      } else {
-        this.stockInTag_cnt=this.items[index].stockInTag_cnt;
-        this.stockInTag_max_cnt=this.items[index].stockInTag_cnt;
-
-        this.stockInTag_min_cnt=1;
-        this.stockInTag_reagID=this.items[index].stockInTag_reagID;
-        this.stockInTag_reagName=this.items[index].stockInTag_reagName;
-
-        this.stockInTag_station=this.items[index].grid_station;
-        this.stockInTag_layout=this.items[index].grid_layout;
-        this.stockInTag_pos=this.items[index].grid_pos;
-      }
-
-      //this.items[index].active=!this.items[index].active;
-    },
-    */
-    /*
-    toggle(index) {
-      const i = this.selected.indexOf(index)
-
-      if (i > -1) {
-          this.selected.splice(i, 1)
-      } else {
-          this.selected.push(index)
-      }
-    },
-    */
     fromReagIdDisp() {
       if (this.stockInTag_reagID != '' && this.isSort) {
         console.log("result 1-1...", this.items);
@@ -998,10 +654,11 @@ export default {
           this.currentLedStation=this.items[0].grid_station;
           this.currentLedLayout=this.items[0].grid_layout;
           this.currentLedPos=this.items[0].grid_pos;
-          this.currentLedPos=this.items[0].grid_pos;
 
           this.currentLedRange_begin=this.items[0].range0;  //2023-1-12 add
           this.currentLedRange_end=this.items[0].range1;  //2023-1-12 add
+          //
+          //
         }
         //if (index != -1) {
         //  console.log("result 2...", index);
@@ -1045,6 +702,7 @@ export default {
       this.stockInTag_min_cnt=1;
       this.stockInTag_unit=this.items[this.model].stockInTag_unit;
 
+      //
       this.stockInTag_reagID=this.items[this.model].stockInTag_reagID;
       this.stockInTag_reagName=this.items[this.model].stockInTag_reagName;
 
@@ -1060,8 +718,9 @@ export default {
       console.log("current: ", this.currentLedLayout, "  ", this.currentLedRange_begin, "  ", this.currentLedRange_end);
 
       this.isOK=true; //2023-01-06 mark
+
       let temp_sw=this.items[this.model].grid_station;
-      console.log("temp_sw", temp_sw);
+      console.log("StockIn: isOK, temp_sw",this.isOK, temp_sw);
       if (temp_sw==1) {
         this.home_url=this.home_url_R;
       }
@@ -1074,7 +733,6 @@ export default {
         this.home_url=this.home_url_G;
       }
       this.redirect_ok()
-      //return;
     },
 
     redirect_ok() {
@@ -1092,6 +750,7 @@ export default {
         this.stockInTag_cnt=0;
         this.stockInTag_max_cnt=0;
         this.stockInTag_min_cnt=0;
+
         this.stockInTag_unit='';
 
         this.stockInTag_reagName='';
@@ -1168,16 +827,4 @@ span.stockinStr {
 .v-card.on-hover.theme--dark > .v-card__text {
     color: #000;
 }
-
-/*
-.v-select__selection.v-list .v-list-item--active {
-  background-color: green!important;
-}
-.v-list .v-list-item--active .v-list-item__title {
-  color: #1f4788 !important;
-}
-*/
-//::v-deep .v-select__selection--comma {
-//  background: red;
-//}
 </style>

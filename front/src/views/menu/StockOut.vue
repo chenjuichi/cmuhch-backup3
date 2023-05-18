@@ -10,13 +10,14 @@
       </template>
     </v-snackbar>
     <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-      <v-card class="overflow-hidden mx-auto mt-3" width="88vw">
-        <v-toolbar flat color="#7DA79D" height="80vw" >
+      <v-card class="overflow-hidden mx-auto mt-3" width="95vw">
+        <v-toolbar flat color="#7DA79D" height="90vw" >
           <v-row dense style="margin-bottom: -36px; margin-top: -12x;">
             <v-col cols="12" md="2" class="mr-1" style="position: relative; top: -15px;">
               <v-text-field
                 v-model="stockOutTag_reagID"
                 label="資材碼"
+
                 style="position:relative; top: 15px;"
                 :value="stockOutTag_reagID"
                 @keyup.native.enter="handleUpdateItem($event)"
@@ -41,7 +42,7 @@
                 label="品名"
                 :value="stockOutTag_reagName"
                 readonly
-                style="width: 300px !important; max-width: 300px !important;"
+                style="width: 300px !important; max-width: 270px !important;"
               ></v-text-field>
             </v-col>
 
@@ -57,7 +58,14 @@
             </v-col>
 
             <v-col cols="12" md="2" align="left" class="pl-0 mx-1" style="max-width:120px; width=120px;">
-              <vue-numeric-input v-model="stockOutTag_cnt" :min="1" :max="stockOutTag_max_cnt" :step="1" size="small" align="center"></vue-numeric-input>
+              <vue-numeric-input
+                v-model="stockOutTag_cnt"
+                :min="1"
+                :max="stockOutTag_max_cnt"
+                :step="1"
+                size="small"
+                align="center"
+              ></vue-numeric-input>
               <span class="stockout_str" style="position: relative; top: -20px; right: -105px; font-weight: bold; font-size: 1em;">
                 {{stockOutTag_unit}}
               </span>
@@ -246,11 +254,10 @@ export default {
     stockOutTag_pos: '',
 
     stockOutTag_cnt: 0,
+    current_cnt:0,
     stockOutTag_min_cnt: 0,
     stockOutTag_max_cnt: 0,
     stockOutTag_unit: '', //add
-
-    current_cnt:0,
 
     currentIndex: 0,
     currentLedStation: 1,
@@ -258,6 +265,7 @@ export default {
     currentLedPos: 1,
     currentLedRange_begin: 1,
     currentLedRange_end: 2,
+
     current_unit: '',   //add
 
     pre_topic: 0,
@@ -278,192 +286,7 @@ export default {
     //selected: [2],
     model: 0,
 
-    items: [
-      /*
-      {
-        //id: 1,
-        stockOutTag_reagID: '123456789',
-        stockOutTag_reagName: 'ABC',
-        stockOutTag_reagPeriod: '111/10/31',
-        stockOutTag_reagTemp: '2~8度C',
-        stockOutTag_Date: '111/06/01',
-        stockOutTag_EmpID: 'N12345',
-        stockOutTag_Employer: '陳健南',
-        stockOutTag_batch: '1110012345B123400066',
-        stockOutTag_cnt: 4,
-        active: false,
-      },
-      {
-        //id: 2,
-        stockOutTag_reagID: '234567891',
-        stockOutTag_reagName: 'ABCD1',
-        stockOutTag_reagPeriod: '111/12/31',
-        stockOutTag_reagTemp: '2~8度C',
-        stockOutTag_Date: '111/06/01',
-        stockOutTag_EmpID: 'N12345',
-        stockOutTag_Employer: '陳健南',
-        stockOutTag_batch: '1110012345C123400055',
-        stockOutTag_cnt: 2,
-        active: false,
-      },
-      {
-        //id: 3,
-        stockOutTag_reagID: '234567892',
-        stockOutTag_reagName: 'A11',
-        stockOutTag_reagPeriod: '111/12/31',
-        stockOutTag_reagTemp: '2~8度C',
-        stockOutTag_Date: '111/06/01',
-        stockOutTag_EmpID: 'N12345',
-        stockOutTag_Employer: '陳健南',
-        stockOutTag_batch: '1110012345B123400033',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 4,
-        stockOutTag_reagID: '234567893',
-        stockOutTag_reagName: 'A12',
-        stockOutTag_reagPeriod: '112/6/30',
-        stockOutTag_reagTemp: '2~8度C',
-        stockOutTag_Date: '111/06/01',
-        stockOutTag_EmpID: 'N12345',
-        stockOutTag_Employer: '陳健南',
-        stockOutTag_batch: '1110012345B123400033',
-        stockOutTag_cnt: 1,
-        active: false,
-      },
-      {
-        //id: 5,
-        stockOutTag_reagID: '234567894',
-        stockOutTag_reagName: 'B2233',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '2~8度C',
-        stockOutTag_Date: '111/06/01',
-        stockOutTag_EmpID: 'N12345',
-        stockOutTag_Employer: '陳健南',
-        stockOutTag_batch: '1110012345B123400022',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 6,
-        stockOutTag_reagID: '234567897',
-        stockOutTag_reagName: 'B3344',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/03/10',
-        stockOutTag_EmpID: 'T12345',
-        stockOutTag_Employer: '林成興',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 1,
-        active: false,
-      },
-      {
-        //id: 7,
-        stockOutTag_reagID: '234567898',
-        stockOutTag_reagName: 'B3341',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/03/10',
-        stockOutTag_EmpID: 'T12345',
-        stockOutTag_Employer: '林成興',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 8,
-        stockOutTag_reagID: '234567899',
-        stockOutTag_reagName: 'B3342',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/03/10',
-        stockOutTag_EmpID: 'T12345',
-        stockOutTag_Employer: '林成興',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 5,
-        active: false,
-      },
-      {
-        //id: 9,
-        stockOutTag_reagID: '214567897',
-        stockOutTag_reagName: 'B3343',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/03/10',
-        stockOutTag_EmpID: 'T12345',
-        stockOutTag_Employer: '林成興',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 10,
-        stockOutTag_reagID: '214567898',
-        stockOutTag_reagName: 'B3345',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/03/10',
-        stockOutTag_EmpID: 'T12345',
-        stockOutTag_Employer: '林成興',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 2,
-        active: false,
-      },
-      {
-        //id: 11,
-        stockOutTag_reagID: '214567899',
-        stockOutTag_reagName: 'B3346',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/06/25',
-        stockOutTag_EmpID: 'T87654',
-        stockOutTag_Employer: '吳仲偉',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 12,
-        stockOutTag_reagID: '224567897',
-        stockOutTag_reagName: 'B3347',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/06/25',
-        stockOutTag_EmpID: 'T87654',
-        stockOutTag_Employer: '吳仲偉',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 20,
-        active: false,
-      },
-      {
-        //id: 13,
-        stockOutTag_reagID: '224567898',
-        stockOutTag_reagName: 'B3348',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/06/25',
-        stockOutTag_EmpID: 'T87654',
-        stockOutTag_Employer: '吳仲偉',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      {
-        //id: 14,
-        stockOutTag_reagID: '224567899',
-        stockOutTag_reagName: 'B3349',
-        stockOutTag_reagPeriod: '111/8/31',
-        stockOutTag_reagTemp: '常溫',
-        stockOutTag_Date: '111/06/25',
-        stockOutTag_EmpID: 'T87654',
-        stockOutTag_Employer: '吳仲偉',
-        stockOutTag_batch: '1110012345A123400001',
-        stockOutTag_cnt: 10,
-        active: false,
-      },
-      */
-    ],
+    items: [ ],
     temp_items : [],
 
     reagentForSelect: [],
@@ -494,11 +317,6 @@ export default {
 
   watch: {
     stockOutTag_reagID (val) {
-      //let matchResult = this.items.find(x => x.stockOutTag_reagID === this.stockOutTag_reagID);
-      //if (typeof(matchResult) == 'undefined') {
-      //  console.log("stockOutTag_reagID is undefined...");
-      //}
-
       this.fromReagIdDisp();
     },
 
@@ -552,11 +370,11 @@ export default {
       if (val) {
         this.load_5thTable_ok=false;
         this.isOK=false;
+        console.log("StockIn, load_5thTable_ok, isOk: ", this.isOK);
         this.home_url=this.default_home_url;    //2023-1-12 add
 
         if (this.emptyRecordReady)      //2023-02-14 add
           this.isEmptyRecord = true;    //2023-02-14 add
-
       }
     },
   },
@@ -582,124 +400,6 @@ export default {
     initialize () {
       this.load_SingleTable_ok=false;
       this.listStockOutItems();
-      //this.liststockOutGrids();
-      /*
-      this.grids = [
-        {
-          //id: 1,
-          grid_reagID: '123456789',
-          grid_reagName: 'ABC',
-          grid_station: 1,
-          grid_layout: 4,
-          grid_pos: 4,
-        },
-        {
-          //id: 2,
-          grid_reagID: '234567891',
-          grid_reagName: 'ABCD',
-          grid_station: 1,
-          grid_layout: 4,
-          grid_pos: 5,
-        },
-        {
-          //id: 3,
-          grid_reagID: '234567892',
-          grid_reagName: 'A11',
-          grid_station: 2,
-          grid_layout: 1,
-          grid_pos: 6,
-        },
-        {
-          //id: 4,
-          grid_reagID: '234567893',
-          grid_reagName: 'A12',
-          grid_station: 2,
-          grid_layout: 3,
-          grid_pos: 5,
-        },
-        {
-          //id: 5,
-          grid_reagID: '234567894',
-          grid_reagName: 'B2233',
-          grid_station: 3,
-          grid_layout: 2,
-          grid_pos: 2,
-        },
-        {
-          //id: 6,
-          grid_reagID: '234567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 1,
-          grid_pos: 6,
-        },
-        {
-          //id: 7,
-          grid_reagID: '234567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 2,
-          grid_pos: 6,
-        },
-        {
-          //id: 8,
-          grid_reagID: '234567899',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 3,
-          grid_pos: 6,
-        },
-        {
-          //id: 9,
-          grid_reagID: '214567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 4,
-          grid_pos: 6,
-        },
-        {
-          //id: 10,
-          grid_reagID: '214567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 6,
-        },
-        {
-          //id: 11,
-          grid_reagID: '214567899',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 7,
-        },
-        {
-          //id: 13,
-          grid_reagID: '224567897',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-        {
-          //id: 14,
-          grid_reagID: '224567898',
-          grid_reagName: 'B3344',
-          grid_station: 3,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-        {
-          //id: 15,
-          grid_reagID: '224567899',
-          grid_reagName: 'B3344',
-          grid_station: 1,
-          grid_layout: 5,
-          grid_pos: 8,
-        },
-
-      ];
-      */
     },
 
     listStockOutItems() {
@@ -810,35 +510,37 @@ export default {
     },
 
     async mqttForStation() {
-        let path='/mqtt/station';
-        let temp_layout=this.currentLedLayout;
-        let range_begin=this.currentLedRange_begin;
-        let range_end=this.currentLedRange_end;
-        console.log("station: " +"layout: " + temp_layout + " pos: " + range_begin + " , " + range_end)
-        let temp_sw= 'flash';
-        let myTopic=this.mqtt_topic[parseInt(this.currentLedStation) - 1]
-        let payload= {
-          topic: myTopic,
-          layout: temp_layout,
-          pos_begin: range_begin,
-          pos_end: range_end,
-          msg: temp_sw,
-        };
+      console.log("mqttForStation...");
 
-        try {
-          let res = await axios.post(path, payload);
-          console.log("mqtt ok", res.data.status);
-          this.pre_topic=myTopic;     //2023-1-5 add
-          this.load_3thTable_ok=true;
-        } catch (err) {
-          console.error(err)
-          console.log("通訊錯誤!");
-          this.snackbar_color='red accent-2';
-          this.snackbar=true;
-          this.snackbar_info= '通訊錯誤!';
-          this.snackbar_icon_color= '#adadad';
-          this.load_3thTable_ok=false;
-        }
+      let path='/mqtt/station';
+      let temp_layout=this.currentLedLayout;
+      let range_begin=this.currentLedRange_begin;
+      let range_end=this.currentLedRange_end;
+      console.log("station: " +"layout: " + temp_layout + " begin: " + range_begin + " end: " + range_end, this.model, this.items[this.model])
+      let temp_sw= 'flash';
+      let myTopic=this.mqtt_topic[parseInt(this.currentLedStation) - 1]
+      let payload= {
+        topic: myTopic,
+        layout: temp_layout,
+        pos_begin: range_begin,
+        pos_end: range_end,
+        msg: temp_sw,
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("mqtt ok", res.data.status);
+        this.pre_topic=myTopic;     //2023-1-5 add
+        this.load_3thTable_ok=true;
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_3thTable_ok=false;
+      }
     },
 
     async mqttForStationOff() {
@@ -873,14 +575,15 @@ export default {
 
     listActionClick_m(index) {
       if (this.items.length==0) {
-        console.log("HELLO...", index, this.items[index]);
+        console.log("HELLO1...", index, this.items[index]);
 
         this.home_url=this.default_home_url;
-        this.isOK=false;
+        //this.isOK=false;    //2023-04-27 mark
 
         this.stockOutTag_cnt=0;
         this.stockOutTag_max_cnt=0;
         this.stockOutTag_min_cnt=0;
+
         this.stockOutTag_unit='';   //add
 
         this.stockOutTag_reagID='';
@@ -890,12 +593,15 @@ export default {
         this.stockOutTag_layout='';
         this.stockOutTag_pos='';
       } else {
+        console.log("HELLO2...", index, this.items[index]);
+
         this.currentIndex=index;
         this.currentLedStation=this.items[index].grid_station;
         this.currentLedLayout=this.items[index].grid_layout;
         this.currentLedPos=this.items[index].grid_pos;
         this.currentLedRange_begin=this.items[index].range0;
         this.currentLedRange_end=this.items[index].range1;
+
         this.current_unit=this.items[index].stockOutTag_unit; //add
 
         console.log("id, current: ",this.items[index].id, this.currentIndex, this.currentLedStation, this.currentLedLayout, this.currentLedPos, this.currentLedRange_begin, this.currentLedRange_end)
@@ -916,56 +622,7 @@ export default {
         this.stockOutTag_pos=this.items[index].grid_pos;
       }
     },
-    /*
-    listActionClick(index, active) {
-      console.log("list action: ", index, active);
 
-      this.currentIndex=index;
-      this.currentLedStation=this.items[index].grid_station;
-      this.currentLedLayout=this.items[index].grid_layout;
-      this.currentLedPos=this.items[index].grid_pos;
-      this.currentLedRange_begin=this.items[index].range0;
-      this.currentLedRange_end=this.items[index].range1;
-
-      this.isSort=false;
-      if (active) {
-        this.stockOutTag_cnt=0;
-        this.stockOutTag_max_cnt=0;
-        this.stockOutTag_min_cnt=0;
-
-        this.stockOutTag_reagID='';
-        this.stockOutTag_reagName='';
-
-        this.stockOutTag_station='';
-        this.stockOutTag_layout='';
-        this.stockOutTag_pos='';
-      } else {
-        this.stockOutTag_cnt=this.items[index].stockOutTag_cnt;
-        this.stockOutTag_max_cnt=this.items[index].stockOutTag_cnt;
-
-        this.stockOutTag_min_cnt=1;
-        this.stockOutTag_reagID=this.items[index].stockOutTag_reagID;
-        this.stockOutTag_reagName=this.items[index].stockOutTag_reagName;
-
-        this.stockOutTag_station=this.items[index].grid_station;
-        this.stockOutTag_layout=this.items[index].grid_layout;
-        this.stockOutTag_pos=this.items[index].grid_pos;
-      }
-
-      //this.items[index].active=!this.items[index].active;
-    },
-    */
-    /*
-    toggle(index) {
-      const i = this.selected.indexOf(index)
-
-      if (i > -1) {
-          this.selected.splice(i, 1)
-      } else {
-          this.selected.push(index)
-      }
-    },
-    */
     fromReagIdDisp() {
       if (this.stockOutTag_reagID != '' && this.isSort) {
         console.log("result 1-1...", this.items);
@@ -1001,7 +658,7 @@ export default {
           this.currentLedRange_begin=this.items[0].range0;  //2023-1-12 add
           this.currentLedRange_end=this.items[0].range1;  //2023-1-12 add
 
-          this.current_unit=this.items[0].stockOutTag_unit; //add
+          //this.current_unit=this.items[0].stockOutTag_unit; //2023-04-27 remove
         }
         //if (index != -1) {
         //  console.log("result 2...", index);
@@ -1057,25 +714,13 @@ export default {
     },
 
     redirect_to_mqtt() {
-      console.log("hello click image button...", this.model);
+      console.log("redirect_to_mqtt, hello click image button...", this.model);
+      console.log("current: ", this.currentLedLayout, "  ", this.currentLedRange_begin, "  ", this.currentLedRange_end);
+
       this.isOK=true;
-      /*
+
       let temp_sw=this.items[this.model].grid_station;
-      switch (temp_sw) {
-        case 1:
-          this.home_url=this.home_url_R;
-          break;
-        case 2:
-          this.home_url=this.home_url_Y;
-          break;
-        case 3:
-          this.home_url=this.home_url_G;
-          break;
-      }
-      this.redirect_ok();
-      */
-      let temp_sw=this.items[this.model].grid_station;
-      console.log("temp_sw", temp_sw);
+      console.log("StockOut: isOK, temp_sw",this.isOK, temp_sw);
       if (temp_sw==1) {
         this.home_url=this.home_url_R;
       }
@@ -1119,6 +764,7 @@ export default {
           this.stockOutTag_max_cnt=this.items[this.model].stockOutTag_cnt;
           this.stockOutTag_min_cnt=1;
           this.stockOutTag_unit=this.items[this.model].stockOutTag_unit;  //add
+
           this.stockOutTag_reagID=this.items[this.model].stockOutTag_reagID;
           this.stockOutTag_reagName=this.items[this.model].stockOutTag_reagName;
 
@@ -1137,6 +783,7 @@ export default {
         this.stockOutTag_max_cnt=this.items[this.model].stockOutTag_cnt;
         this.stockout_record=this.items[this.model];
       }
+      console.log("current, mqttForStation: ", this.currentLedLayout, "  ", this.currentLedRange_begin, "  ", this.currentLedRange_end);
 
       this.mqttForStation();
     },

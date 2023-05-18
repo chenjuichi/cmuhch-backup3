@@ -29,12 +29,17 @@ def list_users():
         dep_item = s.query(Department).filter_by(id=user['dep_id']).first()
         # if (user.perm_id != None):
         perm_item = s.query(Permission).filter_by(id=user['perm_id']).first()
+
+        dep_name_data=''                      # 2023-04-25 add
+        if dep_item is not None:              # 2023-04-25 add
+          dep_name_data=dep_item.dep_name     # 2023-04-25 add
+
         if (user['isRemoved']):
             _user_object = {
                 'emp_id': user['emp_id'],
                 'emp_name': user['emp_name'],
-                'emp_dep': dep_item.dep_name,
-                'emp_perm': perm_item.auth_code  # for inventory.vue
+                'emp_dep': dep_name_data,         # 2023-04-25 modify
+                'emp_perm': perm_item.auth_code   # for inventory.vue
             }
             _user_results.append(_user_object)
     s.close()
@@ -65,6 +70,16 @@ def list_reagents():
         cat_item = s.query(Department).filter_by(
             id=reagent['catalog_id']).first()
 
+        sup_name_data=''                      # 2023-04-25 add
+        if sup_item is not None:              # 2023-04-25 add
+          sup_name_data=sup_item.super_name   # 2023-04-25 add
+        prc_name_data=''                      # 2023-04-25 add
+        if prc_item is not None:              # 2023-04-25 add
+          prc_name_data=prc_item.name         # 2023-04-25 add
+        dep_name_data=''                      # 2023-04-25 add
+        if cat_item is not None:              # 2023-04-25 add
+          dep_name_data=cat_item.dep_name     # 2023-04-25 add
+
         k1 = ''
         if reagent['reag_temp'] == 0:  # 0:室溫、1:2~8度C、2:-20度C
             k1 = '室溫'
@@ -78,15 +93,15 @@ def list_reagents():
                 'id': reagent['id'],
                 'reag_id': reagent['reag_id'],
                 'reag_name': reagent['reag_name'],
-                'reag_product': prc_item.name,
+                'reag_product': prc_name_data,              # 2023-04-25 modify
                 'reag_In_unit': reagent['reag_In_unit'],
                 'reag_Out_unit': reagent['reag_Out_unit'],
                 'reag_scale': reagent['reag_scale'],
                 # 'reag_period': reagent['reag_period'],    #依2022-12-12操作教育訓練建議作修正(刪除)
                 'reag_stock': reagent['reag_stock'],
                 'reag_temp': k1,
-                'reag_catalog': cat_item.dep_name,
-                'reag_supplier': sup_item.super_name,
+                'reag_catalog': dep_name_data,              # 2023-04-25 modify
+                'reag_supplier': sup_name_data,             # 2023-04-25 modify
             }
             _results.append(_obj)
     s.close()
@@ -417,14 +432,43 @@ def list_grid_for_check():
 
     s = Session()
     reag_item = s.query(Reagent).filter_by(reag_id=_reag_id).first()
-    if (not reag_item.grid_id):
+    if reag_item:   # 2023-05-03 add
+      if not reag_item.grid_id:
         return_value = False
+    else:           # 2023-05-03 add
+        return_value = False  # 2023-05-03 add
 
     print("reeagent grid: ", reag_item.grid_id, return_value)
 
     s.close()
     return jsonify({
         'status':  return_value,
+    })
+
+# 2023-04-14 add
+@listTable.route("/listGridForCheckByReagentName", methods=['POST'])
+def list_grid_for_check_by_reagent_name():
+    print("listGridForCheckByReagentName....")
+
+    request_data = request.get_json()
+    _reag_name = request_data['reag_name']
+    print("reeagent name: ", _reag_name)
+
+    _results = []
+    return_value = True
+    s = Session()
+
+    if _reag_name is not None:  # 2023-05-03 add
+      _objects = s.query(Reagent).filter(Reagent.reag_name.ilike("%" + _reag_name + "%")).all()
+      #reag_item = [u.__dict__ for u in _objects]
+      for reag_item in _objects:
+        print(reag_item.reag_name)
+        _results.append(reag_item.reag_name)
+
+    s.close()
+    return jsonify({
+        'status':  return_value,
+         'outputs': _results
     })
 
 
@@ -890,6 +934,16 @@ def list_requirements_data():
         _supplier = s.query(Supplier).filter_by(id=_reagent.super_id).first()
         _product = s.query(Product).filter_by(id=_reagent.product_id).first()
 
+        dep_name_data=''                        # 2023-04-25 add
+        if _department is not None:             # 2023-04-25 add
+          dep_name_data=_department.dep_name    # 2023-04-25 add
+        sup_name_data=''                        # 2023-04-25 add
+        if _supplier is not None:               # 2023-04-25 add
+          sup_name_data=_supplier.super_name    # 2023-04-25 add
+        prc_name_data=''                        # 2023-04-25 add
+        if _product is not None:                # 2023-04-25 add
+          prc_name_data=_product.name           # 2023-04-25 add
+
         #item = s.query(InTag).filter_by(id=obj).first()
         #_reagent = s.query(Reagent).filter_by(id=obj).first()
         print("item.count", outtag.id, _reagent.reag_id)
@@ -925,9 +979,9 @@ def list_requirements_data():
         _obj = {
             'reqRecord_reagID': _reagent.reag_id,  # 資材碼
             'reqRecord_reagName': _reagent.reag_name,  # 品名
-            'reqRecord_prdName': _product.name,  # 產品類別
-            'reqRecord_catalog': _department.dep_name,  # 資材組別
-            'reqRecord_supplier': _supplier.super_name,  # 供應商
+            'reqRecord_prdName': prc_name_data,  # 產品類別
+            'reqRecord_catalog': dep_name_data,  # 資材組別
+            'reqRecord_supplier': sup_name_data,  # 供應商
             'reqRecord_stockInDate': _inTag.intag_date,  # 入庫日期
             'reqRecord_stockInBatch': _inTag.batch, # 入庫批次, 2023-2-4 add
             'reqRecord_Date': outtag.outtag_date,  # 領用日期
@@ -1006,13 +1060,17 @@ def list_stock_records():
         #_grid = s.query(Grid).filter_by(id=item.grid_id).first()     # 2023-01-13 mark
         _grid = s.query(Grid).filter_by(id=_reagent.grid_id).first()  # 2023-01-13 add
 
+        sup_name_data=''                        # 2023-04-25 add
+        if _supplier is not None:               # 2023-04-25 add
+          sup_name_data=_supplier.super_name    # 2023-04-25 add
+
         _obj = {
             'id': temp_kk,
             'stkRecord_reagID': _reagent.reag_id,         # 資材碼
             'stkRecord_reagName': _reagent.reag_name,     # 品名
-            'stkRecord_supplier': _supplier.super_name,   # 供應商
-            'stkRecord_Date': item.intag_date,           # 入庫日期
-            'stkRecord_period': item.reag_period,        # 效期, 依2022-12-12操作教育訓練建議作修正
+            'stkRecord_supplier': sup_name_data,          # 供應商, 2023-04-25 modify
+            'stkRecord_Date': item.intag_date,            # 入庫日期
+            'stkRecord_period': item.reag_period,         # 效期, 依2022-12-12操作教育訓練建議作修正
             # 安全存量
             'stkRecord_saftStockUnit': str(_reagent.reag_stock) + _reagent.reag_In_unit,
             'stkRecord_saftStock': str(_reagent.reag_stock),  # 安全存量, 數量

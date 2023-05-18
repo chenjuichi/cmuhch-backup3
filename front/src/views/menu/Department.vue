@@ -229,16 +229,19 @@ export default {
         this.desserts = Object.assign([], this.temp_desserts);
       }
     },
-
+    //2023-04-18 MODIFY
     'editedItem.dep_name': function (){
+      let len=this.editedItem.dep_name.length
+      /*
       let isDepRule = /^([a-zA-Z\u4e00-\u9fa5_.-]+)$/;
       // /^([a-zA-Z0-9\u0600-\u06FF\u0660-\u0669\u06F0-\u06F9 _.-]+)$/
       let result = this.editedItem.dep_name.search(isDepRule);
-      let len=this.editedItem.dep_name.length
       result = (len==0)?0:result
       //console.log("result, len: ", result, len);
+      */
       this.depErrMsg = '';
-      if (result==-1 || len > 12) {
+      //if (result==-1 || len > 12) {
+      if (len > 12) {
         this.depErrMsg = '資料格式錯誤!';
         //this.disbtn = true;
       } else{
@@ -380,7 +383,7 @@ export default {
       });
     },
 
-    save () {
+    save() {
       console.log("click save button, editedIndex: ", this.editedIndex);
 
       if (this.editedIndex == -1) {    //add

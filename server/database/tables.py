@@ -182,7 +182,7 @@ class Reagent(BASE):
     __tablename__ = 'reagent'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    reag_id = Column(String(9), nullable=False)
+    reag_id = Column(String(10), nullable=False)    # 2023-04-13 modify String(9) into String(10)
     reag_name = Column(String(50), nullable=False)
     reag_In_unit = Column(String(10), nullable=False)  # 入庫單位
     reag_Out_unit = Column(String(10), nullable=False)  # 出庫單位
@@ -245,7 +245,7 @@ class Supplier(BASE):
     __tablename__ = 'supplier'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    super_id = Column(String(4), nullable=False)
+    super_id = Column(String(6), nullable=False)        # 2023-04-13 modify String(4) into String(6)
     super_name = Column(String(40), nullable=False)
     super_address = Column(String(80), nullable=False)
     super_connector = Column(String(10), nullable=False)

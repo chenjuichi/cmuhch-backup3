@@ -41,7 +41,7 @@
                     <v-container>
                       <!-- 第1列-->
                       <v-row>
-                        <v-col cols="12" md="3">
+                        <v-col cols="12" md="2">    <!-- 2023-04-14 modify md=3 => md=2   -->
                           <v-text-field
                             v-model="editedItem.reag_id"
                             label="資材碼"
@@ -51,7 +51,7 @@
                           ></v-text-field>
                           <small class="msgErr" v-text= "IDErrMsg"></small>
                         </v-col>
-                        <v-col cols="12" md="3">
+                        <v-col cols="12" md="4">    <!-- 2023-04-14 modify md=3 => md=4   -->
                           <v-text-field
                             v-model="editedItem.reag_name"
                             label="品名"
@@ -375,6 +375,7 @@ export default {
     nameErrMsg: '',
     scaleErrMsg: '',
     stockErrMsg: '',
+    firstEdit: true,
 
     //資料表頭
     headers: [
@@ -443,8 +444,8 @@ export default {
     },
     newItemIn: '',
     newItemOut: '',
-    InUnits: ['盒', '包', '袋', '瓶', '個', '條', '其他'],
-    OutUnits: ['盒', '包', '袋', '瓶', '個', '條', '其他'],
+    InUnits: ['盒', '包', '袋', '瓶', '個', '條', '組', '其他'],  //2023-0413 add 組
+    OutUnits: ['盒', '包', '袋', '瓶', '個', '條', '組', '其他'], //2023-0413 add 組
     newItem: '',
     reagents: [],
 
@@ -480,7 +481,7 @@ export default {
           !!this.editedItem.reag_In_unit && !!this.editedItem.reag_Out_unit &&
         //  !!this.editedItem.reag_scale && !!this.editedItem.reag_period &&
           !!this.editedItem.reag_scale &&
-          !!this.editedItem.reag_stock && !!this.editedItem.reag_temp && this.editedItem.reag_supplier &&
+          !!this.editedItem.reag_stock && !!this.editedItem.reag_temp && !!this.editedItem.reag_supplier &&
           this.IDErrMsg == '' && this.nameErrMsg == '' && this.scaleErrMsg == '') {
         return false;
       } else {
@@ -501,7 +502,7 @@ export default {
 
     'editedItem.reag_id': function () {
       //let isEmpIDRule = /^\w{1,9}$/;
-      let isEmpIDRule = /^[A-Za-z0-9.]{1,9}$/;
+      let isEmpIDRule = /^[A-Za-z0-9\-.]{1,10}$/; //2023-0413 modify 9碼=>10碼
 
       this.IDErrMsg = '';
       let result = this.editedItem.reag_id.search(isEmpIDRule);
@@ -513,7 +514,7 @@ export default {
 
       //if (result != -1 || len==0) {
       if (result != -1) {
-        if (typeof(matchResult) != 'undefined') {
+        if (typeof(matchResult) != 'undefined' && this.editedIndex == -1) { // 2023-04-18 modify
           console.log("typeof is undefined...");
           this.IDErrMsg = '資材碼與 ' + matchResult.reag_name + ' 重複!';
         } else {
@@ -526,7 +527,7 @@ export default {
 
     'editedItem.reag_name': function () {
       //let isNameRule = /^\w{1,50}$/;
-      let isNameRule = /^[A-Za-z0-9_-]{1,50}$/;
+      let isNameRule = /^[A-Za-z0-9\-_]{1,50}$/;  // 2023-04-25 modify
 
       this.nameErrMsg = '';
       let result = this.editedItem.reag_name.search(isNameRule);
@@ -850,10 +851,22 @@ export default {
     });
     },
 
-    save () {
+    save() {
       console.log("click save button, editedIndex: ", this.editedIndex);
-
+      this.editedItem.reag_id=this.editedItem.reag_id.trim();     //2023-05-12 add
+      this.editedItem.reag_name=this.editedItem.reag_name.trim(); //2023-05-12 add
       if (this.editedIndex == -1) {    //add
+        //2023-04-14 add
+        if (this.newItemIn !== "") {
+          this.editedItem.reag_In_unit=this.newItemIn;
+          this.newItemIn="";
+        }
+
+        if (this.newItemOut !== "") {
+          this.editedItem.reag_Out_unit=this.newItemOut;
+          this.newItemOut="";
+        }
+        //
         this.createReagent(this.editedItem);
         if (!this.tosterOK) {
           this.desserts.push(this.editedItem);

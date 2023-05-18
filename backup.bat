@@ -16,3 +16,5 @@ copy C:\vue\project01\server\database\*.py C:\cmuhch-backup3\server\database\
 copy C:\vue\project01\server\ajax\*.py C:\cmuhch-backup3\server\ajax\
 copy C:\vue\project01\server\common\*.py C:\cmuhch-backup3\server\common\
 copy C:\vue\project01\server\resource\*.py C:\cmuhch-backup3\server\resource\
+
+copy C:\cmuhch-backup2\*.pptx C:\cmuhch-backup3\

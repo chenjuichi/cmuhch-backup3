@@ -56,7 +56,7 @@ print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
 '''
 # --------------------------
 
-# host_ip = '192.168.0.12'    # for home #//////2/2-
+# host_ip = '192.168.0.15'    # for home #//////2/2-
 # host_ip = '10.108.249.107'  # for cmuhch #//////2/2-
 host_ip = '192.168.32.178'  # for zh  #//////2/2-
 # host_ip = '192.168.43.117'  # for mobile  #//////2/2-

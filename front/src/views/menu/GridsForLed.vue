@@ -35,7 +35,10 @@
                     </v-col>
                     <v-col cols="12" md="4">
                       <div style="color: #007bff; font-weight: 800;">格位編號</div>
-                      <vue-numeric-input  v-model="editedItem.grid_pos" :min="1" :max="10" :step="1"></vue-numeric-input>
+                      <!-- 2023-05-17 modify the following line -->
+                      <!-- <vue-numeric-input  v-model="editedItem.grid_pos" :min="1" :max="10" :step="1"></vue-numeric-input> -->
+                      <vue-numeric-input  v-model="editedItem.grid_pos" :min="1" :max="20" :step="1"></vue-numeric-input>
+                      <!-- -->
                     </v-col>
                     <v-col cols="12" md="3">
                       <v-switch

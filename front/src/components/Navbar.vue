@@ -39,7 +39,7 @@
                 {{ navbar.name4 }}
               </template>
               <b-dropdown-item :to="navbar.router4">{{ navbar.name4 }}</b-dropdown-item>
-              <b-dropdown-item to="/gridsForLed">儲位燈條資料設定</b-dropdown-item>
+              <b-dropdown-item to="/gridsForLed">儲位燈條設定</b-dropdown-item>
             </b-dropdown>
 
             <!--供應商-->
@@ -299,7 +299,7 @@ export default {
           icon1: "person-plus", name1: "人員資料", router1: "/emp",
           icon2: "person-lines-fill", name2: "人員權限資料", router2: "/perm",
           icon3: "clipboard-data", name3: "試劑資料", router3: "/reag",
-          icon4: "bookshelf", name4: "儲位設定", router4: "/grid",
+          icon4: "bookshelf", name4: "儲位資料", router4: "/grid",
           icon5: "briefcase", name5: "供應商資料", router5: "/sup",
           icon6: "people", name6: "組別資料", router6: "/dep",
           //icon7: "people", name7: "Led資料設定", router7: "/gridsForLed",
@@ -314,7 +314,7 @@ export default {
           text: "出庫管理",
           icon1: "bookmark-dash", name1: "出庫標籤資料", router1: "/outTag",
           icon2: "bag-dash", name2: "出庫標籤列印", router2: "/outTagPrint",
-          icon3: "cart-dash", name3: "出庫作業", router3: "/stockOut",
+          icon3: "cart-dash", name3: "待出庫作業", router3: "/stockOut",
         },
         { id: 4,
           text: "物料盤點",

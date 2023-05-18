@@ -1030,7 +1030,15 @@ export default {
       for (let i=0; i<this.selectedCatalogs.length; i++) {
         arr_for_products.push(this.products[this.selectedCatalogs[i]])
       }
-      console.log("payload: ", arr_for_products, arr_for_suppliers)
+
+      // 2023-05-17 add block, for remove all duplicates from an array of objects
+      //console.log("before => arr_for_products, arr_for_suppliers payload: ", arr_for_products, arr_for_suppliers)
+      arr_for_products = arr_for_products.filter((value, index, self) =>
+        index === self.findIndex((t) => (t.id === value.id && t.stockIn_id === value.stockIn_id))
+      )
+      console.log("after => arr_for_products, arr_for_suppliers payload: ", arr_for_products, arr_for_suppliers)
+      // end block
+
       //console.log("3-1.check...", this.temp_suppliers);
 
       var payload= {
@@ -1314,7 +1322,7 @@ export default {
       })
     },
 
-    save () {
+    save() {
       console.log("save...");
       this.desserts = this.desserts.map(v => ({...v, isOnTable: true}))
       //console.log("save...");

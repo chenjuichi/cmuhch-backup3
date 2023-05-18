@@ -382,7 +382,7 @@ export default {
       //let result = this.editedItem.sup_id.search(isRule);
       //console.log("this.editedItem.sup_id, typeof ", typeof(this.editedItem.sup_id));
       //let pattern1 =/^\d+$/
-      let pattern1 = /^[A-Za-z0-9]{1,4}$/;
+      let pattern1 = /^[A-Za-z0-9]{1,6}$/;  // 2023-04-18 modify LENGTH FROM 4 into 6
 
       let isNumber = pattern1.test(this.editedItem.sup_id);
       //let pattern2 =/^\s+$/
@@ -392,21 +392,25 @@ export default {
 
       this.IDErrMsg = '';
       //if (result == -1 && !(isNumber && this.editedItem.sup_id.length<5 && this.editedItem.sup_id.length>=0)) {
-      if (!(isNumber && this.editedItem.sup_id.length<5 && this.editedItem.sup_id.length>0)) {
+      // 2023-04-18 modify LENGTH FROM 4 into 6
+      if (!(isNumber && this.editedItem.sup_id.length<7 && this.editedItem.sup_id.length>0)) {
         if (this.editedItem.sup_id.length!=0)
           this.IDErrMsg = '資料格式錯誤!';
       } else {
-        if (typeof(matchResult) != 'undefined') {
+        if (typeof(matchResult) != 'undefined' && this.editedIndex == -1) { // 2023-04-18 modify
           this.IDErrMsg = '供應商代碼與 ' + matchResult.sup_name + ' 重複!';
         } else {
           this.IDErrMsg = '';
         }
       }
     },
-
+    //2023-04-18 MODIFY
     'editedItem.sup_name': function () {
-      let isRule = /^([a-zA-Z\u4e00-\u9fa5_.-]+)$/;
+      let len=this.editedItem.sup_name.length
+     /*
+      let isRule = /^([a-zA-Z\u4e00-\u9fa5_\-.]+)$/;
       let result = this.editedItem.sup_name.search(isRule);
+      console.log("tt result: ", result)
       let len=this.editedItem.sup_name.length
       result = (len==0)?0:result
       //if (len==0)
@@ -417,24 +421,30 @@ export default {
         this.supNameErrMsg = '';
         return;
       }
+      */
 
-      if (result == -1 || len > 40) {
+      //if (result == -1 || len > 40) {
+      if (len > 40) {
         this.supNameErrMsg = '資料格式錯誤!';
       } else {
         this.supNameErrMsg = '';
       }
     },
 
+    //2023-04-18 MODIFY
     'editedItem.sup_contact': function () {
+      let len = this.editedItem.sup_contact.length;
+      /*
       let isRule = /^([a-zA-Z\u4e00-\u9fa5_.-]+)$/;
       let result = this.editedItem.sup_contact.search(isRule);
-      let len = this.editedItem.sup_contact.length;
       result = (len==0)?0:result
       //if (len==0)
       //  result=0
       this.supContactErrMsg = '';
       //console.log("watch:", result, len)
-      if (result == -1 || len > 10) {
+      */
+      //if (result == -1 || len > 10) {
+      if (len > 10) {
         this.supContactErrMsg = '資料格式錯誤!';
       } else {
         this.supContactErrMsg = '';
@@ -469,14 +479,16 @@ export default {
     load_SingleTable_ok(val) {
       if (val) {
         this.desserts = Object.assign([], this.temp_desserts);
+        this.load_SingleTable_ok=false;
       }
     },
 
     load_2thTable_ok(val) {
       if (val) {
         this.items = Object.assign([], this.temp_items);
+        this.load_2thTable_ok=false;
 
-        this.load_SingleTable_ok=false;
+        //this.load_SingleTable_ok=false;
         this.listSuppliers();
       }
     },
@@ -640,6 +652,8 @@ export default {
 
     save() {
       console.log("click save button, editedIndex: ", this.editedIndex);
+
+      this.editedItem.sup_id=this.editedItem.sup_id.trim();     //2023-05-13 add
 
       this.editedItem.sup_products=[];
       let temp_len=this.temp_product.length

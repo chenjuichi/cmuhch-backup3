@@ -138,19 +138,29 @@ def create_stockin():
 
     batch = (request_data['stockInTag_batch'] or '')
 
+    print("2023-06-02 trace data: ", reagID, len(reagID), employer, date, cnt, reagPeriod, batch)
+
     return_value = True  # true: 資料正確, true
+    return_message=''
     if reagID == "" or employer == "" or date == "" or cnt == "" or reagPeriod == "" or batch == "":
         return_value = False  # false: 資料不完全
+        return_message='錯誤! 資料不完整...'
+        print("2023-06-02 trace step1")
 
     s = Session()
     _user = s.query(User).filter_by(emp_name=employer).first()
     if not _user:
         return_value = False  # if the user data does not exist
+        return_message='錯誤! 找不到人員 ' + employer + ' 資料'
+        print("2023-06-02 trace step2")
 
     _reagent = s.query(Reagent).filter_by(reag_id=reagID).first()
     if not _reagent:
         return_value = False  # if the reagent data  does not exist
+        return_message='錯誤! 找不到試劑 ' + reagID + ' 資料'
+        print("2023-06-02 trace step3")
 
+    print("return_value: ", return_value)
     if return_value:
         new_stockIn = InTag(user_id=_user.id,
                             reagent_id=_reagent.id,
@@ -411,11 +421,17 @@ def add_stockout_item():
           print("b, 該筆入庫數量大於出庫數量(單位已轉換)...")
           myInCount=myReturn / temp_scale
           print("b-1, myInCount ",myInCount)
-          myInCount=math.floor(myInCount*10)  # 取小數點1位
+          # 2023-06-02 modify
+          #myInCount=math.floor(myInCount*10)  # 取小數點1位
+          myInCount=math.floor(myInCount*1000)  # 取小數點3位
           print("b-2, myInCount ",myInCount)
-          myInCount=myInCount/10
+          # 2023-06-02 modify
+          #myInCount=myInCount/10
+          myInCount=myInCount/1000
           print("b-3, myInCount ",myInCount)
-          intag_item.count=myInCount
+          # 2023-06-02 modify
+          #intag_item.count=myInCount
+          intag_item.count=round(myInCount, 2)
           break
 
         if (myReturn<0):  #該筆入庫數量小於出庫數量(單位已轉換)

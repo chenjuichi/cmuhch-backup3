@@ -724,4 +724,9 @@ div.v-toolbar__title {
 ::v-deep .v-data-table-header th:nth-last-child(1) span {
   color: #1f4788 !important;
 }
+
+::v-deep .v-data-footer {
+  margin-top: 0px;
+  margin-bottom: 2px;
+}
 </style>

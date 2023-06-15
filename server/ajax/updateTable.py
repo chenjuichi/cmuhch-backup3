@@ -904,9 +904,11 @@ def update_StockIn_data_by_Inv():
         s = Session()
 
         for obj in _blocks:
+            #print("obj: ", obj)
             if obj['isGridChange']:  # 儲位有變更
+                print("obj: ", obj)
                 gridID = modify_InTags_grid(obj['stockInTag_grid_id'], int(obj['stockInTag_grid_station']),
-                                            int(obj['stockInTag_grid_layout']), int(obj['stockInTag_grid_pos']), int(obj['stockInTag_reagID']))
+                                            int(obj['stockInTag_grid_layout']), int(obj['stockInTag_grid_pos']), obj['stockInTag_reagID']) # 2023-06-14 modify
                 print("return grid id: ", gridID)
                 intag = s.query(InTag).filter_by(id=obj['intag_id']).first()
                 reagent = s.query(Reagent).filter_by(
@@ -920,10 +922,13 @@ def update_StockIn_data_by_Inv():
                     reagent.grid_id = gridID  # 2023-01-13 add
                 # intag.count = int(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料
                 # 修改在庫數資料, 2023-02-13 update
-                intag.count = float(obj['stockInTag_cnt_inv_mdf'])
+                #intag.count = float(obj['stockInTag_cnt_inv_mdf']) # 2023-06-12 modify
+                intag.count = obj['stockInTag_cnt_inv_mdf']
+                print("intag.count = obj['stockInTag_cnt_inv_mdf'] ", intag.count, obj['stockInTag_cnt_inv_mdf'] )
                 # 修改盤點數資料
                 # intag.count_inv_modify = int(obj['stockInTag_cnt_inv_mdf'])  #2023-01-05 mark
-                intag.count_inv_modify = 0
+                #intag.count_inv_modify = 0   # 2023-06-12 modify
+                intag.count_inv_modify = 0.0
                 intag.comment = obj['stockInTag_comment']     # 修改盤點說明資料
                 intag.updated_at = now  # 資料修改的時間
                 # intag.updated_at = datetime.datetime.utcnow()  # 資料修改的時間

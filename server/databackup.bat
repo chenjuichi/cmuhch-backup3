@@ -1,4 +1,4 @@
-cd ..
+::pushd e:\cmuhch
 
 IF not exist ";C:\Program Files\MySQL\MySQL Server 5.7\bin;" SET PATH=%PATH%;C:\Program Files\MySQL\MySQL Server 5.7\bin
 
@@ -12,7 +12,6 @@ IF not exist ";C:\Program Files\MySQL\MySQL Server 5.7\bin;" SET PATH=%PATH%;C:\
 
 ::setx Path "%str%;c:\path\to\add" -m
 :: proceed with setting the path
-
-mysqldump -u root -p cmuhch > cmuhch_backup.sql;
-
-cd server
+ECHO cmuhch password: 77974590
+mysqldump -u root -p cmuhch > cmuhch_backup_0606.sql
+::popd

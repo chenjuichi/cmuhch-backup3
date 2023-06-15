@@ -124,6 +124,24 @@ def list_suppliers_by_select():
     s = Session()
 
     if selectedProducts:    # 有產品類別選項資料
+        product_query = s.query(Product).filter(Product.name.in_(selectedProducts))
+        products = product_query.all()
+        products_id_list=[]
+        for product in products:  # 列出產品類別
+          products_id_list.append(product.id)
+        print("products_id_list: ", products_id_list)
+
+        reagent_query = s.query(Reagent).filter(Reagent.product_id.in_(products_id_list))
+        reagents = reagent_query.all()
+        reagents_id_list=[]
+        for reagent in reagents:  # 列出產品類別
+          reagents_id_list.append(reagent.id)
+        print("reagents_id_list: ", reagents_id_list)
+
+        intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
+        intags = intag_query.all()
+        for _inTag in intags:
+          '''
         products = s.query(Product).all()
         for product in products:  # 列出產品類別
             if product.name in selectedProducts:
@@ -138,22 +156,31 @@ def list_suppliers_by_select():
                         #if _inTag:
                         #    temp = _inTag.count - _inTag.stockOut_temp_count
                         #if _inTag and temp > 0 and _inTag.isRemoved:    # 列出在庫所有試劑資料
-                        if _inTag and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
-                            #print("a reagent: ", _inTag.reagent_id)
-                            _obj = {
-                                'stockIn_reagent_id': reagent.reag_id,
-                                'stockIn_reagent_name': reagent.reag_name,
-                                'stockIn_supplier': supplier.super_name,
-                                'stockIn_reagent_period': _inTag.reag_period,  # 依2022-12-12操作教育訓練建議作修正
-                                'stockIn_date': _inTag.intag_date,  # 入庫日期
-                                'stockIn_reagent_Out_unit': reagent.reag_Out_unit,
-                                #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
-                                # 'stockIn_reagent_Out_cnt': _inTag.count,
-                                'stockIn_reagent_Out_cnt': _inTag.count,
-                                # 'stockIn_reagent_Out_cnt': 1,
-                                'stockIn_id': _inTag.id,
-                            }
-                            _results_for_stockOut.append(_obj)
+          '''
+          if _inTag and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
+              #print("a reagent: ", _inTag.reagent_id)
+            reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
+            supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
+            _results_for_supplier.append(supplier.super_name)
+            _obj = {
+                'id': _inTag.id,    # 2023-06-05 add
+
+                'stockIn_reagent_id': reagent.reag_id,
+                'stockIn_reagent_name': reagent.reag_name,
+
+                'stockIn_batch': _inTag.batch,  # 2023-06-05 add
+
+                'stockIn_supplier': supplier.super_name,
+                'stockIn_reagent_period': _inTag.reag_period,  # 依2022-12-12操作教育訓練建議作修正
+                'stockIn_date': _inTag.intag_date,  # 入庫日期
+                'stockIn_reagent_Out_unit': reagent.reag_Out_unit,
+                #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
+                # 'stockIn_reagent_Out_cnt': _inTag.count,
+                'stockIn_reagent_Out_cnt': _inTag.count,
+                # 'stockIn_reagent_Out_cnt': 1,
+                'stockIn_id': _inTag.id,
+            }
+            _results_for_stockOut.append(_obj)
 
     s.close()
 
@@ -181,6 +208,32 @@ def list_stockInData_by_Select():
 # ===狀況1
     if selectedCatalogs and selectedSuppliers:  # 有產品類別和供應商選項資料
         print("狀況1...")
+        product_query = s.query(Product).filter(Product.name.in_(selectedCatalogs))
+        products = product_query.all()
+        products_id_list=[]
+        for product in products:  # 列出產品類別
+          products_id_list.append(product.id)
+        print("products_id_list: ", products_id_list)
+
+        supplier_query = s.query(Supplier).filter(Supplier.super_name.in_(selectedSuppliers))
+        suppliers = supplier_query.all()
+        suppliers_id_list=[]
+        for supplier in suppliers:  # 列出產品類別
+          suppliers_id_list.append(supplier.id)
+        print("suppliers_id_list: ", suppliers_id_list)
+
+        reagent_query_1 = s.query(Reagent).filter(Reagent.super_id.in_(suppliers_id_list))
+        reagent_query = reagent_query_1.filter(Reagent.product_id.in_(products_id_list))
+        reagents = reagent_query.all()
+        reagents_id_list=[]
+        for reagent in reagents:  # 列出產品類別
+          reagents_id_list.append(reagent.id)
+        print("reagents_id_list: ", reagents_id_list)
+
+        temp_cycle=0
+        intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
+        intags = intag_query.all()
+        '''
         products = s.query(Product).all()
         for product in products:  # 列出產品類別
             if product.name in selectedCatalogs:  # 選項資料內有該筆產品類別名稱
@@ -191,114 +244,133 @@ def list_stockInData_by_Select():
                         for reagent in supplier._reagents:  # 列出試劑
 
                             intags = s.query(InTag).all()
-                            for _inTag in intags:
-                            #_inTag = s.query(InTag).filter_by(reagent_id=reagent.id).first()
-                            #if _inTag:
-                            #    #temp = _inTag.count - _inTag.stockOut_temp_count  #stockOut_temp_count暫時都為0
-                            #    temp = _inTag.count #stockOut_temp_count暫時都為0
-                              if _inTag and _inTag.reagent_id==reagent.id and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
-                                  _obj = {
-                                      'id': _inTag.id,
-                                      'stockIn_reagent_id': reagent.reag_id,
-                                      'stockIn_reagent_name': reagent.reag_name,
-                                      'stockIn_batch': _inTag.batch,
-                                      'stockIn_supplier': supplier.super_name,
-                                      'stockIn_reagent_period': _inTag.reag_period,       #效期
-                                      'stockIn_date': _inTag.intag_date,                  #入庫日期
-                                      #'stockIn_reagent_Out_unit': reagent.reag_Out_unit,  #領料單位
-                                      #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
-                                      # 'stockIn_reagent_Out_cnt': _inTag.count,
-                                      # 'stockIn_reagent_Out_cnt': _inTag.count,
-                                      'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
-                                      #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
-                                # 'stockIn_reagent_Out_cnt': 1,
-                                      'stockIn_id': _inTag.id,
-                                  }
-                                  _results_for_stockOut.append(_obj)
+        '''
+        for _inTag in intags:
+          if _inTag and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
+            reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
+            supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
+            _obj = {
+                'id': _inTag.id,
+                'stockIn_reagent_id': reagent.reag_id,
+                'stockIn_reagent_name': reagent.reag_name,
+                'stockIn_batch': _inTag.batch,
+                'stockIn_supplier': supplier.super_name,
+                'stockIn_reagent_period': _inTag.reag_period,       #效期
+                'stockIn_date': _inTag.intag_date,                  #入庫日期
+                #'stockIn_reagent_Out_unit': reagent.reag_Out_unit,  #領料單位
+                #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
+                # 'stockIn_reagent_Out_cnt': _inTag.count,
+                # 'stockIn_reagent_Out_cnt': _inTag.count,
+                # 2023-06-02 modify
+                'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
+                'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
+                #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
+          # 'stockIn_reagent_Out_cnt': 1,
+                'stockIn_id': _inTag.id,
+            }
+            _results_for_stockOut.append(_obj)
+            temp_cycle=temp_cycle+1
+          print("temp_cycle: ", temp_cycle)
     #end 狀況1
 # ===狀況2
     elif not selectedCatalogs and selectedSuppliers:  # 只有供應商選項資料
         print("狀況2...")
-        suppliers = s.query(Supplier).all()
+        supplier_query = s.query(Supplier).filter(Supplier.super_name.in_(selectedSuppliers))
+        suppliers = supplier_query.all()
+        suppliers_id_list=[]
+        for supplier in suppliers:  # 列出產品類別
+          suppliers_id_list.append(supplier.id)
 
-        for supplier in suppliers:  # 列出供應商
-            if supplier.super_name in selectedSuppliers:  # 選項資料內有該筆供應商名稱
-                #print("*: ", supplier.super_name)
+        reagent_query = s.query(Reagent).filter(Reagent.super_id.in_(suppliers_id_list))
+        reagents = reagent_query.all()
+        reagents_id_list=[]
+        for reagent in reagents:  # 列出產品類別
+          reagents_id_list.append(reagent.id)
 
-                for reagent in supplier._reagents:  # 列出該供應商的所有試劑編號
-                    #print("b reagent: ", reagent.id)
+        temp_cycle=0
+        intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
+        intags = intag_query.all()
+        for _inTag in intags:
+          if _inTag and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
+            reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
+            supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
+            _obj = {
+                'id': _inTag.id,
+                'stockIn_reagent_id': reagent.reag_id,
+                'stockIn_reagent_name': reagent.reag_name,
+                'stockIn_batch': _inTag.batch,
+                'stockIn_supplier': supplier.super_name,
+                'stockIn_reagent_period': _inTag.reag_period,       #效期, 依2022-12-12操作教育訓練建議作修正
+                'stockIn_date': _inTag.intag_date,                  #入庫日期
+                #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
+                'stockIn_reagent_Out_unit': reagent.reag_Out_unit,  #領料單位
 
-                    intags = s.query(InTag).all()
-                    for _inTag in intags:
-                    #_inTag = s.query(InTag).filter_by(reagent_id=reagent.id).first()
+                # 'stockIn_reagent_Out_cnt': _inTag.count,
+                #'stockIn_reagent_Out_cnt': temp,
+                # 2023-06-02 modify
+                'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
+                #'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
+                'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
+                #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
 
-                    #if _inTag:
-                    #    #print(type(_inTag.count), type(_inTag.stockOut_temp_count))
-                    #    #temp = _inTag.count - _inTag.stockOut_temp_count  #stockOut_temp_count暫時都為0
-                    #    temp = _inTag.count #stockOut_temp_count暫時都為0
-                    #if _inTag and temp > 0 and _inTag.isRemoved:    # 列出在庫所有試劑資料
-                      if _inTag and _inTag.reagent_id==reagent.id and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
-                          _obj = {
-                              'id': _inTag.id,
-                              'stockIn_reagent_id': reagent.reag_id,
-                              'stockIn_reagent_name': reagent.reag_name,
-                              'stockIn_batch': _inTag.batch,
-                              'stockIn_supplier': supplier.super_name,
-                              'stockIn_reagent_period': _inTag.reag_period,       #效期, 依2022-12-12操作教育訓練建議作修正
-                              'stockIn_date': _inTag.intag_date,                  #入庫日期
-                              #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
-                              'stockIn_reagent_Out_unit': reagent.reag_Out_unit,  #領料單位
-
-                              # 'stockIn_reagent_Out_cnt': _inTag.count,
-                              #'stockIn_reagent_Out_cnt': temp,
-                              'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
-                              'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
-                              #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
-
-                              # 'stockIn_reagent_Out_cnt': 1,
-                              'stockIn_id': _inTag.id,
-                          }
-                          _results_for_stockOut.append(_obj)
+                # 'stockIn_reagent_Out_cnt': 1,
+                'stockIn_id': _inTag.id,
+            }
+            _results_for_stockOut.append(_obj)
+            temp_cycle=temp_cycle+1
+          print("temp_cycle: ", temp_cycle)
     #end 狀況2
 # ===狀況3
     elif selectedCatalogs and not selectedSuppliers:  # 只有產品類別選項資料
         print("狀況3...")
-        products = s.query(Product).all()
+        product_query = s.query(Product).filter(Product.name.in_(selectedCatalogs))
+        products = product_query.all()
+        products_id_list=[]
         for product in products:  # 列出產品類別
-            if product.name in selectedCatalogs:  # 選項資料內有該筆產品類別名稱
-                for supplier in product._suppliers:  # 列出供應商
-                    # if supplier.super_name in selectedSuppliers:  # 選項資料內有該筆供應商名稱
-                    for reagent in supplier._reagents:  # 列出試劑
+          products_id_list.append(product.id)
+        print("products_id_list: ", products_id_list)
 
-                        intags = s.query(InTag).all()
-                        for _inTag in intags:
-                        #_inTag = s.query(InTag).filter_by(reagent_id=reagent.id).first()
-                        #print("_inTag: ", _inTag)
-                        #if _inTag:
-                        #    #temp = _inTag.count - _inTag.stockOut_temp_count  #stockOut_temp_count暫時都為0
-                        #    temp = _inTag.count #stockOut_temp_count暫時都為0
-                        #if _inTag and temp > 0 and _inTag.isRemoved:    # 列出在庫所有試劑資料
-                          if _inTag and _inTag.reagent_id==reagent.id and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
-                              _obj = {
-                                  'id': _inTag.id,
-                                  'stockIn_reagent_id': reagent.reag_id,
-                                  'stockIn_reagent_name': reagent.reag_name,
-                                  'stockIn_batch': _inTag.batch,
-                                  'stockIn_supplier': supplier.super_name,
-                                  # 'stockIn_supplier': '',
-                                  'stockIn_reagent_period': _inTag.reag_period,         #效期, 依2022-12-12操作教育訓練建議作修正
-                                  'stockIn_date': _inTag.intag_date,                    #入庫日期
-                                  'stockIn_reagent_Out_unit': reagent.reag_Out_unit,    #領料單位
-                                  # 'stockIn_reagent_Out_cnt': _inTag.count,
-                                  #'stockIn_reagent_Out_cnt': _inTag.count,
-                                  'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
-                                  'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
-                                  #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
+        reagent_query = s.query(Reagent).filter(Reagent.product_id.in_(products_id_list))
+        reagents = reagent_query.all()
+        reagents_id_list=[]
+        for reagent in reagents:  # 列出產品類別
+          reagents_id_list.append(reagent.id)
+        print("reagents_id_list: ", reagents_id_list)
 
-                                  # 'stockIn_reagent_Out_cnt': 1,
-                                  'stockIn_id': _inTag.id,
-                              }
-                              _results_for_stockOut.append(_obj)
+        temp_cycle=0
+        intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
+        intags = intag_query.all()
+        for _inTag in intags:
+          #if _inTag and _inTag.reagent_id==reagent.id and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
+          if _inTag and _inTag.count > 0 and _inTag.isRemoved and _inTag.isStockin:    # 列出在庫所有試劑資料
+            #print("_inTag: ", _inTag)
+            reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
+            #print("reagent: ", reagent)
+            supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
+            _obj = {
+                'id': _inTag.id,
+                'stockIn_reagent_id': reagent.reag_id,
+                'stockIn_reagent_name': reagent.reag_name,
+                'stockIn_batch': _inTag.batch,
+                'stockIn_supplier': supplier.super_name,
+                # 'stockIn_supplier': '',
+                'stockIn_reagent_period': _inTag.reag_period,         #效期, 依2022-12-12操作教育訓練建議作修正
+                'stockIn_date': _inTag.intag_date,                    #入庫日期
+                'stockIn_reagent_Out_unit': reagent.reag_Out_unit,    #領料單位
+                # 'stockIn_reagent_Out_cnt': _inTag.count,
+                #'stockIn_reagent_Out_cnt': _inTag.count,
+                # 2023-06-02 modify
+                'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
+                #'stockIn_reagent_Out_cnt':     _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
+                'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
+                #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
+
+                # 'stockIn_reagent_Out_cnt': 1,
+                'stockIn_id': _inTag.id,
+            }
+            _results_for_stockOut.append(_obj)
+            temp_cycle=temp_cycle+1
+        print("temp_cycle: ", temp_cycle)
     #end 狀況3
     s.close()
 
@@ -348,19 +420,30 @@ def get_last_batch_alpha_for_stockout():
 
     _objects = s.query(OutTag).filter(OutTag.isRemoved == True, or_(OutTag.isPrinted == True, OutTag.isStockout == True)
                                       ).order_by(OutTag.stockOut_alpha.asc()).all()
+    #print("_objects", _objects)
     your_count = len(_objects)
     print("your_count: ", your_count)
-    your_stockout_date = _objects[your_count-1].outtag_date
+    #your_stockout_date = _objects[your_count-1].outtag_date  # 2023-06-05 mark
     if (your_count != 0):
+        print("_objects, step1...")
+        your_stockout_date = _objects[your_count-1].outtag_date # 2023-06-05 add
         your_last_alpha = _objects[your_count-1].stockOut_alpha
+        if your_last_alpha:
+          return_value = True # 2023-06-05 add
+        else:         # 2023-06-15 add
+          return_value = False    # 2023-06-15 add
     else:
+        print("_objects, step2...")
         your_last_alpha = 'a'
+        your_stockout_date = '' # 2023-06-05 add
+        return_value = False    # 2023-06-05 add
+
     print("Out, Alpha: ", your_last_alpha)
 
     s.close()
 
-    if (your_count == 0):
-        return_value = False
+    #if (your_count == 0):      # 2023-06-05 mark
+    #    return_value = False   # 2023-06-05 mark
 
     return jsonify({
         'status': return_value,

@@ -1108,13 +1108,16 @@ def list_inventorys():
     # intags = [u.__dict__ for u in _objects]
     for intag in _objects:
         # if (intag.isRemoved and intag.isPrinted and intag.isStockin):
-        if (intag.isRemoved and intag.isStockin):
+        #if (intag.isRemoved and intag.isStockin): # 在庫 且 已入庫    , 2023-06-12 modify
+        if (intag.isRemoved and intag.isStockin and intag.count > 0): # 在庫 且 已入庫, 2023-06-15 modify
             _user = s.query(User).filter_by(id=intag.user_id).first()
             _reagent = s.query(Reagent).filter_by(id=intag.reagent_id).first()
             # _supplier = s.query(Supplier).filter_by(id=_reagent.super_id).first()
             #_grid = s.query(Grid).filter_by(id=intag.grid_id).first()    # 2023-01-13 mark
             _grid = s.query(Grid).filter_by(id=_reagent.grid_id).first()  # 2023-01-13 add
 
+            _product = s.query(Product).filter_by(id=_reagent.product_id).first() # 2023-05-23 add
+            print("_product.name: ", _product.name)
             k1 = ''
             if _reagent.reag_temp == 0:  # 0:室溫、1:2~8度C、2:-20度C
                 k1 = '室溫'
@@ -1123,10 +1126,21 @@ def list_inventorys():
             if _reagent.reag_temp == 2:
                 k1 = '-20度C'
 
+            # 2023-06-15 modify
+            #modify_cnt_str=str(intag.count_inv_modify)
+            #modify_comment=intag.comment
+            #if intag.count_inv_modify==0.0:
+            #  modify_cnt_str=''
+            #  modify_comment=''
+            modify_cnt_str=''
+            modify_comment=''
+
             _obj = {
-                'id': temp_kk,
+                #'id': temp_kk,     # 2023-0612 modify
+                'id': intag.id,     #
                 'stockInTag_reagID': _reagent.reag_id,          # 資材碼
                 'stockInTag_reagName': _reagent.reag_name,      # 品名
+                'stockInTag_reagProduct': _product.name,        # 2023-05-23 add, 資材類別
                 'stockInTag_stockInBatch': intag.batch,         #批次, # 2023-0216 add
                 'stockInTag_reagPeriod': intag.reag_period,     # 效期, 依2022-12-12操作教育訓練建議作修正
                 'stockInTag_reagTemp': k1,    # 保存溫度
@@ -1141,8 +1155,8 @@ def list_inventorys():
                 # 在庫數量
                 # 'stockInTag_cnt': str(intag.count) + _reagent.reag_In_unit,
                 'stockInTag_cnt': str(intag.count) + _reagent.reag_In_unit,
-                'stockInTag_cnt_inv_mdf': str(intag.count_inv_modify),
-                'stockInTag_comment': intag.comment,
+                'stockInTag_cnt_inv_mdf': modify_cnt_str,
+                'stockInTag_comment': modify_comment,
                 'intag_id': intag.id,
             }
 

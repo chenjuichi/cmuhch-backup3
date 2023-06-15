@@ -28,9 +28,16 @@
             <v-toolbar flat>
               <v-toolbar-title style="height: 40px;">盤點作業</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
-              <!-- 查詢 -->
+              <!-- 查詢  2023-05-24, add @input -->
               <v-spacer></v-spacer>
-              <v-text-field v-model="search" placeholder="關鍵字查詢" class="style-0"></v-text-field>
+              <v-text-field
+                v-model="search"
+                placeholder="關鍵字查詢(Caps)"
+                @input="(val) => (search = search.toUpperCase())"
+
+                class="style-0"
+              >
+              </v-text-field>
               <v-spacer></v-spacer>
               <!-- 效期查詢 -->
               <v-menu
@@ -220,92 +227,45 @@
                     ></vue-numeric-input>
                   </v-col>
                 </v-row>
-
-              <!--
-                <v-text-field
-                  v-model="editName"
-                  label="格位"
-                  single-line
-                  autofocus
-                ></v-text-field>
-              -->
-
               </template>
             </v-edit-dialog>
           </template>
-          <!--
-          <template v-slot:[`item.stockInTag_grid`]="{ item }">
+
+          <!-- text field 2 -->
+          <template v-slot:item.stockInTag_cnt_inv_mdf="props">
             <v-text-field
               dense
-              v-model="item.stockInTag_grid"
+              v-model="props.item.stockInTag_cnt_inv_mdf"
+              class="centered-input pe-0 me-2 py-1 my-0 block_myText_inv_cnt_mdf"
 
-              class="pe-0 me-2 py-1 my-0 myText"
-              @input="getGrid(item)"
+              style="width:35px; max-width:35px;"
+              @input="getmData(props.item)"
             ></v-text-field>
-          </template>
-          -->
-          <!-- text field 2 -->
-          <template v-slot:[`item.stockInTag_cnt_inv_mdf`]="{ item, index }">
-  <!--T <v-tooltip class="tooltip1"  bottom color="red">-->
-  <!--T   <template v-slot:activator="{ on, attrs }">-->
-            <!--<div class="row_myText_inv">-->
-                <v-text-field
-                  dense
-                  v-model="temp_desserts[index].stockInTag_cnt_inv_mdf"
-                  class="centered-input pe-0 me-2 py-1 my-0 block_myText_inv_cnt_mdf"
-                  :class="{'block_myText_inv_cnt_mdf_color' : item.isEnter}"
-                  style="width:20px; max-width:20px;"
-                  @input="getData(item)"
-                ></v-text-field>
-            <!--</div>-->
-  <!--T    </template>-->
-  <!--T   <span>修改後, 請寫說明!</span>-->
-  <!--T  </v-tooltip>-->
           </template>
 
           <!-- text field 3 -->
-          <!--<template v-slot:[`item.stockInTag_comment`]="{ item }">-->
-            <template v-slot:item.stockInTag_comment="{ item }">
-  <!--  <v-tooltip class="tooltip2" bottom color="red"> T-->
-  <!--    <template v-slot:activator="{ on, attrs }"> T-->
-
-            <div v-if="item.stockInTag_comment !== '其他'">
+          <template v-slot:item.stockInTag_comment="props">
+            <div v-if="props.item.stockInTag_comment !== '其他'">
               <v-select
-                v-model="item.stockInTag_comment"
-
+                v-model="props.item.stockInTag_comment"
                 :items="comment_items"
                 class="pe-0 me-2 py-1 my-0 myText"
-                required>
-              </v-select>
+                required
+              ></v-select>
             </div>
             <div v-else>
               <v-text-field
                 autofocus
                 style="position:relative; top:-10px;"
                 v-model="commentForInventory"
-                v-on:keyup.enter="getComment(item)">
+                v-on:keyup.enter="getmComment(props.item)">
               </v-text-field>
             </div>
-<!--
-            <v-text-field
-              dense
-              v-model="item.stockInTag_comment"
-
-              class="pe-0 me-2 py-1 my-0 myText"
-              @input="getComment(item)"
-
-            ></v-text-field>
--->
-
-  <!--    </template> T-->
-  <!--    <span>請寫說明!</span> T-->
-  <!--  </v-tooltip> T-->
           </template>
 
           <template v-slot:no-data>
             <strong><font color='red'>目前沒有資料</font></strong>
           </template>
-
         </v-data-table>
       </v-card>
     </v-row>
@@ -420,9 +380,11 @@ export default {
     //資料表頭
     headers: [
       { text: 'ID', sortable: false, value: 'id', align: 'start', width: '4%' },
-      { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '8%' },
-      { text: '品名', sortable: true, value: 'stockInTag_reagName', width: '12%' },
-
+      { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '6%' },
+      { text: '品名', sortable: true, value: 'stockInTag_reagName', width: '8%' },
+      //2023-05-23 add
+      { text: '資材類別', sortable: false, value: 'stockInTag_reagProduct', width: '6%', }, //2023-2-16 add
+      //
       { text: '批次', sortable: false, value: 'stockInTag_stockInBatch', width: '8%', }, //2023-2-16 add
 
       { text: '效期', sortable: true, value: 'stockInTag_reagPeriod', width: '8%' },
@@ -715,6 +677,10 @@ export default {
   },
 
   methods: {
+    valueAutoCaps(val) {
+      return val.toUpperCase()
+    },
+
     initialize() {
       this.load_SingleTable_ok=false;
       this.listInventorys();
@@ -742,6 +708,10 @@ export default {
         id: 'ID',
         stockInTag_reagID: '資材碼',
         stockInTag_reagName: '品名',
+
+        stockInTag_reagProduct: '資材類別',   //2023-05-23 add
+        stockInTag_stockInBatch: '批次',     //2023-05-23 add
+
         stockInTag_reagPeriod: '效期',
         stockInTag_reagTemp: '保存溫度',
         stockInTag_Date: '入庫日期',
@@ -933,7 +903,7 @@ export default {
       let date1 = cEnd.getTime();
       let date2 = cToday_add.getTime();
       let cmp_date =date2 > date1 ? true:false
-      console.log("天數比較: ", "效期=", cEnd, "今天+30=", cToday_add, "大小", cmp_date);
+      //console.log("天數比較: ", "效期=", cEnd, "今天+30=", cToday_add, "大小", cmp_date);
 
       return cmp_date ? 'style-1' : ''
     },
@@ -945,11 +915,14 @@ export default {
     //},
     modifyInvCntForBlur(item) {  //mdf, for blur function
       item.isEnter=false;
-      let temp_int1=parseInt(item.stockInTag_cnt_inv_mdf);
-      let temp_int2=parseInt(item.stockInTag_cnt);
+      //let temp_int1=parseInt(item.stockInTag_cnt_inv_mdf);  //2023-06-12 modify
+      let temp_int1=parseFloat(item.stockInTag_cnt_inv_mdf);
+      //let temp_int2=parseInt(item.stockInTag_cnt);          //2023-06-12 modify
+      let temp_int2=parseFloat(item.stockInTag_cnt);
       let temp_str=item.editReagentID.trim();
-
+      console.log("inv, step1...", temp_int1, temp_int2)
       if (temp_int1!=temp_int2 && temp_int1!=0 && temp_str==item.stockInTag_reagID) {
+        console.log("inv, step2...", temp_int1, temp_int2)
         //console.log("1-1, hello writeComm..", item.stockInTag_reagID, this.clickTimes)
         item.stockInTag_comment="異常! "
         item.editReagentID=item.stockInTag_reagID;
@@ -957,13 +930,16 @@ export default {
       }
 
       if (temp_int1==temp_int2 && temp_int1!=0 && temp_str==item.stockInTag_reagID) {
+        console.log("inv, step3...", temp_int1, temp_int2)
         //console.log("1-2, hello writeComm..", item.stockInTag_reagID, this.clickTimes)
         item.stockInTag_comment="盤點OK! "
         item.editReagentID=item.stockInTag_reagID;
         return;
       }
+      console.log("inv, step4...", temp_int1, temp_int2)
 
-      item.stockInTag_cnt_inv_mdf='0';
+      //item.stockInTag_cnt_inv_mdf='0';    //2023-06-15 modify
+      item.stockInTag_cnt_inv_mdf='';
       item.editReagentID='';
     },
 
@@ -974,8 +950,10 @@ export default {
 
     modifyIDForBlur(item) {   //id,for blur function
       item.isEnter=false;
-      let temp_int1=parseInt(item.stockInTag_cnt_inv_mdf);
-      let temp_int2=parseInt(item.stockInTag_cnt);
+      //let temp_int1=parseInt(item.stockInTag_cnt_inv_mdf);  //2023-06-12 modify
+      let temp_int1=parseFloat(item.stockInTag_cnt_inv_mdf);
+      //let temp_int2=parseInt(item.stockInTag_cnt);          //2023-06-12 modify
+      let temp_int2=parseFloat(item.stockInTag_cnt);
 
       if (temp_int1!=temp_int2 && temp_int1!=0 && this.clickTimes!=0) {
         item.stockInTag_comment="異常! "
@@ -999,7 +977,8 @@ export default {
     },
 
     modifyIDForFocus(item) {     //id, for focus function
-      item.stockInTag_cnt_inv_mdf='0';
+      //item.stockInTag_cnt_inv_mdf='0';  //2023-06-15 modify
+      item.stockInTag_cnt_inv_mdf='';
       item.stockInTag_comment='';
       item.editReagentID='';
       this.clickTimes=0;
@@ -1008,7 +987,9 @@ export default {
 
     modifyIDForPressRet(item) { //id, for press return function
       this.clickTimes=this.clickTimes+1;
-      let temp_int=parseInt(item.stockInTag_cnt_inv_mdf);
+      //let temp_int=parseInt(item.stockInTag_cnt_inv_mdf);  //2023-06-12 modify
+      let temp_int=parseFloat(item.stockInTag_cnt_inv_mdf);
+
       let temp_str=item.editReagentID.trim();
       if (temp_str==item.stockInTag_reagID) {
         temp_int= temp_int + 1;
@@ -1017,10 +998,23 @@ export default {
       item.editReagentID='';
     },
 
+    getmData(item) {
+      console.log("getmData: ",item);
+
+      this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
+      console.log("getmData, index: ", this.editedIndex, this.desserts[this.editedIndex].stockInTag_cnt_inv_mdf);
+
+      //this.desserts[this.editedIndex].stockInTag_cnt_inv_mdf=this.temp_desserts[this.editedIndex].stockInTag_cnt_inv_mdf;
+      this.desserts[this.editedIndex].isGridChange=true;
+
+      console.log("cnt data: ", item.stockInTag_cnt);
+    },
+
     getData(item) {
       //this.editedIndex = this.desserts.indexOf(item);                           //for desserts
+      //this.editedIndex = this.dessertsDisplay.map(object => object.id).indexOf(item.id); //for dessertsDisplay
       this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
-      console.log("getData, index: ", this.editedIndex);
+      console.log("getData, index: ", this.editedIndex, item);
 
       //if (this.temp_desserts[this.editedIndex].stockInTag_cnt != item.stockInTag_cnt) {
         //this.desserts[this.editedIndex].isGridChange=true;
@@ -1034,16 +1028,20 @@ export default {
       console.log("cnt data: ", this.desserts);
     },
 
-    //getComment(item) {
-    //  //this.editedIndex = this.desserts.indexOf(item);                             //for desserts
-    //  this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
-    //  console.log("getComment, index: ", this.editedIndex);
-    //
-    //  if (this.temp_desserts[this.editedIndex].stockInTag_comment != item.stockInTag_comment) {
-    //    this.desserts[this.editedIndex].isGridChange=true;
-    //  }
-    //  //console.log("comment data: ", this.temp_desserts[this.editedIndex].stockInTag_comment, item.stockInTag_comment);
-    //},
+    getmComment(item) {
+      console.log("getmComment: ",item);
+
+      this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
+      console.log("getmComment, index: ", this.editedIndex, this.desserts[this.editedIndex].stockInTag_comment);
+
+      this.commentForInventory=this.commentForInventory.trim()
+      if (this.commentForInventory.length != 0) {
+        this.desserts[this.editedIndex].isGridChange=true;
+        this.desserts[this.editedIndex].stockInTag_comment = this.commentForInventory;
+        this.comment_items.unshift(this.commentForInventory);
+      }
+      console.log("getmComment, this.desserts[this.editedIndex]: ", this.desserts[this.editedIndex].stockInTag_comment);
+    },
 
     getComment(item) {
       this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay

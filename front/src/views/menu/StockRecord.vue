@@ -34,8 +34,15 @@
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <!-- 查詢 -->
                 <v-spacer></v-spacer>
-                <v-text-field v-model="search" placeholder="關鍵字查詢" class="style-0"></v-text-field>
-                <v-spacer></v-spacer>
+                <!-- 2023-06-02 add @input -->
+                <v-text-field
+                  v-model="search"
+                  placeholder="關鍵字查詢(Caps)"
+                  @input="(val) => (search = search.toUpperCase())"
+                  class="style-0"
+                >
+                </v-text-field>
+                <!-- <v-spacer></v-spacer> 2023-06-02 mark-->
                 <!-- 入庫日期查詢 -->
                 <v-menu
                   v-model="fromDateMenuStart"
@@ -754,8 +761,8 @@ export default {
       return value != null &&
         search != null &&
         typeof value === 'string' &&
-        //value.toString().toLocaleUpperCase().indexOf(search) !== -1
-        value.toString().indexOf(search) !== -1
+        value.toString().toLocaleUpperCase().indexOf(search) !== -1
+        //value.toString().indexOf(search) !== -1
     },
 
     getSumForDisplay() {
@@ -1084,13 +1091,13 @@ div.v-toolbar__title {
 
 /* for 關鍵字查詢 start*/
 ::v-deep div.v-input.style-0 > .v-input__control > .v-input__slot > .v-text-field__slot > input {
-  max-width: 100px !important;
-  width: 100px !important;
+  max-width: 120px !important;  /*2023-06-02 modify 100px => 120px */
+  width: 120px !important;      /* */
 }
 
 ::v-deep div.v-input.style-0 > .v-input__control > .v-input__slot {
-  max-width: 100px !important;
-  width: 100px !important;
+  max-width: 120px !important;  /*2023-06-02 modify 100px => 120px */
+  width: 120px !important;      /* */
 }
 /* */
 /*

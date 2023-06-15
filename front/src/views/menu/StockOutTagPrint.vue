@@ -510,7 +510,8 @@ export default {
       console.log("getLastBatchAlphaForStockOut, Axios get data...")
       axios.get(path)
       .then((res) => {
-        console.log("GET ok, total records:", res.data.outputs.length);
+        //console.log("GET ok, total records:", res.data.outputs.length);
+        console.log("getLastBatchAlphaForStockOut, GET ok...");
 
         this.last_status=res.data.status
         //if (res.data.status) {

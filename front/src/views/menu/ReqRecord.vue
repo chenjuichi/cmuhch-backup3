@@ -40,9 +40,14 @@
                 <v-toolbar-title>領用記錄查詢</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
-                <!--<v-text-field v-model="search" label="Search (UPPER CASE ONLY)" class="mx-4"></v-text-field>-->
-                <!--<v-text-field v-model="search" label="查詢" class="mx-4"></v-text-field>-->
-                <v-text-field v-model="search" placeholder="關鍵字查詢" class="style-1"></v-text-field>
+
+                <v-text-field
+                  v-model="search"
+                  placeholder="關鍵字查詢(Caps)"
+                  @input="(val) => (search = search.toUpperCase())"
+                  class="style-1"
+                >
+                </v-text-field>
 
                 <v-btn color="primary" class="mt-n1 mr-15 mx-auto" @click="exportToExcel" v-show="currentUser.perm<=2">
                   <v-icon left>mdi-microsoft-excel</v-icon>
@@ -407,6 +412,10 @@ export default {
   },
 
   methods: {
+    valueAutoCaps(val) {
+      return val.toUpperCase()
+    },
+
     initialize () {
       this.load_SingleTable_ok=false;
       this.listRequirements();
@@ -489,8 +498,8 @@ export default {
       return value != null &&
         search != null &&
         typeof value === 'string' &&
-        //value.toString().toLocaleUpperCase().indexOf(search) !== -1
-        value.toString().indexOf(search) !== -1
+        value.toString().toLocaleUpperCase().indexOf(search) !== -1
+        //value.toString().indexOf(search) !== -1
     },
 
     strDateToNum(myVar) {

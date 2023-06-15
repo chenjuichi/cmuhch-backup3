@@ -11,7 +11,7 @@
     </v-snackbar>
 
     <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-      <v-card width="72vw">
+      <v-card width="90vw">
         <!-- desserts為dataTable的資料源-->
         <!-- :sort-by.sync="sortBy" -->
         <v-data-table
@@ -30,7 +30,7 @@
               <v-toolbar-title>出庫標籤資料</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="1000px">
+              <v-dialog v-model="dialog" max-width="1180px">
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on" v-show="currentUser.perm<=2">
                     <v-icon left dark>mdi-table-plus</v-icon>新增領料標籤資料
@@ -122,7 +122,6 @@
                                 v-model="editedItem.stockOutTag_Date"
                                 v-on="on"
                                 @blur="setStep1"
-
                               ></v-text-field>
                             </template>
                             <v-date-picker
@@ -177,6 +176,7 @@
                             <!-- suppliers為v-select的資料源-->
                             <v-select
                             @change="checkSelect"
+                            @click="suppliersClicked=true"
                             :items="suppliers"
                             label="供應商"
                             outlined
@@ -199,7 +199,7 @@
                             :items="stock_desserts"
                             :item-class="setRowStyleForStockOut"
                             @item-selected="booking_selected"
-                            style="width: 870px;"
+                            style="width: 1180px;"
                             item-key="id"
                             show-select
                             :single-select="stock_singleSelect"
@@ -207,23 +207,9 @@
                             no-data-text=""
                             :footer-props="{
                               'itemsPerPageText': '每頁的資料筆數',
-                              'items-per-page-options':[5]
+                              'items-per-page-options':[10]
                             }"
-                          >
-                            <template v-slot:[`item.count`]="{ item }">
-                              <div class="adjNumeric">
-                              <vue-numeric-input
-                                v-model="item.count"
-                                min=1
-                                max=10
-                                :step="1"
-                                align="center"
-                                size="small"
-                              ></vue-numeric-input>
-                              </div>
-                            </template>
-
-                          </v-data-table>
+                          ></v-data-table>
                         </template>
                       </v-row>
                     </v-container>
@@ -354,6 +340,8 @@ import axios from 'axios';
 
 import Common from '../../mixin/common.js'
 
+import { Calendar }  from '../../mixin/calendar.js';  //2023-06-02 add
+
 export default {
   name: 'stockOutTag',
 
@@ -432,7 +420,9 @@ export default {
     errorShowForReagName: false,
 
     fromDateMenu: false,
-    fromDateVal: null,
+    //fromDateVal: null,  //2023-06-02 modify
+    fromDateVal: '',      //
+    clickMenu: false,
     minDate: "2012-07-01",
     maxDate: "2042-06-30",
 
@@ -476,6 +466,7 @@ export default {
 
     suppliers: [],        //v-select的供應商資料
     temp_suppliers: [],
+    suppliersClicked: false,
 
     items: [],
     temp_items: [],
@@ -572,7 +563,20 @@ export default {
     },
     */
     fromDateDisp() {  //output: editedItem.stockOutTag_Date
-      if (this.fromDateVal != null) {
+      //2023-06-02 add the following block
+      console.log("con 1...", "edit: ", this.editedItem.stockOutTag_Date, "fromDateVal: ", this.fromDateVal, "index: ", this.editedIndex, "click: ", this.clickMenu);
+      let dateDisp= new Calendar(this.editedItem.stockOutTag_Date, this.fromDateVal, this.editedIndex, this.clickMenu);
+      dateDisp.form();
+      console.log("function get: ",  dateDisp.myEdit,  dateDisp.myValue,  dateDisp.myIndex,  dateDisp.myClick)
+      console.log("con 111...", "edit: ", this.editedItem.stockOutTag_Date, "fromDateVal: ", this.fromDateVal, "index: ", this.editedIndex, "click: ", this.clickMenu);
+      //end block
+
+      //2023-06-02 modify the following block
+      //if (this.fromDateVal != null) {
+      if (this.editedItem.stockOutTag_Date == '' && this.fromDateVal == '' && this.editedIndex==-1) {
+        this.fromDateVal=(new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10);
+      //end block
+
         let yy_value=this.fromDateVal.substring(0, 4);
         let mmdd_value=this.fromDateVal.substring(5, this.fromDateVal.length);
         mmdd_value=mmdd_value.replace('-','/');
@@ -580,8 +584,33 @@ export default {
         b = b - 1911;
         yy_value = b.toString()
         this.editedItem.stockOutTag_Date = yy_value + '/' + mmdd_value;
+      //2023-06-02 modify the follow block
+      //}
+      //return this.fromDateVal;
+        this.fromDateVal='';
+        return;
       }
-      return this.fromDateVal;
+
+      if (this.clickMenu) {
+        console.log("con 3...");
+        if (!(this.editedItem.stockOutTag_Date != '' && this.fromDateVal == '')) {
+          let yy_value=this.fromDateVal.substring(0, 4);
+          let mmdd_value=this.fromDateVal.substring(5, this.fromDateVal.length);
+          mmdd_value=mmdd_value.replace('-','/');
+          let b = parseInt(yy_value);
+          b = b - 1911;
+          yy_value = b.toString()
+          this.editedItem.stockOutTag_Date = yy_value + '/' + mmdd_value;
+          this.fromDateVal = '';
+        }
+        this.clickMenu=false;
+        return;
+      }
+      if (this.editedItem.stockOutTag_Date != '' && this.fromDateVal == '') {
+        console.log("con 4...",this.editedItem.stockOutTag_Date, this.fromDateVal);
+        return;
+      }
+      //end block
     },
 
     check_stock_selected() {
@@ -627,7 +656,8 @@ export default {
         this.selectSuppliers=[];
 
         this.load_4thTable_ok=false;
-        this.listSuppliersBySelect();
+        if (newValue.length !=0)    //2023-06-12 add
+          this.listSuppliersBySelect();
       //}
     },
 
@@ -650,7 +680,9 @@ export default {
 
       if (val) {
         this.load_5thTable_ok=false;
+        console.log("b this.stock_desserts in load_5thTable_ok: ", this.stock_desserts)
         this.stock_desserts = Object.assign([], this.temp_stock_desserts);
+        console.log("a this.stock_desserts in load_5thTable_ok: ", this.stock_desserts)
       }
     },
 
@@ -978,13 +1010,20 @@ export default {
     },
 
     listSuppliersBySelect() {       //從後端讀取v-select的供應商資料及v-data-table的stockIn資料
-      console.log("listSuppliersBySelect, Axios post data...")
+      console.log("listSuppliersBySelect, Axios post data...", this.load_5thTable_ok)
       const path = '/listSuppliersBySelect';
 
       let arr_for_products=[]
       for (let i=0; i<this.selectedCatalogs.length; i++) {
         arr_for_products.push(this.products[this.selectedCatalogs[i]])
       }
+      console.log("arr_for_products...", arr_for_products)
+
+      // 2023-06-05 add block, for remove all duplicates from an array of objects
+      //arr_for_products = arr_for_products.filter((value, index, self) =>
+      //  index === self.findIndex((t) => (t.id === value.id && t.stockIn_id === value.stockIn_id))
+      //)
+      // end block
 
       var payload= {
         //catalogs: this.selectedCatalogs,
@@ -995,7 +1034,7 @@ export default {
       .then((res) => {
         this.temp_stock_desserts = res.data.outputs_for_stockOut;
 
-        //console.log("aa0.check...", this.temp_suppliers);
+        console.log("aa0.check...", this.temp_suppliers);
 
         this.temp_suppliers = res.data.outputs_for_supplier.filter(function(item, pos, self) {
           return self.indexOf(item) == pos;
@@ -1024,18 +1063,20 @@ export default {
       for (let i=0; i<this.selectSuppliers.length; i++) {
         arr_for_suppliers.push(this.selectSuppliers[i])
       }
-      //console.log("3.check...", this.temp_suppliers);
+      console.log("3.check...", arr_for_suppliers);
 
       let arr_for_products=[]
       for (let i=0; i<this.selectedCatalogs.length; i++) {
         arr_for_products.push(this.products[this.selectedCatalogs[i]])
       }
+      console.log("4.check...", arr_for_products);
 
       // 2023-05-17 add block, for remove all duplicates from an array of objects
+      // 2023-06-12 remove block
       //console.log("before => arr_for_products, arr_for_suppliers payload: ", arr_for_products, arr_for_suppliers)
-      arr_for_products = arr_for_products.filter((value, index, self) =>
-        index === self.findIndex((t) => (t.id === value.id && t.stockIn_id === value.stockIn_id))
-      )
+      //arr_for_products = arr_for_products.filter((value, index, self) =>
+      //  index === self.findIndex((t) => (t.id === value.id && t.stockIn_id === value.stockIn_id))
+      //)
       console.log("after => arr_for_products, arr_for_suppliers payload: ", arr_for_products, arr_for_suppliers)
       // end block
 
@@ -1050,7 +1091,7 @@ export default {
       .then((res) => {
         this.temp_stock_desserts = res.data.outputs_for_stockOut;
 
-        console.log("output: ", res.data.outputs_for_stockOut)
+        console.log("output: ", res.data.outputs_for_stockOut, this.temp_stock_desserts)
         //console.log("4.check...", this.temp_suppliers);
 
         /*
@@ -1339,7 +1380,8 @@ export default {
           stockOutTag_InDate:  this.stock_selected[i].stockIn_date,
           stockOutTag_Date: this.editedItem.stockOutTag_Date,
           stockOutTag_Employer: this.editedItem.stockOutTag_Employer,
-          stockOutTag_cnt: this.stock_selected[i].stockIn_reagent_Out_cnt,
+          //stockOutTag_cnt: this.stock_selected[i].stockIn_reagent_Out_cnt,
+          stockOutTag_cnt: 1, //2023-06-15 modify
           stockOutTag_cnt_max: this.stock_selected[i].stockIn_reagent_Out_cnt,
           stockOutTag_unit: this.stock_selected[i].stockIn_reagent_Out_unit,
           stockOutTag_InID: this.stock_selected[i].stockIn_id,
@@ -1349,7 +1391,8 @@ export default {
         let temp_obj = {
           stockOutTag_Date: this.editedItem.stockOutTag_Date,
           stockOutTag_Employer: this.editedItem.stockOutTag_Employer,
-          stockOutTag_cnt: this.stock_selected[i].stockIn_reagent_Out_cnt,
+          //stockOutTag_cnt: this.stock_selected[i].stockIn_reagent_Out_cnt,
+          stockOutTag_cnt: 1, //2023-06-15 modify
           stockOutTag_unit: this.stock_selected[i].stockIn_reagent_Out_unit,
           stockOutTag_InID: this.stock_selected[i].stockIn_id,
         }

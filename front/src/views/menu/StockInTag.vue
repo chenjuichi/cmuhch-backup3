@@ -722,6 +722,7 @@ export default {
         this.fromDateVal='';
         return;
       }
+
       if (this.clickMenu) {
         console.log("con 3...");
         if (!(this.editedItem.stockInTag_Date != '' && this.fromDateVal == '')) {
@@ -789,6 +790,7 @@ export default {
 
     checkDataForSaveButton() {
       if (!!this.editedItem.stockInTag_reagID && !!this.editedItem.stockInTag_EmpID &&
+          !!this.editedItem.stockInTag_batch &&
           !this.errorShowForEmployer && !this.errorShowForReagName) {
         //return this.snackbar ? true : false;
         if (this.snackbar)
@@ -1012,7 +1014,9 @@ export default {
     listGridForCheck() {
       console.log("listGridForCheck, Axios post data...", this.editedItem.stockInTag_reagID)
       const path = '/listGridForCheck';
-
+      this.editedItem.stockInTag_reagID=this.editedItem.stockInTag_reagID.trim()  //2023-06-15  add
+      if (this.editedItem.stockInTag_reagID.length ==0)  //2023-06-15 add
+        return
       var payload= {
         reag_id:  this.editedItem.stockInTag_reagID,
       };

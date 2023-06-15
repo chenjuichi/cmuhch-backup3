@@ -463,10 +463,12 @@ def export_to_Excel_for_Inventory():
         ws.sheet_properties.tabColor = '7da797'  # 修改工作表 1 頁籤顏色為紅色
 
         for obj in _blocks:
+            print("exce obj: ", obj)
             temp_array = []
             temp_array.append(obj['id'])
             temp_array.append(obj['stockInTag_reagID'])
             temp_array.append(obj['stockInTag_reagName'])
+            temp_array.append(obj['stockInTag_reagProduct'])  #類別, # 2023-05-23 add
             temp_array.append(obj['stockInTag_stockInBatch']) #批次, # 2023-02-16 add
             temp_array.append(obj['stockInTag_reagPeriod'])  # 效期
             temp_array.append(obj['stockInTag_reagTemp'])   # 保存溫度

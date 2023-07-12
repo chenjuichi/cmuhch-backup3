@@ -411,6 +411,36 @@ def get_last_batch_alpha_for_stockin():
     })
 
 
+@getTable.route("/getAlphaForRePrintTag", methods=['GET'])
+def get_alpha_for_reprint_tag():
+    print("getAlphaForRePrintTag....")
+
+    s = Session()
+    _results = ''
+    return_value = True
+
+    _objects = s.query(InTag).filter(InTag.isPrinted == True).order_by(InTag.stockIn_alpha.asc()).all()
+    your_count = len(_objects)
+    print("your_count: ", your_count)
+    your_stockin_date = _objects[your_count-1].intag_date
+    if (your_count != 0):
+        your_last_alpha = _objects[your_count-1].stockIn_alpha
+    else:
+        your_last_alpha = 'A'
+    print("In, Alpha: ", your_last_alpha)
+
+    s.close()
+
+    if (your_count == 0):
+        return_value = False
+
+    return jsonify({
+        'status': return_value,
+        'outputs': your_last_alpha,
+        'output_date': your_stockin_date,
+    })
+
+
 @getTable.route("/getLastBatchAlphaForStockOut", methods=['GET'])
 def get_last_batch_alpha_for_stockout():
     print("getLastBatchAlphaForStockOut....")

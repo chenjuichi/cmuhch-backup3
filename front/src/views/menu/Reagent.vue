@@ -528,20 +528,28 @@ export default {
     'editedItem.reag_name': function () {
       //let isNameRule = /^\w{1,50}$/;
       let isNameRule = /^[A-Za-z0-9\-_]{1,50}$/;  // 2023-04-25 modify
-
+      //2023-07-07 add
+      let isDot=true
+      if (this.editedItem.reag_name.indexOf(',') > -1)
+        isDot=false
+      //
       this.nameErrMsg = '';
       let result = this.editedItem.reag_name.search(isNameRule);
       let len=this.editedItem.reag_name.length
-      console.log("reg: ", result, len);
+      console.log("reg: ", result);
       //if (len<=50) {
+      // 2023-07-07 mark this block
+      /*
       if (this.editedIndex ==-1) {
         this.nameErrMsg = '';
         return;
       }
-
-      if (result != -1) {
+      */
+      if (result != -1 && isDot) {    //2023-07-07 modify
+        console.log("資料 ok!");
         this.nameErrMsg = '';
       } else {
+        console.log("資料 not ok!");
         this.nameErrMsg = '資料格式錯誤!';
       }
     },

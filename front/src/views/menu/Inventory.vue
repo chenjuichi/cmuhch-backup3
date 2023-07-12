@@ -379,7 +379,7 @@ export default {
 
     //資料表頭
     headers: [
-      { text: 'ID', sortable: false, value: 'id', align: 'start', width: '4%' },
+      { text: '資料ID', sortable: false, value: 'id', align: 'start', width: '5%' },  //2023-06-26 modify
       { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '6%' },
       { text: '品名', sortable: true, value: 'stockInTag_reagName', width: '8%' },
       //2023-05-23 add
@@ -388,8 +388,8 @@ export default {
       { text: '批次', sortable: false, value: 'stockInTag_stockInBatch', width: '8%', }, //2023-2-16 add
 
       { text: '效期', sortable: true, value: 'stockInTag_reagPeriod', width: '8%' },
-      { text: '保存溫度', sortable: false, value: 'stockInTag_reagTemp', width: '8%' },
-      { text: '入庫日期', sortable: true, value: 'stockInTag_Date', width: '10%' },
+      { text: '保存溫度', sortable: false, value: 'stockInTag_reagTemp', width: '7%' },
+      { text: '入庫日期', sortable: true, value: 'stockInTag_Date', width: '8%' },
       { text: '入庫人員', sortable: true, value: 'stockInTag_Employer', width: '8%' },
       { text: '格位', sortable: false, value: 'stockInTag_grid', width: '8%' },
       { text: '在庫數', sortable: false, value: 'stockInTag_cnt', width: '7%' },

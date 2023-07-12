@@ -37,7 +37,7 @@
         >
           <template v-slot:top>
               <v-toolbar flat>
-                <v-toolbar-title>領用記錄查詢</v-toolbar-title>
+                <v-toolbar-title>入庫記錄查詢</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
 
@@ -167,7 +167,7 @@ import Common from '../../mixin/common.js'
 import Toaster from '../../components/Toaster.vue';
 
 export default {
-  name: 'ReqRecord',
+  name: 'StorageRecord',
 
   mixins: [Common],
 
@@ -176,6 +176,7 @@ export default {
   },
 
   mounted() {
+    console.log("StorageRecord, mounted()...");
     // if back button is pressed
     window.onpopstate = () => {
       console.log("press back button, good bye...");
@@ -229,74 +230,7 @@ export default {
         //page: 1,
       },
 
-      desserts: [
-      /*
-        {
-          reqRecord_reagID: '123456789',
-          reqRecord_reagName: 'ABC',
-          reqRecord_Date: '111/06/01',
-          reqRecord_Employer: '陳健南',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567891',
-          reqRecord_reagName: 'ABCD',
-          reqRecord_Date: '111/05/01',
-          reqRecord_Employer: '林成興',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567892',
-          reqRecord_reagName: 'A11',
-          reqRecord_Date: '111/04/01',
-          reqRecord_Employer: '林成興',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567893',
-          reqRecord_reagName: 'B11',
-          reqRecord_Date: '111/04/01',
-          reqRecord_Employer: '吳仲偉',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567894',
-          reqRecord_reagName: 'C123',
-          reqRecord_Date: '111/08/01',
-          reqRecord_Employer: '吳仲偉',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567897',
-          reqRecord_reagName: 'AB112233',
-          reqRecord_Date: '111/07/11',
-          reqRecord_Employer: '陳健南',
-          reag_Out_unit: '盒',
-          reqRecord_cnt: 4 + ' 盒',
-        },
-        {
-          reqRecord_reagID: '234567898',
-          reqRecord_reagName: 'ABC12345',
-          reqRecord_Date: '111/06/01',
-          reqRecord_Employer: '陳健南',
-          reag_Out_unit: '瓶',
-          reqRecord_cnt: 4 + ' 瓶',
-        },
-        {
-          reqRecord_reagID: '234567899',
-          reqRecord_reagName: 'D100',
-          reqRecord_Date: '111/02/01',
-          reqRecord_Employer: '吳仲偉',
-          reag_Out_unit: '瓶',
-          reqRecord_cnt: 4 + ' 瓶',
-        },
-      */
-      ],
+      desserts: [ ],
 
       load_SingleTable_ok: false, //for get employer table data
       load_2thTable_ok: false,
@@ -309,23 +243,16 @@ export default {
         { text: '資材碼', sortable: true, value: 'reqRecord_reagID', width: '10%', },
         { text: '品名', sortable: false, value: 'reqRecord_reagName', width: '20%',},
         { text: '資材組別', sortable: false, value: 'reqRecord_catalog', width: '9%' },
-
-        //{ text: '供應商', sortable: true, value: 'stkRecord_supplier', width: '15%',},
         { text: '類別', sortable: false, value: 'reqRecord_prdName', width: '9%',},
         { text: '供應商', sortable: true, value: 'reqRecord_supplier', width: '11%',},
-        { text: '入庫日期', sortable: false, value: 'reqRecord_stockInDate', width: '8%', },
-        { text: '批次', sortable: false, value: 'reqRecord_stockInBatch', width: '8%', }, //2023-2-4 add
-
-        { text: '領料日期', sortable: false, value: 'reqRecord_Date', width: '8%',
+        { text: '入庫日期', sortable: false, value: 'reqRecord_stockInDate', width: '8%',
           filter: value => {
-            //console.log("date: ", this.reqRecord_Date);
             this.myIndexEnd=this.desserts.length;
             if (this.compareDate=="" || this.compareDateEnd=="") {
               this.myIndex=0;
-              //this.myIndexEnd=this.desserts.length;
               return true
             }
-            let kk=this.desserts[this.myIndex].reqRecord_Date
+            let kk=this.desserts[this.myIndex].reqRecord_stockInDate
             let c1=this.strDateToNum(kk);
             let cStart=this.strDateToNum(this.compareDate);
             let cEnd=this.strDateToNum(this.compareDateEnd);
@@ -338,9 +265,10 @@ export default {
             return c1 >= cStart && c1 <= cEnd
           },
         },
-        { text: '領料人員', sortable: true, value: 'reqRecord_Employer', width: '10%',},
-        //{ text: '領用單位', sortable: false, value: 'reag_Out_unit', width: '15%' },
-        { text: '領料數量', sortable: false, value: 'reqRecord_cnt', width: '10%' },
+        { text: '批次', sortable: false, value: 'reqRecord_stockInBatch', width: '8%', }, //2023-2-4 add
+
+        { text: '入庫人員', sortable: true, value: 'reqRecord_Employer', width: '10%',},
+        { text: '入庫數量', sortable: false, value: 'reqRecord_cnt', width: '10%' },
       ]
     },
 
@@ -395,6 +323,8 @@ export default {
   },
 
   created () {
+    console.log("StorageRecord, created()...");
+
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     if (this.currentUser.perm < 1) {
       this.permDialog=true;
@@ -407,8 +337,7 @@ export default {
     this.load_SingleTable_ok=false;
     this.initAxios();
 
-    this.listRequirements();
-    //this.initialize()
+    this.listStorages();
   },
 
   methods: {
@@ -418,12 +347,12 @@ export default {
 
     initialize () {
       this.load_SingleTable_ok=false;
-      this.listRequirements();
+      this.listStorages();
     },
 
-    listRequirements() {    //從後端讀取dataTable的資料
-      const path = '/listRequirements';
-      console.log("listRequirements, Axios get data...")
+    listStorages() {    //從後端讀取dataTable的資料
+      const path = '/listStorages';
+      console.log("StorageRecord, listStorages, Axios get data...")
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
@@ -437,22 +366,25 @@ export default {
     },
 
     exportToExcel() {
-      console.log("ReqRecord, exportToExcel, Axios post data...")
+      console.log("StorageRecord, exportToExcel, Axios post data...")
 
       let obj= {
         reqRecord_reagID: '資材碼',
         reqRecord_reagName: '品名',
         reqRecord_supplier: '供應商',
         reqRecord_stockInDate: '入庫日期',
-        reqRecord_Date: '領用日期',
+        //reqRecord_Date: '領用日期',
         reqRecord_Employer: '領用人員',
-        reqRecord_cnt: '領用數量',
+        //reqRecord_cnt: '領用數量',
+
+        reqRecord_ori_count: '領用數量',
+        reqRecord_In_Unit: '領用單位'
       }
       let object_Desserts = Object.assign([], this.desserts);
       object_Desserts.unshift(obj);
       console.log("object_Desserts: ",object_Desserts);
 
-      const path = '/exportToExcelForReq';
+      const path = '/exportToExcelForStorage';
       var payload= {
         //blocks: this.desserts,
         blocks: object_Desserts,

@@ -27,6 +27,8 @@ import StockOut from '../views/menu/StockOut.vue'
 import ReqRecord from '../views/menu/ReqRecord.vue'
 import StockRecord from '../views/menu/StockRecord.vue'
 import Inventory from '../views/menu/Inventory.vue'
+import RePrintTag from '../views/menu/RePrintTag.vue'
+import StorageRecord from '../views/menu/StorageRecord.vue'
 
 
 Vue.use(VueRouter)
@@ -61,6 +63,8 @@ const routes = [
   { path: '/reqRec', name: 'ReqRecord', component: ReqRecord},
   { path: '/stockRec', name: 'StockRecord', component: StockRecord},
   { path: '/invent', name: 'Inventory', component: Inventory},
+  { path: '/reprintTag', name: 'RePrintTag', component: RePrintTag},
+  { path: '/storageRec', name: 'StorageRecord', component: StorageRecord},
   //{ path: '/barcode', name: 'BarCode', component: BarCode}, //for test
 ]
 

@@ -317,7 +317,7 @@ export default {
     headers() {
       const headers =
       [
-        { text: 'ID', sortable: false, value: 'id', align: 'start', width: '4%' },
+        { text: '資料ID', sortable: false, value: 'id', align: 'start', width: '4%' },  //2023-06-26 modify
         { text: '資材碼', sortable: true, value: 'stkRecord_reagID', width: '8%', },
         { text: '品名', sortable: true, value: 'stkRecord_reagName', width: '14%',},
         { text: '供應商', sortable: true, value: 'stkRecord_supplier', width: '10%',},

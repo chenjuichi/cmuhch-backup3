@@ -69,6 +69,19 @@
             </b-dropdown-item>
             -->
           </div>
+          <!-- get icons from https://icons.getbootstrap.com/ -->
+          <div v-show="navbar.id==4">
+            <b-dropdown-item :to="navbar.router4">
+              <b-avatar variant="success" :icon="navbar.icon4" style="width: 1.5rem; height: 1.5rem; margin-bottom: 3pt;"></b-avatar>
+              {{ navbar.name4 }}
+            </b-dropdown-item>
+
+            <b-dropdown-item :to="navbar.router5">
+              <b-avatar variant="success" :icon="navbar.icon5" style="width: 1.5rem; height: 1.5rem; margin-bottom: 3pt;"></b-avatar>
+              {{ navbar.name5 }}
+            </b-dropdown-item>
+          </div>
+
         </b-nav-item-dropdown>
       </div>
     </b-navbar-nav>
@@ -318,9 +331,11 @@ export default {
         },
         { id: 4,
           text: "物料盤點",
-          icon1: "book", name1: "領用記錄查詢", router1: "/reqRec",
+          icon1: "cart-dash", name1: "領用記錄查詢", router1: "/reqRec",
           icon2: "calendar2-check", name2: "庫存紀錄查詢", router2: "/stockRec",
           icon3: "upc-scan", name3: "盤點作業", router3: "/invent",
+          icon4: "printer", name4: "補印標籤", router4: "/reprintTag",
+          icon5: "cart-plus", name5: "入庫記錄查詢", router5: "/storageRec",
         },
       ],
 

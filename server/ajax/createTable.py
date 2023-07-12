@@ -208,6 +208,7 @@ def add_stockin_item():
         new_intag = InTag(user_id=intag_item.user_id,
                           reagent_id=intag_item.reagent_id,
                           count=_count,
+                          ori_count=_count,     # 2023-07-11 add
                           reag_period=intag_item.reag_period,
                           batch=intag_item.batch,
                           intag_date=intag_item.intag_date,
@@ -227,6 +228,7 @@ def add_stockin_item():
         new_intag = InTag(user_id=intag_item.user_id,
                           reagent_id=intag_item.reagent_id,
                           count=_count,
+                          ori_count=_count,     # 2023-07-11 add
                           reag_period=intag_item.reag_period,
                           batch=intag_item.batch,
                           intag_date=intag_item.intag_date,
@@ -359,8 +361,12 @@ def add_stockout_item():
 
           if (myReturn>0):  #該筆入庫數量大於出庫數量(單位已轉換)
             myInCount=myReturn / _reagent.reag_scale
-            myInCount=math.floor(myInCount*10)  # 取小數點1位
-            myInCount=myInCount/10
+
+            #myInCount=math.floor(myInCount*10)  # 取小數點1位  # 2023-07-11 modify
+            #myInCount=myInCount/10
+            myInCount=math.floor(myInCount*1000)  # 取小數點3位
+            myInCount=round(myInCount/1000, 0)         # 取整數, # 2023-07-12 modify
+
             intag_item.count=myInCount
             break
 
@@ -422,12 +428,12 @@ def add_stockout_item():
           myInCount=myReturn / temp_scale
           print("b-1, myInCount ",myInCount)
           # 2023-06-02 modify
-          #myInCount=math.floor(myInCount*10)  # 取小數點1位
+          #myInCount=math.floor(myInCount*10)   # 取小數點1位
           myInCount=math.floor(myInCount*1000)  # 取小數點3位
           print("b-2, myInCount ",myInCount)
           # 2023-06-02 modify
           #myInCount=myInCount/10
-          myInCount=myInCount/1000
+          myInCount=round(myInCount/1000, 0)         # 取整數, # 2023-07-12 modify
           print("b-3, myInCount ",myInCount)
           # 2023-06-02 modify
           #intag_item.count=myInCount

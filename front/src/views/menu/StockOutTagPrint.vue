@@ -162,7 +162,7 @@ export default {
 
     //資料表頭
     headers: [
-      { text: '資料ID', sortable: true, value: 'id', width: '10%', align: 'start'},
+      { text: '資料ID', sortable: false, value: 'id', width: '10%', align: 'start'},  //2023-06-26 modify
       { text: '資材碼', sortable: true, value: 'stockOutTag_reagID', width: '7%' },
       { text: '品名', sortable: true, value: 'stockOutTag_reagName', width: '200px' },
       { text: '效期', sortable: true, value: 'stockOutTag_reagPeriod', width: '90px' },

@@ -1,3 +1,5 @@
+@echo off
+
 copy D:\vue\front02\babel.config.js C:\cmuhch-backup3\front\
 copy D:\vue\front02\package.json C:\cmuhch-backup3\front\
 copy D:\vue\front02\package-lock.json C:\cmuhch-backup3\front\
@@ -18,3 +20,5 @@ copy C:\vue\project01\server\common\*.py C:\cmuhch-backup3\server\common\
 copy C:\vue\project01\server\resource\*.py C:\cmuhch-backup3\server\resource\
 
 copy D:\cmuhch-backup2\*.pptx C:\cmuhch-backup3\
+
+@echo on

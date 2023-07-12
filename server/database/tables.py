@@ -362,7 +362,7 @@ class InTag(BASE):
     reagent_id = Column(Integer, ForeignKey('reagent.id'))  # 一對多中的 "多"
     #grid_id = Column(Integer, ForeignKey('grid.id'))  # 一對多中的 "多" , 11/26建議刪除, 2023-01-13 mark
     count = Column(Float, default=1.0)                # 入(在)庫數量,  2023-2-10 modify
-
+    ori_count = Column(Float)
     # 效期, 依2022-12-12教育訓練會後需求作增加
     reag_period = Column(String(10), nullable=False)
 

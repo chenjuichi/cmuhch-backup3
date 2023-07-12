@@ -741,6 +741,91 @@ def list_stockout_tag_print_data():
 
 
 # list inStock_tagPrint table all data
+@listTable.route("/listRePrintTagData", methods=['GET'])
+def list_reprint_tag_data():
+    print("listRePrintTagData....")
+    s = Session()
+    _results = []
+
+    _objects = s.query(InTag).all()
+    for intag_print in _objects:
+        #if (intag_print.isRemoved and intag_print.isPrinted):
+        if (intag_print.isPrinted):
+            user = s.query(User).filter_by(id=intag_print.user_id).first()
+            reagent = s.query(Reagent).filter_by(
+                id=intag_print.reagent_id).first()
+
+            k1 = ''
+            if reagent.reag_temp == 0:  # 0:室溫、1:2~8度C、2:-20度C
+                k1 = '室溫'
+            if reagent.reag_temp == 1:
+                k1 = '2~8度C'
+            if reagent.reag_temp == 2:
+                k1 = '-20度C'
+
+            _obj = {
+                'id': intag_print.id,
+                'stockInTag_reagID': reagent.reag_id,
+                'stockInTag_reagName': reagent.reag_name,
+                'stockInTag_rePrint': '入庫',
+                'stockInTag_reagTemp': k1,
+                'stockInTag_Date': intag_print.intag_date,  # 入庫日期
+                'stockInTag_Employer': user.emp_name,
+                'stockInTag_batch': intag_print.batch,
+                #'stockInTag_cnt': intag_print.count,
+                'stockInTag_cnt': 1,
+                'stockInTag_alpha': intag_print.stockIn_alpha,
+                # 'stockInTag_cnt': intag_print.count - intag_print.stockOut_temp_count,
+                'stockInTag_isPrinted': intag_print.isPrinted,
+                'stockInTag_isStockin': intag_print.isStockin,
+            }
+
+            _results.append(_obj)
+
+    _objects = s.query(OutTag).all()
+    for intag_print in _objects:
+        #if (intag_print.isRemoved and intag_print.isPrinted):
+        if (intag_print.isPrinted):
+            user = s.query(User).filter_by(id=intag_print.user_id).first()
+            in_tag = s.query(InTag).filter_by(id=intag_print.intag_id).first()
+            reagent = s.query(Reagent).filter_by(id=in_tag.reagent_id).first()
+
+            k1 = ''
+            if reagent.reag_temp == 0:  # 0:室溫、1:2~8度C、2:-20度C
+                k1 = '室溫'
+            if reagent.reag_temp == 1:
+                k1 = '2~8度C'
+            if reagent.reag_temp == 2:
+                k1 = '-20度C'
+
+            _obj = {
+                'id': intag_print.id,
+                'stockInTag_reagID': reagent.reag_id,
+                'stockInTag_reagName': reagent.reag_name,
+                'stockInTag_rePrint': '出庫',
+                'stockInTag_reagTemp': k1,
+                'stockInTag_Date': intag_print.outtag_date,  # 入庫日期
+                'stockInTag_Employer': user.emp_name,
+                'stockInTag_batch': in_tag.batch,
+                #'stockInTag_cnt': intag_print.count,
+                'stockInTag_cnt': 1,
+                'stockInTag_alpha': intag_print.stockOut_alpha,
+                # 'stockInTag_cnt': intag_print.count - intag_print.stockOut_temp_count,
+                'stockInTag_isPrinted': intag_print.isPrinted,
+                'stockInTag_isStockin': intag_print.isStockout,
+            }
+
+            _results.append(_obj)
+
+
+    s.close()
+    return jsonify({
+        'status': 'success',
+        'outputs': _results
+    })
+
+
+# list inStock_tagPrint table all data
 @listTable.route("/listStockInTagPrintData", methods=['GET'])
 def list_stockin_tag_print_data():
     print("listStockInTagPrintData....")
@@ -991,6 +1076,63 @@ def list_requirements_data():
 
             'reqRecord_InTag_ID': _inTag.id,  # 入庫record id
             'reqRecord_OutTag_ID': outtag.id,  # 出庫record id
+        }
+
+        _results.append(_obj)
+
+    s.close()
+    return jsonify({
+        'status': 'success',
+        'outputs': _results
+    })
+
+
+# list storage records(StockIn) all data
+@listTable.route("/listStorages", methods=['GET'])
+def list_storages():
+    print("listStorages....")
+    s = Session()
+    _results = []
+
+    _objects = s.query(InTag).all()
+
+    for intag in _objects:
+      #print("outtag: ", outtag)
+      if (intag.isRemoved and intag.isStockin and intag.count !=0 and not intag.isPrinted):
+        _user = s.query(User).filter_by(id=intag.user_id).first()                   #入庫人員資料
+        _reagent = s.query(Reagent).filter_by(id=intag.reagent_id).first()          #入庫試劑資料
+
+        _department = s.query(Department).filter_by(id=_reagent.catalog_id).first()
+        _supplier = s.query(Supplier).filter_by(id=_reagent.super_id).first()
+        _product = s.query(Product).filter_by(id=_reagent.product_id).first()
+
+        dep_name_data=''                        # 2023-04-25 add
+        if _department is not None:             # 2023-04-25 add
+          dep_name_data=_department.dep_name    # 2023-04-25 add
+        sup_name_data=''                        # 2023-04-25 add
+        if _supplier is not None:               # 2023-04-25 add
+          sup_name_data=_supplier.super_name    # 2023-04-25 add
+        prc_name_data=''                        # 2023-04-25 add
+        if _product is not None:                # 2023-04-25 add
+          prc_name_data=_product.name           # 2023-04-25 add
+        ori_count=''
+        if intag.ori_count is not None:
+            ori_count=str(intag.ori_count) + _reagent.reag_Out_unit
+
+        _obj = {
+            'reqRecord_reagID': _reagent.reag_id,       # 資材碼
+            'reqRecord_reagName': _reagent.reag_name,   # 品名
+            'reqRecord_prdName': prc_name_data,         # 產品類別
+            'reqRecord_catalog': dep_name_data,         # 資材組別
+            'reqRecord_supplier': sup_name_data,        # 供應商
+            'reqRecord_stockInDate': intag.intag_date,  # 入庫日期
+            'reqRecord_stockInBatch': intag.batch,      # 入庫批次
+            'reqRecord_Employer': _user.emp_name,       # 入庫人員
+            'reqRecord_cnt': ori_count,                 # 原始入庫數量
+
+            'reqRecord_ori_count': intag.ori_count,     # 數量
+            'reqRecord_In_Unit': _reagent.reag_In_unit, # 單位
+            'reqRecord_InTag_ID': intag.id,             # 入庫record id
         }
 
         _results.append(_obj)

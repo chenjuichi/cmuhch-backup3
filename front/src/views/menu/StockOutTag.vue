@@ -391,8 +391,8 @@ export default {
     stock_headers: [
       { text: '資料ID', sortable: false, value: 'id', width: '10%', align: 'start'},
       { text: '資材碼', value: 'stockIn_reagent_id', align: 'start', sortable: true, width: '120px' },
-      { text: '品名', value: 'stockIn_reagent_name', sortable: false, width: '180px' },
-      { text: '批號', value: 'stockIn_batch', sortable: false, width: '80px' },
+      { text: '品名', value: 'stockIn_reagent_name', sortable: true, width: '180px' },  // 2023-06-22 add
+      { text: '批號', value: 'stockIn_batch', sortable: true, width: '80px' },
       { text: '供應商', value: 'stockIn_supplier', sortable: true, width: '120px' },
       { text: '效期', value: 'stockIn_reagent_period', sortable: true, width: '75px' },
       { text: '入庫日期', value: 'stockIn_date', sortable: true, width: '75px' },

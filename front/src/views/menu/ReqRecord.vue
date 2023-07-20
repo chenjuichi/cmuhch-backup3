@@ -45,7 +45,7 @@
                   v-model="search"
                   placeholder="關鍵字查詢(Caps)"
                   @input="(val) => (search = search.toUpperCase())"
-                  class="style-1"
+                  class="style-10"
                 >
                 </v-text-field>
 
@@ -565,13 +565,13 @@ div.v-toolbar__title {
   font-weight: bold;
 }
 
-::v-deep div.v-input.style-1 > .v-input__control > .v-input__slot > .v-text-field__slot > input {
+::v-deep div.v-input.style-10 > .v-input__control > .v-input__slot > .v-text-field__slot > input {
   max-width: 350px !important;
   width: 350px !important;
 
 }
 
-::v-deep div.v-input.style-1 > .v-input__control > .v-input__slot {
+::v-deep div.v-input.style-10 > .v-input__control > .v-input__slot {
   max-width: 350px !important;
   width: 350px !important;
 }

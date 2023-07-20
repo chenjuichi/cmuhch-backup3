@@ -3,7 +3,7 @@
   <v-sheet class="overflow-hidden" style="position: relative;">
     <v-container fluid>
       <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-        <v-card width="90vw">
+        <v-card width="96vw">
           <v-data-table
             dense
             v-model="selected"
@@ -42,6 +42,19 @@
               </v-toolbar>
 
             </template>
+            <!-- 2023-07-20 -->
+            <template v-slot:[`item.stockInTag_alpha`]="{ item }">
+              <v-text-field
+                v-model="item.stockInTag_alpha"
+
+                class="centered-input pe-0 me-2 py-1 my-0 block_tag_pages"
+                style="width:35px; max-width:35px;"
+
+                @input="getAlpha(item)"
+                :disabled="currentUser.perm>2"
+              ></v-text-field>
+            </template>
+
             <template v-slot:[`item.stockInTag_cnt`]="{ item }">
               <v-text-field
                 v-model="item.stockInTag_cnt"
@@ -171,16 +184,15 @@ export default {
 
     //資料表頭
     headers: [
-      { text: '資料ID', sortable: true, value: 'id', width: '6%', align: 'start'},
+      { text: '資料ID', sortable: false, value: 'id', width: '6%', align: 'start'},
       { text: '資材碼', sortable: true, value: 'stockInTag_reagID', width: '7%' },
       { text: '品名', sortable: true, value: 'stockInTag_reagName', width: '215px' },
       { text: '入庫/出庫', sortable: true, value: 'stockInTag_rePrint', width: '90px' },
       { text: '保存溫度', sortable: false, value: 'stockInTag_reagTemp', width: '10%' },
       { text: '入(出)庫日期', sortable: true, value: 'stockInTag_Date', width: '90px' },
       { text: '入(出)庫人員', sortable: true, value: 'stockInTag_Employer', width: '10%' },
-      { text: '字母', sortable: true, value: 'stockInTag_alpha', width: '5%' },
-
       { text: '批號', sortable: true, value: 'stockInTag_batch', width: '9%' },
+      { text: '字母', sortable: true, value: 'stockInTag_alpha', width: '5%' },
       { text: '張數', sortable: false, value: 'stockInTag_cnt', width: '6%' },
     ],
 
@@ -401,6 +413,29 @@ export default {
       console.log("hello...", item, value)
     },
 
+    getAlpha(item) {
+      console.log("getAlpha: ",item);
+
+      this.editedIndex = this.desserts.indexOf(item);
+      //this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
+      this.desserts[this.editedIndex].stockInTag_alpha=this.desserts[this.editedIndex].stockInTag_alpha.trim()
+      this.temp_desserts[this.editedIndex].stockInTag_alpha = this.desserts[this.editedIndex].stockInTag_alpha;
+
+      console.log("getAlpha, index: ", this.editedIndex, this.desserts[this.editedIndex].stockInTag_alpha);
+      let inputLetter=this.desserts[this.editedIndex].stockInTag_alpha
+      //console.log("STEP1...")
+      let letterLength=inputLetter.length
+      //console.log("comment: ", this.commentForInventory, this.commentForInventory.length)
+      if (letterLength == 1 && inputLetter.toUpperCase() === inputLetter) {
+        let objIndex = this.selected.findIndex(o => o.id == this.desserts[this.editedIndex].id);
+        //console.log("STEP2..., objIndex", objIndex)
+        if (objIndex != -1) {
+          this.selected[objIndex]['stockInTag_alpha'] = inputLetter;
+          //console.log("STEP3...")
+        }
+      }
+    },
+
     getdata(item) {
       this.editedIndex = this.desserts.indexOf(item);
       console.log(this.desserts[this.editedIndex].stockInTag_cnt);
@@ -572,5 +607,14 @@ div.v-toolbar__title {
 ::v-deep div.v-input.style-1 > .v-input__control > .v-input__slot {
   max-width: 350px !important;
   width: 350px !important;
+}
+// modify data table header text color, 2023-0707-14 add
+::v-deep .v-data-table-header th:last-child span {
+  color: #1f4788 !important;
+}
+
+::v-deep .block_tag_pages {
+  width: 24px;
+  font-size: 14px;
 }
 </style>

@@ -13,7 +13,7 @@ IF not exist ";C:\Program Files\MySQL\MySQL Server 5.7\bin;" SET PATH=%PATH%;C:\
 ::setx Path "%str%;c:\path\to\add" -m
 :: proceed with setting the path
 ECHO cmuhch password: 77974590
-mysql -u root -p cmuhch < ..\cmuhch_backup_0601.sql
+mysql -u root -p cmuhch < ..\cmuhch_backup_0717.sql
 ::popd
 
 ::SELECT * FROM cmuhch.intag where ceil(count) != count;

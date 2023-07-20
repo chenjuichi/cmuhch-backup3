@@ -101,6 +101,7 @@
 import axios from 'axios';
 import Common from '../../mixin/common.js'
 
+//import SideBar from '../../components/RenderBarCode.vue';
 import SideBar from '../../components/RenderBarCode.vue';
 //import print from 'vue-print-nb';
 
@@ -114,7 +115,7 @@ export default {
   },
 
   mounted() {
-    console.log("stockOutTag, mounted()...");
+    console.log("stockOutTagPrint, mounted()...");
 
     //document.addEventListener('click', this.onClick);
 
@@ -162,18 +163,21 @@ export default {
 
     //資料表頭
     headers: [
-      { text: '資料ID', sortable: false, value: 'id', width: '10%', align: 'start'},  //2023-06-26 modify
-      { text: '資材碼', sortable: true, value: 'stockOutTag_reagID', width: '7%' },
-      { text: '品名', sortable: true, value: 'stockOutTag_reagName', width: '200px' },
-      { text: '效期', sortable: true, value: 'stockOutTag_reagPeriod', width: '90px' },
-      { text: '保存溫度', sortable: false, value: 'stockOutTag_reagTemp', width: '10%' },
-      { text: '入庫日期', sortable: true, value: 'stockOutTag_In_Date', width: '90px' },
-      { text: '領料日期', sortable: true, value: 'stockOutTag_Out_Date', width: '90' },
-      { text: '領料人員', sortable: true, value: 'stockOutTag_Employer', width: '12%' },
+      { text: '資料ID', sortable: false, value: 'id', width: '5%', align: 'start'},  //2023-06-26 modify
+      { text: '資材碼', sortable: true, value: 'stockOutTag_reagID', width: '6%' },
+      { text: '品名', sortable: true, value: 'stockOutTag_reagName', width: '270px' },
+      { text: '效期', sortable: true, value: 'stockOutTag_reagPeriod', width: '70px' },
+      { text: '保存溫度', sortable: false, value: 'stockOutTag_reagTemp', width: '6%' },
+      { text: '入庫日期', sortable: true, value: 'stockOutTag_In_Date', width: '75px' },
+      { text: '領料日期', sortable: true, value: 'stockOutTag_Out_Date', width: '75px' },
+      { text: '領料人員', sortable: true, value: 'stockOutTag_Employer', width: '75px' },
      //{ text: '入庫人員', sortable: false, value: 'stockOutTag_Employer', width: '15%' },
-      { text: '批號', sortable: true, value: 'stockOutTag_batch', width: '15%' },
-      { text: '領料單位', sortable: false, value: 'stockOutTag_unit', width: '10%', align: 'center' },
-      { text: '張數', sortable: false, value: 'stockOutTag_cnt', width: '6%' },
+      { text: '批號', sortable: true, value: 'stockOutTag_batch', width: '8%' },
+
+      { text: '字母', sortable: true, value: 'stockOutTag_alpha', width: '5%' },    // 2023-07-14 add
+
+      { text: '領料單位', sortable: false, value: 'stockOutTag_unit', width: '8%', align: 'center' },
+      { text: '張數', sortable: false, value: 'stockOutTag_cnt', width: '5%' },
     ],
 
     in_drafTags: 0,
@@ -233,7 +237,7 @@ export default {
         this.desserts =  JSON.parse(JSON.stringify(this.temp_desserts));
 
         this.load_SingleTable_ok=false;
-        this.getLastBatchAlphaForStockOut();
+        //this.getLastBatchAlphaForStockOut();    // 2023-07-14 mark
       }
     },
 
@@ -271,7 +275,7 @@ export default {
   },
 
   created () {
-    console.log("stockOutTag, created()...");
+    console.log("stockOutTagPrint, created()...");
 
     //load 員工與權限資料
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
@@ -527,9 +531,9 @@ export default {
       });
     },
 
-    //setRowStyle(item) {
-    //  return 'style-for-data-table';
-    //},
+    setRowStyle(item) {
+      return 'style-1';
+    },
 
     getdata(item) {
       this.editedIndex = this.desserts.indexOf(item);
@@ -709,5 +713,13 @@ div.v-toolbar__title {
 ::v-deep .v-data-table__wrapper td:nth-last-child(1) .v-text-field {
   width: 40px !important;
   max-width: 40px !important;
+}
+// modify font size, 2023-07-14 add
+::v-deep .v-data-table td {
+  font-size: 12px !important;
+}
+// modify table header font size, 2023-07-14 add
+::v-deep .v-data-table-header th {
+  font-size: 0.9em !important;
 }
 </style>

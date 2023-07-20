@@ -380,9 +380,13 @@ class InTag(BASE):
     stockIn_alpha = Column(String(4))  # 入庫標籤上的批次文字, 2022/11/15討論增加
 
     #count_inv_modify = Column(Integer, default=0)  # 盤點數
-    count_inv_modify = Column(Float, default=0.0)  # 盤點數 2023-06-12 modify
+    #count_inv_modify = Column(Float, default=0.0)  # 盤點數 2023-06-12 modify
+    count_inv_modify = Column(Float)          # 盤點數 2023-07-13 modify
+    user_id_inv_modify= Column(Integer)       # 盤點人員 2023-07-12 add
 
-    comment = Column(String(80), default='')  # 盤點說明  ,  , 11/26建議 default=''
+    comment = Column(String(80), default='')  # 盤點說明 , 11/26建議 default=''
+
+    date_inv_modify = Column(String(12))      # 盤點日期-國曆  ,  # 2023-07-13 add
 
     updated_at = Column(DateTime, onupdate=datetime.utcnow())  # 資料修改的時間
 

@@ -72,4 +72,4 @@ for intag in intags:
 #s.commit()
 s.close()
 
-print("Ready insert inTag data is ok...")
+print("Ready insert inTag data(ori_count) is ok...")

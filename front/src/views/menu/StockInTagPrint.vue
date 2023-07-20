@@ -35,9 +35,14 @@
               ></v-switch>
               -->
             </template>
+
             <template v-slot:[`item.stockInTag_cnt`]="{ item }">
               <v-text-field
                 v-model="item.stockInTag_cnt"
+
+                class="centered-input pe-0 me-2 py-1 my-0 block_tag_pages"
+                style="width:35px; max-width:35px;"
+
                 type="number"
                 min=1
                 max=20
@@ -99,7 +104,9 @@
 import axios from 'axios';
 import Common from '../../mixin/common.js'
 
-import SideBar from '../../components/RenderBarCode.vue';
+//import SideBar from '../../components/RenderBarCode.vue';
+import SideBar from '../../components/RenderBarCodeRePrintTag.vue';
+
 //import print from 'vue-print-nb';
 
 export default {
@@ -155,6 +162,7 @@ export default {
     //singleSelect: true,
     selected: [],
     temp_selected: [],
+    tmp_selected: [], //2023-07-20 add
 
     pagination: {},
 
@@ -185,6 +193,7 @@ export default {
 
     load_SingleTable_ok: false, //for get employer table data
     load_2thTable_ok: false,    //for get reagent table data
+    load_3thTable_ok: false     // 2023-07-20
   }),
 
   computed: {
@@ -244,7 +253,18 @@ export default {
         this.desserts =  JSON.parse(JSON.stringify(this.temp_desserts));
 
         this.load_SingleTable_ok=false;
-        this.getLastBatchAlphaForStockIn();
+        //this.insertAlphaForStockIn();       //2023-07-19 add
+        //this.getLastBatchAlphaForStockIn(); //2023-07-19 mark
+      }
+    },
+    // 2023-07-20 add
+    load_3thTable_ok(val) {
+      if (val) {
+        this.tmp_selected
+        this.selected =  JSON.parse(JSON.stringify(this.tmp_selected));
+        this.drawer=true;
+
+        this.load_3thTable_ok=false;
       }
     },
 
@@ -277,6 +297,7 @@ export default {
     },
 
     selected(val) {
+      console.log("selected: ", val)
       this.temp_selected =  JSON.parse(JSON.stringify(val));
     },
   },
@@ -495,7 +516,8 @@ export default {
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
-        console.log("GET ok, total records:", res.data.outputs.length);
+        //console.log("GET ok, total records:", res.data.outputs.length);
+        console.log("GET ok, records:", res.data.outputs);
         this.load_SingleTable_ok=true;
       })
       .catch((error) => {
@@ -611,9 +633,34 @@ export default {
         this.tosterOK = true;   //true: 顯示錯誤訊息畫面
       });
     },
+    // 2023-07-20 add
+    insertAlphaForStockIn() {
+      console.log("insertAlphaForStockIn, selected: ", this.selected);
+
+      let path='/insertAlphaForStockIn';
+      let payload= {
+        //blocks: this.desserts,
+        blocks: this.selected,
+      };
+
+      axios.post(path, payload)
+      .then((res) => {
+        //this.temp_desserts = res.data.outputs;
+        this.tmp_selected = res.data.outputs;
+        console.log("Insert Alpha ok, records:", res.data.outputs);
+        this.load_3thTable_ok=true;
+      })
+      .catch((error) => {
+        console.error(error);
+        this.load_3thTable_ok=false;
+      });
+    },
 
     printSection() {
       console.log("click, printSection()...");
+
+      this.insertAlphaForStockIn();       //2023-07-19 add
+
       //2023-01-04 ADD
       /*
       if (this.selected.length > 1) {
@@ -633,7 +680,7 @@ export default {
       }
       */
       //
-      this.drawer=true;
+      //this.drawer=true;     //2023-07-20 mark
       /*
       this.$router.push({
         name: 'RenderBarCode',
@@ -728,5 +775,10 @@ div.v-toolbar__title {
 ::v-deep .v-data-footer {
   margin-top: 0px;
   margin-bottom: 2px;
+}
+
+::v-deep .block_tag_pages {
+  width: 24px;
+  font-size: 14px;
 }
 </style>

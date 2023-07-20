@@ -112,7 +112,7 @@ export default {
         let uniqueRegFields = [...new Set(this.temp_barcode_data)];
         console.log("watch: ", this.temp_barcode_data, uniqueRegFields)
         this.load_SingleTable_ok=false;
-        this.getLastAlphaForUniqueStockIn(uniqueRegFields);
+        //this.getLastAlphaForUniqueStockIn(uniqueRegFields);
 
         this.asrs = true;
       } else {     //出庫

@@ -250,6 +250,7 @@
                 v-model="props.item.stockInTag_comment"
                 :items="comment_items"
                 class="pe-0 me-2 py-1 my-0 myText"
+                @change="getmSelect(props.item)">
                 required
               ></v-select>
             </div>
@@ -391,10 +392,10 @@ export default {
       { text: '保存溫度', sortable: false, value: 'stockInTag_reagTemp', width: '7%' },
       { text: '入庫日期', sortable: true, value: 'stockInTag_Date', width: '8%' },
       { text: '入庫人員', sortable: true, value: 'stockInTag_Employer', width: '8%' },
-      { text: '格位', sortable: false, value: 'stockInTag_grid', width: '8%' },
-      { text: '在庫數', sortable: false, value: 'stockInTag_cnt', width: '7%' },
-      { text: '盤點數', sortable: false, value: 'stockInTag_cnt_inv_mdf', width: '7%' },
-      { text: '說明', sortable: false, value: 'stockInTag_comment', width: '12%' },
+      { text: '格位', sortable: false, value: 'stockInTag_grid', width: '7%' },
+      { text: '在庫數', sortable: false, value: 'stockInTag_cnt', width: '5%' },
+      { text: '盤點數', sortable: false, value: 'stockInTag_cnt_inv_mdf', width: '5%' },
+      { text: '說明(輸入完後按enter)', sortable: false, value: 'stockInTag_comment', width: '16%' },
     ],
 
     pagination: {
@@ -769,6 +770,7 @@ export default {
       var payload= {
         blocks: this.desserts,
         count: this.desserts.length,
+        empID: this.currentUser.empID    //2023-07-13 add
       };
       axios.post(path, payload)
       .then((res) => {
@@ -1027,6 +1029,19 @@ export default {
       console.log("cnt data: ", this.temp_desserts[this.editedIndex].stockInTag_cnt_inv_mdf, item.stockInTag_cnt_inv_mdf);
       console.log("cnt data: ", this.desserts);
     },
+    // 2023-07-17 add
+    getmSelect(item) {
+      console.log("getmSelect: ",item);
+
+      this.editedIndex = this.desserts.map(object => object.id).indexOf(item.id); //for dessertsDisplay
+
+      this.desserts[this.editedIndex].isGridChange=true;
+      this.desserts[this.editedIndex].stockInTag_comment = item.stockInTag_comment;
+
+      console.log("getmSelect, this.desserts[this.editedIndex]: ", this.desserts[this.editedIndex].stockInTag_comment);
+
+    },
+
 
     getmComment(item) {
       console.log("getmComment: ",item);
@@ -1035,10 +1050,12 @@ export default {
       console.log("getmComment, index: ", this.editedIndex, this.desserts[this.editedIndex].stockInTag_comment);
 
       this.commentForInventory=this.commentForInventory.trim()
+      console.log("comment: ", this.commentForInventory, this.commentForInventory.length)
       if (this.commentForInventory.length != 0) {
         this.desserts[this.editedIndex].isGridChange=true;
         this.desserts[this.editedIndex].stockInTag_comment = this.commentForInventory;
         this.comment_items.unshift(this.commentForInventory);
+        this.commentForInventory='' // 2023-07-13 add
       }
       console.log("getmComment, this.desserts[this.editedIndex]: ", this.desserts[this.editedIndex].stockInTag_comment);
     },

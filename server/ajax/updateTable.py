@@ -7,6 +7,8 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from sqlalchemy import distinct
 
+#from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound  # 2023-07-17 add
+
 from database.tables import User, Reagent, Department, Supplier, Grid, Permission, Product, OutTag, InTag, Setting, Session
 
 from werkzeug.security import generate_password_hash
@@ -654,6 +656,169 @@ def update_stockin_by_printFlag():
     })
 
 
+# 2023-07-19 add(modify the getLastBatchAlphaForStockIn function)
+@updateTable.route("/insertAlphaForStockIn", methods=['POST'])
+def insert_alpha_for_stockin():
+  print("insertAlphaForStockIn....")
+
+  request_data = request.get_json()
+
+  _blocks = request_data['blocks']
+
+  stockinIDs = [ sub['id'] for sub in _blocks ]
+  #stockinIDs = [932, 933, 934]
+  print("data: ", stockinIDs)
+
+  s = Session()
+
+  _results = []
+  reagentIDs = []
+  batchs=[]
+  intagDates=[]
+
+  intag_objects = s.query(InTag).filter(InTag.id.in_(stockinIDs))
+  intags = [u.__dict__ for u in intag_objects]
+
+  for intag in intags:
+    #if (intag['isRemoved'] and intag['isStockin']):
+    reagentIDs.append(intag['reagent_id'])
+    batchs.append(intag['batch'])
+    intagDates.append(intag['intag_date'])
+
+  reagentIDs = list(dict.fromkeys(reagentIDs))
+  reagentIDs.sort()
+  batchs = list(dict.fromkeys(batchs))
+  batchs.sort()
+  intagDates = list(dict.fromkeys(intagDates))
+  intagDates.sort()
+
+##
+#  for reagentID in reagentIDs:
+#    maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
+#    print(max(node.stockIn_alpha for node in maxAlphaObjectsOrder))
+##
+
+  i=1
+  j=0
+  for reagentID in reagentIDs:
+    #myAlpha="A"
+    maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
+    myAlpha=max(node.stockIn_alpha for node in maxAlphaObjectsOrder)
+    #myAlpha=chr(ord(myAlpha) + 1)
+    print("myAlpha: ", myAlpha)
+    myReagID=_blocks[j]['stockInTag_reagID']
+    myReagName=_blocks[j]['stockInTag_reagName']
+    myReagTemp=_blocks[j]['stockInTag_reagTemp']
+    myEmployer=_blocks[j]['stockInTag_Employer']
+
+    for batch in batchs:
+      for intagDate in intagDates:
+        _objects=s.query(InTag).filter_by(
+          reagent_id=reagentID,
+          batch=batch,
+          intag_date=intagDate,
+          #isRemoved=True,
+          #isStockin=True
+        ).all()
+        if _objects:
+          for myIntag in _objects:
+            myIntag.stockIn_alpha=myAlpha
+            s.query(InTag).filter(InTag.id == myIntag.id).update({'stockIn_alpha': myAlpha})
+            _obj = {
+                'id': myIntag.id,
+                'stockInTag_reagID': myReagID,
+                'stockInTag_reagName': myReagName,
+                'stockInTag_reagPeriod': myIntag.reag_period,  # 依2022-12-12操作教育訓練建議作修正
+                'stockInTag_reagTemp': myReagTemp,
+                'stockInTag_Date': myIntag.intag_date,  # 入庫日期
+                'stockInTag_Employer': myEmployer,
+                'stockInTag_batch': myIntag.batch,
+                'stockInTag_cnt': myIntag.count,
+                'stockInTag_alpha': myIntag.stockIn_alpha,
+                # 'stockInTag_cnt': myIntag.count - myIntag.stockOut_temp_count,
+                'stockInTag_isPrinted': myIntag.isPrinted,
+                'stockInTag_isStockin': myIntag.isStockin,
+            }
+            _results.append(_obj)
+
+            print(i,":", myIntag)
+            i=i+1
+          myAscii=ord(myAlpha)
+          if myAscii==ord("Z"):
+            myAlpha="A"
+          else:
+            myAlpha=chr(ord(myAlpha) + 1)
+
+
+  #update
+  s.commit()
+
+  s.close()
+
+  return_message = ''
+  return_value = True   # true: 資料正確
+
+  return jsonify({
+    'status': return_value,
+    'outputs': _results
+  })
+
+
+# 2023-07-20 add
+@updateTable.route("/insertBadge", methods=['POST'])
+def insert_badge():
+  print("insertBadge....")
+
+  request_data = request.get_json()
+
+  _blocks = request_data['blocks']
+  print("_blocks: ", _blocks)
+  stockinIDs = [ sub['id'] for sub in _blocks ]
+  print("data: ", stockinIDs)
+
+  s = Session()
+  return_message = ''
+  return_value=True
+  _results = []
+  reagentIDs = []
+  batchs=[]
+  intagDates=[]
+  letters=[]
+
+  intag_objects = s.query(InTag).filter(InTag.id.in_(stockinIDs))
+  intags = [u.__dict__ for u in intag_objects]
+
+  for intag in intags:
+    reagentIDs.append(intag['reagent_id'])
+    batchs.append(intag['batch'])
+    intagDates.append(intag['intag_date'])
+    letters.append(intag['stockIn_alpha'])
+
+  print("letters: ", letters)
+  i=0
+  for reagentID in reagentIDs:
+    maxLetterObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True).order_by(InTag.stockIn_alpha.desc()).all()
+    myLetter=min(node.stockIn_alpha for node in maxLetterObjectsOrder)
+    t1=ord(letters[i])
+    t2=ord(myLetter)
+    print("t1, t2: ", t1, t2)
+    if (t1 > t2):
+      return_message = '有更早的在庫試劑...'
+      return_value = False
+      #_results.append(letters[i])
+    i=i+1
+    print("myLetter, minLetter: ", myLetter)
+  s.close()
+
+  print("return_value, return_message", return_value, return_message)
+
+  return jsonify({
+    'outputs': _results,
+    'status': return_value,
+    'message':  return_message
+  })
+
+
 '''
 @updateTable.route("/updateStockInByPrintFlag", methods=['POST'])
 def update_stockin_by_printFlag():
@@ -875,7 +1040,7 @@ def update_stockout_by_cnt():
     })
 
 
-@updateTable.route("/updateStockInDataByInv", methods=['POST'])
+@updateTable.route("/updateStockInDataByInv", methods=['POST', 'GET'])
 def update_StockIn_data_by_Inv():
     print("updateStockInDataByInv....")
 
@@ -883,59 +1048,81 @@ def update_StockIn_data_by_Inv():
 
     _blocks = request_data['blocks']
     _count = request_data['count']
+    _empID = request_data['empID']
     temp = len(_blocks)
     data_check = (True, False)[_count == 0 or temp == 0 or _count != temp]
-
     return_value = True  # true: export into excel成功
     return_message = ''
     if not data_check:  # false: 資料不完全
         return_value = False
         return_message = '資料不完整.'
 
+    print("step1, check:", return_value, data_check)
+
     if return_value:
-        ts = time.time()
-        now = datetime.datetime.fromtimestamp(ts)
-        # utc_now, now = datetime.datetime.utcfromtimestamp(
-        #    ts), datetime.datetime.fromtimestamp(ts)
-        # local_tz = get_localzone()  # get local timezone
-        # local_now = utc_now.replace(tzinfo=pytz.utc).astimezone(
-        #    local_tz)  # utc -> local
+      ts = time.time()
+      now = datetime.datetime.fromtimestamp(ts)
+      tty=now.strftime('%Y')
+      tty=str(int(tty)-1911)
+      ttm=now.strftime('%m')
+      ttd=now.strftime('%d')
 
-        s = Session()
+      # utc_now, now = datetime.datetime.utcfromtimestamp(
+      #    ts), datetime.datetime.fromtimestamp(ts)
+      # local_tz = get_localzone()  # get local timezone
+      # local_now = utc_now.replace(tzinfo=pytz.utc).astimezone(
+      #    local_tz)  # utc -> local
 
-        for obj in _blocks:
-            #print("obj: ", obj)
-            if obj['isGridChange']:  # 儲位有變更
-                print("obj: ", obj)
-                gridID = modify_InTags_grid(obj['stockInTag_grid_id'], int(obj['stockInTag_grid_station']),
-                                            int(obj['stockInTag_grid_layout']), int(obj['stockInTag_grid_pos']), obj['stockInTag_reagID']) # 2023-06-14 modify
-                print("return grid id: ", gridID)
-                intag = s.query(InTag).filter_by(id=obj['intag_id']).first()
-                reagent = s.query(Reagent).filter_by(
-                    id=intag.reagent_id).first()  # 2023-01-13 add
+      s = Session()
+      _user = s.query(User).filter_by(emp_id=_empID).first()
+      #print("_empID:", _empID, _user)
 
-                if gridID == -1:
-                    return_value = False  # 已經放其他試劑, 儲位重複
-                    return_message = '儲位重複.'
-                if gridID > 0:  # 新儲位或空儲位
-                    # intag.grid_id = gridID   # 2023-01-13 mark
-                    reagent.grid_id = gridID  # 2023-01-13 add
-                # intag.count = int(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料
-                # 修改在庫數資料, 2023-02-13 update
-                #intag.count = float(obj['stockInTag_cnt_inv_mdf']) # 2023-06-12 modify
-                intag.count = obj['stockInTag_cnt_inv_mdf']
-                print("intag.count = obj['stockInTag_cnt_inv_mdf'] ", intag.count, obj['stockInTag_cnt_inv_mdf'] )
-                # 修改盤點數資料
-                # intag.count_inv_modify = int(obj['stockInTag_cnt_inv_mdf'])  #2023-01-05 mark
-                #intag.count_inv_modify = 0   # 2023-06-12 modify
-                intag.count_inv_modify = 0.0
-                intag.comment = obj['stockInTag_comment']     # 修改盤點說明資料
-                intag.updated_at = now  # 資料修改的時間
-                # intag.updated_at = datetime.datetime.utcnow()  # 資料修改的時間
+      for obj in _blocks:
+        #print("obj: ", obj)
+        if obj['isGridChange']:  # 儲位有變更
+          #print("obj: ", obj)
+          gridID = modify_InTags_grid(obj['stockInTag_grid_id'], int(obj['stockInTag_grid_station']),
+                                      int(obj['stockInTag_grid_layout']), int(obj['stockInTag_grid_pos']), obj['stockInTag_reagID']) # 2023-06-14 modify
+          print("return grid id: ", gridID)
+          intag = s.query(InTag).filter_by(id=obj['intag_id']).first()
+          reagent = s.query(Reagent).filter_by(id=intag.reagent_id).first()  # 2023-01-13 add
 
-                s.commit()
+          if gridID == -1:
+            return_value = False  # 已經放其他試劑, 儲位重複
+            return_message = '儲位重複.'
+          if gridID > 0:  # 新儲位或空儲位
+            # intag.grid_id = gridID   # 2023-01-13 mark
+            reagent.grid_id = gridID  # 2023-01-13 add
+          # intag.count = int(obj['stockInTag_cnt_inv_mdf'])      # 修改在庫數資料
+          # 修改在庫數資料, 2023-02-13 update
+          #intag.count = float(obj['stockInTag_cnt_inv_mdf']) # 2023-06-12 modify
 
-        s.close()
+          strTemp=obj['stockInTag_cnt_inv_mdf'].strip()   # 2023-07-13 add
+          comment=obj['stockInTag_comment'].strip()       # 2023-07-13 add
+          if strTemp:                                     # 2023-07-13 add
+            print("intag...step1")
+            floatTemp=float(strTemp)                      # 2023-07-13 add
+            intag.count = floatTemp
+          #print("intag.count = obj['stockInTag_cnt_inv_mdf'] ", intag.count, obj['stockInTag_cnt_inv_mdf'], type(obj['stockInTag_cnt_inv_mdf']) )
+          # 修改盤點數資料
+          # intag.count_inv_modify = int(obj['stockInTag_cnt_inv_mdf'])   # 2023-01-05 mark
+          #intag.count_inv_modify = 0   # 2023-06-12 modify
+          #intag.count_inv_modify = 0.0                                   # 2023-07-13 modify
+            intag.count_inv_modify = floatTemp                            # 2023-07-13 modify
+          elif comment:
+            print("intag...step2")
+            intag.comment = comment     # 修改盤點說明資料
+
+          if strTemp or comment:
+            print("intag...step3")
+            #print("_user: ",_empID, _user, _user.id)
+            intag.user_id_inv_modify=_user.id                               # 2023-07-13 add
+            #print("intag...step4")
+            intag.date_inv_modify=tty+"/"+ttm+"/"+ttd
+            intag.updated_at = now  # 資料修改的時間
+
+      s.commit()
+      s.close()
 
     return jsonify({
         'status': return_value,

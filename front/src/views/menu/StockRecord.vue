@@ -319,7 +319,7 @@ export default {
       [
         { text: '資料ID', sortable: false, value: 'id', align: 'start', width: '4%' },  //2023-06-26 modify
         { text: '資材碼', sortable: true, value: 'stkRecord_reagID', width: '8%', },
-        { text: '品名', sortable: true, value: 'stkRecord_reagName', width: '14%',},
+        { text: '品名', sortable: true, value: 'stkRecord_reagName', width: '18%',},
         { text: '供應商', sortable: true, value: 'stkRecord_supplier', width: '10%',},
         { text: '入庫日期', sortable: true, value: 'stkRecord_Date', width: '9%',},
 
@@ -328,7 +328,8 @@ export default {
         { text: '效期', sortable: true, value: 'stkRecord_period', width: '9%',},
         { text: '安全存量', sortable: false, value: 'stkRecord_saftStockUnit', width: '12%', align: 'center' },
         { text: '數量', sortable: false, value: 'stkRecord_cntUnit', width: '6%', align: 'center' },
-        { text: '儲位', sortable: false, value: 'stkRecord_grid', width: '16%', align: 'center' },
+        //{ text: '儲位', sortable: false, value: 'stkRecord_grid', width: '16%', align: 'center' },  //2023-07-17 modify
+        { text: '儲位', sortable: false, value: 'stkRecord_grid', width: '10%', },                    //
         //{ text: '', value: 'data-table-expand' },
       ]
 
@@ -1172,8 +1173,8 @@ div.v-toolbar__title {
   font-size: 14px;;
 }
 ::v-deep .v-list--dense .v-list-item, .v-list-item--dense {
-    min-height: 30px !important;
-    height: 30px !important;
+  min-height: 30px !important;
+  height: 30px !important;
 }
 ::v-deep .v-select.v-input--dense .v-select__selection--comma {
   font-size: 14px !important;

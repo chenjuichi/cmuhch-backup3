@@ -715,6 +715,66 @@ def list_stockout_tag_print_data():
                 'stockOutTag_InID': outtag_print.intag_id,
                 'stockOutTag_reagID': reagent.reag_id,
                 'stockOutTag_reagName': reagent.reag_name,
+                'stockOutTag_reagPeriod': in_tag.reag_period,         # 依2022-12-12操作教育訓練建議作修正
+                'stockOutTag_reagTemp': k1,
+                'stockOutTag_In_Date': in_tag.intag_date,             # 入庫日期
+                'stockOutTag_Out_Date': outtag_print.outtag_date,     # 出庫日期(領用日期)
+                'stockOutTag_Employer': user.emp_name,
+
+                'stockOutTag_batch': in_tag.batch,
+                #'stockOutTag_unit': outtag_print.unit,     # 2023-01-13 mark
+                'stockOutTag_unit': reagent.reag_Out_unit,            # 2023-01-13 add
+                'stockOutTag_cnt': outtag_print.count,
+                #'stockOutTag_cnt': in_tag.count * reagent.reag_scale, #在庫數 * 比例
+                'stockOutTag_alpha': outtag_print.stockOut_alpha,
+                # 'stockOutTag_cnt': outtag_print.count - outtag_print.stockOut_temp_count,
+                'stockOutTag_isPrinted': outtag_print.isPrinted,
+                'stockOutTag_isStockin': outtag_print.isStockout,
+            }
+
+            tempAlpha=in_tag.stockIn_alpha.lower()
+            _obj['stockOutTag_alpha']=tempAlpha    # 字母, 2023-07-14 add
+            #print("_obj: ", _obj)
+
+            _results.append(_obj)
+
+    s.close()
+    #print("_results: ", _results)
+    return jsonify({
+        'status': 'success',
+        'outputs': _results
+    })
+
+
+# list outStock_tagPrint table all data
+@listTable.route("/liststockOutTagPrintForSame", methods=['GET'])
+def list_stockout_tag_print_for_same():
+    print("liststockOutTagPrintForSame....")
+    s = Session()
+    _results = []
+    _objects = s.query(OutTag).all()
+    # grids = [u.__dict__ for u in _objects]
+    for outtag_print in _objects:
+        if (outtag_print.isRemoved and (not outtag_print.isPrinted) and (not outtag_print.isStockout)):  # 在庫, 還沒列印標籤, 還沒出庫
+            user = s.query(User).filter_by(id=outtag_print.user_id).first()
+
+            in_tag = s.query(InTag).filter_by(
+                id=outtag_print.intag_id).first()
+            reagent = s.query(Reagent).filter_by(id=in_tag.reagent_id).first()
+
+            k1 = ''
+            if reagent.reag_temp == 0:  # 0:室溫、1:2~8度C、2:-20度C
+                k1 = '室溫'
+            if reagent.reag_temp == 1:
+                k1 = '2~8度C'
+            if reagent.reag_temp == 2:
+                k1 = '-20度C'
+
+            _obj = {
+                'id': outtag_print.id,
+                'stockOutTag_InID': outtag_print.intag_id,
+                'stockOutTag_reagID': reagent.reag_id,
+                'stockOutTag_reagName': reagent.reag_name,
                 'stockOutTag_reagPeriod': in_tag.reag_period,  # 依2022-12-12操作教育訓練建議作修正
                 'stockOutTag_reagTemp': k1,
                 'stockOutTag_In_Date': in_tag.intag_date,  # 入庫日期
@@ -750,7 +810,8 @@ def list_reprint_tag_data():
     _objects = s.query(InTag).all()
     for intag_print in _objects:
         #if (intag_print.isRemoved and intag_print.isPrinted):
-        if (intag_print.isPrinted):
+        #if (intag_print.isPrinted):
+        if (intag_print.isRemoved and (not intag_print.isPrinted) and intag_print.isStockin):    # 2023-07-20 modify
             user = s.query(User).filter_by(id=intag_print.user_id).first()
             reagent = s.query(Reagent).filter_by(
                 id=intag_print.reagent_id).first()
@@ -943,13 +1004,16 @@ def list_stockout_data():
             supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
 
             _obj = {
-                'stockOutTag_reagID': reagent.reag_id,  # 資材碼
-                'stockOutTag_reagName': reagent.reag_name,  # 品名
-                'stockOutTag_batch': _inTag.batch,    # 入庫批號, 2023-02-10 add
-                'stockOutTag_supplier': supplier.super_name,  # 供應商
-                'stockOutTag_reagPeriod': _inTag.reag_period,  # 效期, 依2022-12-12操作教育訓練建議作修正
-                'stockOutTag_InDate': _inTag.intag_date,  # 入庫日期
-                'stockOutTag_Date': outtag.outtag_date,  # 領用日期
+                'stockOutTag_reagID': reagent.reag_id,                # 資材碼
+                'stockOutTag_reagName': reagent.reag_name,            # 品名
+
+                'stockOutTag_alpha': _inTag.stockIn_alpha.lower(),    # 字母, 2023-07-14 add
+
+                'stockOutTag_batch': _inTag.batch,              # 入庫批號, 2023-02-10 add
+                'stockOutTag_supplier': supplier.super_name,    # 供應商
+                'stockOutTag_reagPeriod': _inTag.reag_period,   # 效期, 依2022-12-12操作教育訓練建議作修正
+                'stockOutTag_InDate': _inTag.intag_date,        # 入庫日期
+                'stockOutTag_Date': outtag.outtag_date,         # 領用日期
                 'stockOutTag_EmpID': user.emp_id,
                 'stockOutTag_Employer': user.emp_name,
                 #'stockOutTag_cnt': outtag.count,
@@ -958,9 +1022,9 @@ def list_stockout_data():
                 'stockOutTag_cnt_max': outtag.count,
                 'stockOutTag_cnt': outtag.count,
                 'stockOutTag_scale': reagent.reag_scale,
-                #'stockOutTag_unit': outtag.unit,           # 2023-01-13 mark
-                'stockOutTag_unit': reagent.reag_Out_unit,  # 2023-01-13 add
-                #'stockOutTag_unit':  reagent.reag_In_unit,  #在庫單位,reag_In_unit
+                #'stockOutTag_unit': outtag.unit,             # 2023-01-13 mark
+                'stockOutTag_unit': reagent.reag_Out_unit,    # 2023-01-13 add
+                #'stockOutTag_unit':  reagent.reag_In_unit,   # 在庫單位,reag_In_unit
                 'stockOutTag_InID': _inTag.id,
                 'stockOutTag_ID': outtag.id,
                 'stockOutTag_isPrinted': outtag.isPrinted,
@@ -1117,7 +1181,7 @@ def list_storages():
           prc_name_data=_product.name           # 2023-04-25 add
         ori_count=''
         if intag.ori_count is not None:
-            ori_count=str(intag.ori_count) + _reagent.reag_Out_unit
+            ori_count=str(intag.ori_count) + _reagent.reag_In_unit
 
         _obj = {
             'reqRecord_reagID': _reagent.reag_id,       # 資材碼
@@ -1133,6 +1197,65 @@ def list_storages():
             'reqRecord_ori_count': intag.ori_count,     # 數量
             'reqRecord_In_Unit': _reagent.reag_In_unit, # 單位
             'reqRecord_InTag_ID': intag.id,             # 入庫record id
+        }
+
+        _results.append(_obj)
+
+    s.close()
+    return jsonify({
+        'status': 'success',
+        'outputs': _results
+    })
+
+
+# list correction records(StockIn) all data
+@listTable.route("/listCorrections", methods=['GET'])
+def list_corrections():
+    print("listCorrections....")
+    s = Session()
+    _results = []
+
+    _objects = s.query(InTag).all()
+
+    for intag in _objects:
+      #print("outtag: ", outtag)
+      if (intag.isRemoved and intag.isStockin and not intag.isPrinted and intag.comment):
+      #if (intag.isRemoved and intag.isStockin and not intag.isPrinted and intag.count_inv_modify  and intag.comment):
+        _user = s.query(User).filter_by(id=intag.user_id).first()                   #入庫人員資料
+        _userInv = s.query(User).filter_by(id=intag.user_id_inv_modify).first()                   #入庫人員資料
+        _reagent = s.query(Reagent).filter_by(id=intag.reagent_id).first()          #入庫試劑資料
+
+        _grid = s.query(Grid).filter_by(id=_reagent.grid_id).first()                # 在庫格位資料
+        _department = s.query(Department).filter_by(id=_reagent.catalog_id).first()
+        _supplier = s.query(Supplier).filter_by(id=_reagent.super_id).first()
+        _product = s.query(Product).filter_by(id=_reagent.product_id).first()
+
+        dep_name_data=''                        # 2023-04-25 add
+        if _department is not None:             # 2023-04-25 add
+          dep_name_data=_department.dep_name    # 2023-04-25 add
+        sup_name_data=''                        # 2023-04-25 add
+        if _supplier is not None:               # 2023-04-25 add
+          sup_name_data=_supplier.super_name    # 2023-04-25 add
+        prc_name_data=''                        # 2023-04-25 add
+        if _product is not None:                # 2023-04-25 add
+          prc_name_data=_product.name           # 2023-04-25 add
+
+        _obj = {
+            'reqRecord_reagID': _reagent.reag_id,         # 資材碼
+            'reqRecord_reagName': _reagent.reag_name,     # 品名
+            'reqRecord_supplier': sup_name_data,          # 供應商
+            'reqRecord_prdName': prc_name_data,           # 資材類別
+            'reqRecord_catalog': dep_name_data,           # 組別
+            'reqRecord_stockInBatch': intag.batch,        # 批次
+            'reqRecord_stockInDate': intag.intag_date,    # 入庫日期
+            'reqRecord_stockInEmployer': _user.emp_name,  # 入庫人員
+            'reqRecord_cnt': intag.count,                 # 原在庫數
+            'reqRecord_reag_In_unit': _reagent.reag_In_unit,
+            'reqRecord_stockInGrid': _grid.station + '站' + _grid.layout + '層' + _grid.pos + '格',
+            'reqRecord_inventoryDate': intag.date_inv_modify,
+            'reqRecord_inventoryEmployer': _userInv.emp_name,
+            'reqRecord_cnt_inv_mdf': intag.count_inv_modify,  # 盤點數
+            'reqRecord_comment': intag.comment,               # 說明
         }
 
         _results.append(_obj)
@@ -1186,7 +1309,7 @@ def list_stock_records():
           if (intag.reagent_id==obj and intag.isRemoved and intag.isStockin):
             mySum=mySum+intag.count
 
-        item = s.query(InTag).filter_by(reagent_id=obj).first()
+        item = s.query(InTag).filter_by(reagent_id=obj, isRemoved=True, isStockin=True).first() # 2023-07-17 modify
         _reagent = s.query(Reagent).filter_by(id=obj).first()
         print("item.count", obj, mySum)
         '''

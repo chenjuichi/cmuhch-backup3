@@ -11,7 +11,7 @@
     </v-snackbar>
 
     <v-row align="center" justify="center" v-if="currentUser.perm >= 1">
-      <v-card width="90vw">
+      <v-card width="92vw">
         <!-- desserts為dataTable的資料源-->
         <!-- :sort-by.sync="sortBy" -->
         <v-data-table
@@ -37,7 +37,7 @@
                   </v-btn>
                 </template>
 
-                <v-card width="82vw">
+                <v-card width="90vw">
                   <v-card-title>
                     <span class="text-h5">{{ formTitle }}</span>
                 <!-- 進度條 -->
@@ -110,8 +110,8 @@
                             transition="scale-transition"
                             offset-y
 
-                            max-width="290px"
-                            min-width="290px"
+                            max-width="300px"
+                            min-width="300px"
                           >
                             <template v-slot:activator="{ on }">
                               <v-text-field
@@ -173,20 +173,40 @@
                             </v-sheet>
                           </v-col>
                           <v-col cols="12" md="4" ml="2" class="adjTopForSelect">
-                            <!-- suppliers為v-select的資料源-->
-                            <v-select
-                            @change="checkSelect"
-                            @click="suppliersClicked=true"
-                            :items="suppliers"
-                            label="供應商"
-                            outlined
-                            multiple
-                            class="mt-1 ml-3 mx-auto"
-                            style="width:100px; height:20px;"
-                            v-model="selectSuppliers"
-
-                          ></v-select>
+                            <!-- 2023-07-20 modify the block  -->
+                            <v-text-field
+                              v-model="search"
+                              placeholder="關鍵字查詢(Caps)"
+                              @input="(val) => (search = search.toUpperCase())"
+                              class="style-10"
+                            >
+                            </v-text-field>
                           </v-col>
+                          <!--
+                          <v-col cols="12" md="4" ml="2" class="adjTopForSelect">
+                            <v-select
+                              @change="checkSelect"
+                              @click="suppliersClicked=true"
+                              :items="suppliers"
+                              label="供應商"
+                              outlined
+                              multiple
+                              class="mt-1 ml-3 mx-auto"
+                              style="width:100px; height:20px;"
+                              v-model="selectSuppliers"
+                            ></v-select>
+                          </v-col>
+                          -->
+                      </v-row>
+
+                      <v-row>
+                        <v-badge
+                          :content="stock_messages"
+                          :value="stock_messages"
+                          color="#FF5c4E"
+                          overlap
+                        >
+                        </v-badge>
                       </v-row>
 
                       <!-- 第3列-->
@@ -199,8 +219,12 @@
                             :items="stock_desserts"
                             :item-class="setRowStyleForStockOut"
                             @item-selected="booking_selected"
-                            style="width: 1180px;"
+                            style="width: 1220px;"
                             item-key="id"
+
+                            :search="search"
+                            :custom-filter="filterOnlyCapsText"
+
                             show-select
                             :single-select="stock_singleSelect"
                             class="elevation-1"
@@ -270,20 +294,16 @@
             ></v-text-field>
           </template>
 
-
-
-
           <template v-slot:[`item.actions`]="{ item, index }">
-
+            <!--
             <v-icon small class="mr-2" @click="editItem(item)" style="color: blue;">
               mdi-pencil
             </v-icon>
-
+            -->
             <v-icon
               small
               @click="deleteItem(item)"
               style="color: red;"
-
             >
               mdi-delete
             </v-icon>
@@ -387,21 +407,41 @@ export default {
     editedStockIndex: -1,
 
     stock_singleSelect: false,
+    temp_stock_selected: [],
     stock_selected: [],
     stock_headers: [
-      { text: '資料ID', sortable: false, value: 'id', width: '10%', align: 'start'},
-      { text: '資材碼', value: 'stockIn_reagent_id', align: 'start', sortable: true, width: '120px' },
-      { text: '品名', value: 'stockIn_reagent_name', sortable: true, width: '180px' },  // 2023-06-22 add
-      { text: '批號', value: 'stockIn_batch', sortable: true, width: '80px' },
-      { text: '供應商', value: 'stockIn_supplier', sortable: true, width: '120px' },
+      { text: '資料ID', sortable: false, value: 'id', width: '5%', align: 'start'},
+      { text: '資材碼', value: 'stockIn_reagent_id', align: 'start', sortable: true, width: '70px' },
+      { text: '品名', value: 'stockIn_reagent_name', sortable: true, width: '200px' },  // 2023-06-22 add
+      { text: '批號', value: 'stockIn_batch', sortable: true, width: '70px' },
+
+      { text: '字母', value: 'stockIn_alpha', sortable: true, width: '50px' },          // 2023-07-14 add
+
+      { text: '供應商', value: 'stockIn_supplier', sortable: true, width: '100px' },
       { text: '效期', value: 'stockIn_reagent_period', sortable: true, width: '75px' },
       { text: '入庫日期', value: 'stockIn_date', sortable: true, width: '75px' },
       //{ text: '批號', value: 'protein', sortable: false, width: '18%' },
-      { text: '領料單位', value: 'stockIn_reagent_Out_unit', sortable: false, width: '70px' },
-      { text: '領料數量', value: 'stockIn_reagent_Out_cnt', sortable: false, width: '16%' },
+      { text: '領料單位', value: 'stockIn_reagent_Out_unit', sortable: false, width: '50px' },
+      { text: '領料數量', value: 'stockIn_reagent_Out_cnt', sortable: false, width: '50px' },
     ],
-    stock_desserts: [ ],
+    stock_desserts: [],
+    /*
+    stock_desserts: [{
+      id: 0,
+      stockIn_reagent_id: "",
+      stockIn_reagent_name:"",
+      stockIn_batch: "",
+      stockIn_alpha: "",
+      stockIn_supplier: "",
+      stockIn_reagent_period: "",
+      stockIn_date: "",
+      stockIn_reagent_Out_unit: "",
+      stockIn_reagent_Out_cnt: 0,
+    }],
+    */
     temp_stock_desserts: [],
+
+    stock_messages: "",
 //--
     currentUser: {},
     permDialog: false,
@@ -426,6 +466,8 @@ export default {
     minDate: "2012-07-01",
     maxDate: "2042-06-30",
 
+    search: '',
+
     dialog: false,
     dialogDelete: false,
 
@@ -439,16 +481,19 @@ export default {
     //資料表頭
     headers: [
       //{ text: 'ID', sortable: false, value: 'id', width: '10%', align: 'start'},
-      { text: '資材碼', sortable: true, value: 'stockOutTag_reagID', width: '90px' },
-      { text: '品名', sortable: true, value: 'stockOutTag_reagName', width: '120px' },
-      { text: '批號', sortable: true, value: 'stockOutTag_batch', width: '60px' },
-      { text: '供應商', sortable: true, value: 'stockOutTag_supplier', width: '120px' },
-      { text: '效期', sortable: true, value: 'stockOutTag_reagPeriod', width: '75px' },
-      { text: '入庫日期', sortable: true, value: 'stockOutTag_InDate', width: '75px' },
-      { text: '領料日期', sortable: true, value: 'stockOutTag_Date', width: '75px' },
-      { text: '領料人員', sortable: true, value: 'stockOutTag_Employer', width: '75px' },
-      { text: '領料單位', sortable: false, value: 'stockOutTag_unit', width: '65px', align: 'start' },
-      { text: '領料數量', sortable: false, value: 'stockOutTag_cnt', width: '65px', align: 'start', class: 'my-header-style' },
+      { text: '資材碼', sortable: true, value: 'stockOutTag_reagID', width: '50px' },
+      { text: '品名', sortable: true, value: 'stockOutTag_reagName', width: '180px' },
+      { text: '批號', sortable: true, value: 'stockOutTag_batch', width: '40px' },
+
+      { text: '字母', sortable: true, value: 'stockOutTag_alpha', width: '40px' },    // 2023-07-14 add
+
+      { text: '供應商', sortable: true, value: 'stockOutTag_supplier', width: '80px' },
+      { text: '效期', sortable: true, value: 'stockOutTag_reagPeriod', width: '50px' },
+      { text: '入庫日期', sortable: true, value: 'stockOutTag_InDate', width: '50px' },
+      { text: '領料日期', sortable: true, value: 'stockOutTag_Date', width: '50px' },
+      { text: '領料人員', sortable: true, value: 'stockOutTag_Employer', width: '70px' },
+      { text: '領料單位', sortable: false, value: 'stockOutTag_unit', width: '50px', align: 'start' },
+      { text: '領料數量', sortable: false, value: 'stockOutTag_cnt', width: '60px', align: 'start', class: 'my-header-style' },
       { text: 'Actions', sortable: false, value: 'actions', width: '60px', class: 'my-header-style' },
     ],
 
@@ -516,6 +561,7 @@ export default {
     load_3thTable_ok: false,    //true: temp_suppliers ok
     load_4thTable_ok: false,    //true: temp_suppliers ok
     load_5thTable_ok: false,    //true: temp_stock_desserts ok
+    load_6thTable_ok: false,    //2023-07-20 add
   }),
 
   computed: {
@@ -645,6 +691,10 @@ export default {
     //  this.selectSuppliers=uniqueArray_for_suppliers;
     //},
     stock_selected(val) {
+      console.log("watch, stock_selected, val= ", val)
+
+      this.insertBadge();   //2023-07-20 add
+
       if (val.length > 0 && this.step=='step3')
         this.next();
     },
@@ -656,8 +706,8 @@ export default {
         this.selectSuppliers=[];
 
         this.load_4thTable_ok=false;
-        if (newValue.length !=0)    //2023-06-12 add
-          this.listSuppliersBySelect();
+        //if (newValue.length !=0)    //2023-06-12 add, 2023-07-18 mark
+        //  this.listSuppliersBySelect();             //2023-07-18 mark
       //}
     },
 
@@ -666,7 +716,8 @@ export default {
       //console.log("2.check...", this.temp_suppliers);
 
       //if (newValue!=oldValue) {
-        this.load_5thTable_ok=false;    //reset read_flag, false: ready to read, true: readed ok
+        //this.load_5thTable_ok=false;    //reset read_flag, false: ready to read, true: readed ok
+        //  2023-07-18 mark the above line
         this.listStockInDataBySelect();
       //}
     },
@@ -679,10 +730,20 @@ export default {
       console.log("load_5thTable_ok, suppliers: ", val)
 
       if (val) {
-        this.load_5thTable_ok=false;
+        //this.load_5thTable_ok=false;    //2023-07-18 MOVE it to the following line
         console.log("b this.stock_desserts in load_5thTable_ok: ", this.stock_desserts)
         this.stock_desserts = Object.assign([], this.temp_stock_desserts);
+
+        //this.stock_desserts = JSON.parse(JSON.stringify(this.temp_stock_desserts))
+
+        //this.stock_desserts = this.temp_stock_desserts.map(a => {return {...a}})
+
+        //this.stock_desserts = this.temp_stock_desserts.map(
+        //  ({stockIn_id, stockIn_reagent_Out_cnt_max, ...item }) => ({...item})
+        //);
+
         console.log("a this.stock_desserts in load_5thTable_ok: ", this.stock_desserts)
+        this.load_5thTable_ok=false;      //2023-07-18 add
       }
     },
 
@@ -1351,7 +1412,7 @@ export default {
       //console.log("1.check...", this.temp_suppliers);
     },
 
-    closeDelete () {
+    closeDelete() {
       this.stock_selected=[];
       this.selectSuppliers=[];
       this.selectedCatalogs=[];
@@ -1372,9 +1433,12 @@ export default {
 
       let temp_stockOutTag=[]
       for (let i=0; i<i0; i++) {
+        console.log("this.stock_selected[i] ", this.stock_selected[i])
         let obj = {
           stockOutTag_reagID:  this.stock_selected[i].stockIn_reagent_id,
           stockOutTag_reagName: this.stock_selected[i].stockIn_reagent_name,
+          stockOutTag_batch: this.stock_selected[i].stockIn_batch,    // 2023-07-18 add
+          stockOutTag_alpha: this.stock_selected[i].stockIn_alpha.toLowerCase(),  //2023-07-18 add
           stockOutTag_supplier: this.stock_selected[i].stockIn_supplier,
           stockOutTag_reagPeriod: this.stock_selected[i].stockIn_reagent_period,
           stockOutTag_InDate:  this.stock_selected[i].stockIn_date,
@@ -1495,7 +1559,43 @@ export default {
       }
     },
 
-    permCloseFun () {
+    filterOnlyCapsText (value, search, item) {
+      return value != null &&
+        search != null &&
+        typeof value === 'string' &&
+        value.toString().toLocaleUpperCase().indexOf(search) !== -1
+        //value.toString().indexOf(search) !== -1
+    },
+
+    // 2023-07-20 add
+    insertBadge() {
+      console.log("insertBadge, stock_selected: ", this.stock_selected);
+
+      let path='/insertBadge';
+      let payload= {
+        blocks: this.stock_selected,
+      };
+
+      axios.post(path, payload)
+      .then((res) => {
+        this.temp_stock_selected = res.data.outputs;
+        console.log("Insert Badge ok, records:", res.data.outputs);
+        console.log("Insert Badge ok, status:", res.data.status);
+        console.log("Insert Badge ok, message:", res.data.message);
+        if (!res.data.status)
+          this.stock_messages=res.data.message;
+        else
+          this.stock_messages="";
+
+        this.load_6thTable_ok=true;
+      })
+      .catch((error) => {
+        console.error(error);
+        this.load_6thTable_ok=false;
+      });
+    },
+
+    permCloseFun() {
       this.permDialog = false
       console.log("press permission Close Button...");
       this.$router.push('/navbar');
@@ -1739,5 +1839,27 @@ div.v-toolbar__title {
 ::v-deep button.product-style {
   border-style: solid !important;
   border-color: coral !important;
+}
+
+::v-deep div.v-input.style-10 > .v-input__control > .v-input__slot > .v-text-field__slot > input {
+  max-width: 220px !important;
+  width: 220px !important;
+
+
+}
+
+::v-deep div.v-input.style-10 > .v-input__control > .v-input__slot {
+  max-width: 220px !important;
+  width: 220px !important;
+  position: relative;
+  top: 30px;
+  left:10px;
+}
+
+
+::v-deep span.v-badge__badge {
+  margin-bottom: 18px;
+  margin-left: 18px;
+  padding-left: 30px;
 }
 </style>

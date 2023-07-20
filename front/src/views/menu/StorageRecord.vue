@@ -242,8 +242,8 @@ export default {
       return [
         { text: '資材碼', sortable: true, value: 'reqRecord_reagID', width: '10%', },
         { text: '品名', sortable: false, value: 'reqRecord_reagName', width: '20%',},
-        { text: '資材組別', sortable: false, value: 'reqRecord_catalog', width: '9%' },
-        { text: '類別', sortable: false, value: 'reqRecord_prdName', width: '9%',},
+        { text: '組別', sortable: false, value: 'reqRecord_catalog', width: '9%' },
+        { text: '資材類別', sortable: false, value: 'reqRecord_prdName', width: '9%',},
         { text: '供應商', sortable: true, value: 'reqRecord_supplier', width: '11%',},
         { text: '入庫日期', sortable: false, value: 'reqRecord_stockInDate', width: '8%',
           filter: value => {

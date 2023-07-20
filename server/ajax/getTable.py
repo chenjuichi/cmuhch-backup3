@@ -129,14 +129,14 @@ def list_suppliers_by_select():
         products_id_list=[]
         for product in products:  # 列出產品類別
           products_id_list.append(product.id)
-        print("products_id_list: ", products_id_list)
+        #print("products_id_list: ", products_id_list)
 
         reagent_query = s.query(Reagent).filter(Reagent.product_id.in_(products_id_list))
         reagents = reagent_query.all()
         reagents_id_list=[]
         for reagent in reagents:  # 列出產品類別
           reagents_id_list.append(reagent.id)
-        print("reagents_id_list: ", reagents_id_list)
+        #print("listSuppliersBySelect, reagents_id_list: ", reagents_id_list)
 
         intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
         intags = intag_query.all()
@@ -162,11 +162,17 @@ def list_suppliers_by_select():
             reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
             supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
             _results_for_supplier.append(supplier.super_name)
+
+            temp_Out_cnt=_inTag.count * reagent.reag_scale  # 2023-07-18 add
+            round_temp_Out_cnt=round(temp_Out_cnt, 0)       # 2023-07-18 add
+
             _obj = {
                 'id': _inTag.id,    # 2023-06-05 add
 
                 'stockIn_reagent_id': reagent.reag_id,
                 'stockIn_reagent_name': reagent.reag_name,
+
+                'stockIn_alpha': _inTag.stockIn_alpha,    # 字母, 2023-07-18 add
 
                 'stockIn_batch': _inTag.batch,  # 2023-06-05 add
 
@@ -176,10 +182,12 @@ def list_suppliers_by_select():
                 'stockIn_reagent_Out_unit': reagent.reag_Out_unit,
                 #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
                 # 'stockIn_reagent_Out_cnt': _inTag.count,
-                'stockIn_reagent_Out_cnt': _inTag.count,
+                #'stockIn_reagent_Out_cnt': _inTag.count,   # 2023-07-18 mark
                 # 'stockIn_reagent_Out_cnt': 1,
                 'stockIn_id': _inTag.id,
             }
+            _obj['stockIn_reagent_Out_cnt']=str(round_temp_Out_cnt)     #領料數(在庫數 * 比例), 2023-07-18 add
+            _obj['stockIn_reagent_Out_cnt_max']=round_temp_Out_cnt      # 2023-07-18 add
             _results_for_stockOut.append(_obj)
 
     s.close()
@@ -228,7 +236,7 @@ def list_stockInData_by_Select():
         reagents_id_list=[]
         for reagent in reagents:  # 列出產品類別
           reagents_id_list.append(reagent.id)
-        print("reagents_id_list: ", reagents_id_list)
+        print("listStockInDataBySelect, reagents_id_list: ", reagents_id_list)
 
         temp_cycle=0
         intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
@@ -253,6 +261,9 @@ def list_stockInData_by_Select():
                 'id': _inTag.id,
                 'stockIn_reagent_id': reagent.reag_id,
                 'stockIn_reagent_name': reagent.reag_name,
+
+                'stockIn_alpha': _inTag.stockIn_alpha,    # 字母, 2023-07-14 add
+
                 'stockIn_batch': _inTag.batch,
                 'stockIn_supplier': supplier.super_name,
                 'stockIn_reagent_period': _inTag.reag_period,       #效期
@@ -298,6 +309,9 @@ def list_stockInData_by_Select():
                 'id': _inTag.id,
                 'stockIn_reagent_id': reagent.reag_id,
                 'stockIn_reagent_name': reagent.reag_name,
+
+                'stockIn_alpha': _inTag.stockIn_alpha,    # 字母, 2023-07-14 add
+
                 'stockIn_batch': _inTag.batch,
                 'stockIn_supplier': supplier.super_name,
                 'stockIn_reagent_period': _inTag.reag_period,       #效期, 依2022-12-12操作教育訓練建議作修正
@@ -328,14 +342,14 @@ def list_stockInData_by_Select():
         products_id_list=[]
         for product in products:  # 列出產品類別
           products_id_list.append(product.id)
-        print("products_id_list: ", products_id_list)
+        #print("products_id_list: ", products_id_list)
 
         reagent_query = s.query(Reagent).filter(Reagent.product_id.in_(products_id_list))
         reagents = reagent_query.all()
         reagents_id_list=[]
         for reagent in reagents:  # 列出產品類別
           reagents_id_list.append(reagent.id)
-        print("reagents_id_list: ", reagents_id_list)
+        #print("reagents_id_list: ", reagents_id_list)
 
         temp_cycle=0
         intag_query = s.query(InTag).filter(InTag.reagent_id.in_(reagents_id_list))
@@ -347,10 +361,15 @@ def list_stockInData_by_Select():
             reagent = s.query(Reagent).filter_by(id=_inTag.reagent_id).first()
             #print("reagent: ", reagent)
             supplier = s.query(Supplier).filter_by(id=reagent.super_id).first()
+            temp_Out_cnt=_inTag.count * reagent.reag_scale  # 2023-07-18 add
+            round_temp_Out_cnt=round(temp_Out_cnt, 0)       # 2023-07-18 add
             _obj = {
                 'id': _inTag.id,
                 'stockIn_reagent_id': reagent.reag_id,
                 'stockIn_reagent_name': reagent.reag_name,
+
+                'stockIn_alpha': _inTag.stockIn_alpha,    # 字母, 2023-07-14 add
+
                 'stockIn_batch': _inTag.batch,
                 'stockIn_supplier': supplier.super_name,
                 # 'stockIn_supplier': '',
@@ -360,17 +379,20 @@ def list_stockInData_by_Select():
                 # 'stockIn_reagent_Out_cnt': _inTag.count,
                 #'stockIn_reagent_Out_cnt': _inTag.count,
                 # 2023-06-02 modify
-                'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
+                #'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
                 #'stockIn_reagent_Out_cnt':     _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
-                'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
+                #'stockIn_reagent_Out_cnt_max': _inTag.count * reagent.reag_scale, # 2023-02-13 add
                 #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
 
                 # 'stockIn_reagent_Out_cnt': 1,
                 'stockIn_id': _inTag.id,
             }
+            _obj['stockIn_reagent_Out_cnt']=str(round_temp_Out_cnt)      #領料數(在庫數 * 比例), 2023-07-18 add
+            _obj['stockIn_reagent_Out_cnt_max']=round_temp_Out_cnt  # 2023-07-18 add
+            #print("round_temp_Out_cnt ", round_temp_Out_cnt)
             _results_for_stockOut.append(_obj)
             temp_cycle=temp_cycle+1
-        print("temp_cycle: ", temp_cycle)
+        #print("temp_cycle: ", temp_cycle)
     #end 狀況3
     s.close()
 
@@ -511,6 +533,7 @@ def get_last_alpha_for_unique_stockin():
       if (current_count != 0):
           #your_last_alpha = chr(ord(_objects[current_count-1].stockIn_alpha)+1)
           your_last_code = ord(_objects[current_count-1].stockIn_alpha) + 1
+          #your_last_code = ord(_objects[current_count-1].stockIn_alpha) # 2023-07-20
       else:
           #your_last_alpha = 'A'
           your_last_code = 65

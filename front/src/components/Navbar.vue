@@ -80,6 +80,11 @@
               <b-avatar variant="success" :icon="navbar.icon5" style="width: 1.5rem; height: 1.5rem; margin-bottom: 3pt;"></b-avatar>
               {{ navbar.name5 }}
             </b-dropdown-item>
+
+            <b-dropdown-item :to="navbar.router6">
+              <b-avatar variant="success" :icon="navbar.icon6" style="width: 1.5rem; height: 1.5rem; margin-bottom: 3pt;"></b-avatar>
+              {{ navbar.name6 }}
+            </b-dropdown-item>
           </div>
 
         </b-nav-item-dropdown>
@@ -336,6 +341,7 @@ export default {
           icon3: "upc-scan", name3: "盤點作業", router3: "/invent",
           icon4: "printer", name4: "補印標籤", router4: "/reprintTag",
           icon5: "cart-plus", name5: "入庫記錄查詢", router5: "/storageRec",
+          icon6: "chat-square-text", name6: "校正記錄查詢", router6: "/correction",
         },
       ],
 

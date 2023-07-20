@@ -107,7 +107,8 @@ export default {
     barcode_data (val) {
       console.log("this.barcode_data[0]: ", this.barcode_data[0])
       //if ('stockInTag_cnt' in this.barcode_data[0]) {   //入庫
-      if (this.barcode_data[0]['stockInTag_rePrint'].includes('入')) {   //入庫
+      //if (this.barcode_data[0]['stockInTag_rePrint'].includes('入')) {   //入庫, 2023-07-20 mark
+      if (this.barcode_data[0].hasOwnProperty('stockInTag_alpha')) {   //入庫, 2023-07-20 modify
         console.log("入庫...")
 
         //this.temp_barcode_data =  JSON.parse(JSON.stringify(this.barcode_data));

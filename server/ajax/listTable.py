@@ -723,13 +723,16 @@ def list_stockout_tag_print_data():
 
                 'stockOutTag_batch': in_tag.batch,
                 #'stockOutTag_unit': outtag_print.unit,     # 2023-01-13 mark
-                'stockOutTag_unit': reagent.reag_Out_unit,            # 2023-01-13 add
+                'stockOutTag_unit': reagent.reag_Out_unit,  # 2023-01-13 add
                 'stockOutTag_cnt': outtag_print.count,
+                'stockOutTag_cnt_max': in_tag.count * reagent.reag_scale,        # 2023-08-09 add
+
                 #'stockOutTag_cnt': in_tag.count * reagent.reag_scale, #在庫數 * 比例
                 'stockOutTag_alpha': outtag_print.stockOut_alpha,
                 # 'stockOutTag_cnt': outtag_print.count - outtag_print.stockOut_temp_count,
                 'stockOutTag_isPrinted': outtag_print.isPrinted,
                 'stockOutTag_isStockin': outtag_print.isStockout,
+                'stockInTag_rePrint': '出庫'
             }
 
             tempAlpha=in_tag.stockIn_alpha.lower()
@@ -806,7 +809,7 @@ def list_reprint_tag_data():
     print("listRePrintTagData....")
     s = Session()
     _results = []
-
+    # 入庫標籤資料
     _objects = s.query(InTag).all()
     for intag_print in _objects:
         #if (intag_print.isRemoved and intag_print.isPrinted):
@@ -839,14 +842,16 @@ def list_reprint_tag_data():
                 # 'stockInTag_cnt': intag_print.count - intag_print.stockOut_temp_count,
                 'stockInTag_isPrinted': intag_print.isPrinted,
                 'stockInTag_isStockin': intag_print.isStockin,
+                'isIn': True,
             }
 
             _results.append(_obj)
-
+    # 出庫標籤資料
     _objects = s.query(OutTag).all()
     for intag_print in _objects:
         #if (intag_print.isRemoved and intag_print.isPrinted):
-        if (intag_print.isPrinted):
+        #if (intag_print.isPrinted):                                                            #
+        if (intag_print.isRemoved and (not intag_print.isPrinted) and intag_print.isStockout):  # 2023-08-09 modify
             user = s.query(User).filter_by(id=intag_print.user_id).first()
             in_tag = s.query(InTag).filter_by(id=intag_print.intag_id).first()
             reagent = s.query(Reagent).filter_by(id=in_tag.reagent_id).first()
@@ -870,10 +875,12 @@ def list_reprint_tag_data():
                 'stockInTag_batch': in_tag.batch,
                 #'stockInTag_cnt': intag_print.count,
                 'stockInTag_cnt': 1,
-                'stockInTag_alpha': intag_print.stockOut_alpha,
+                #'stockInTag_alpha': intag_print.stockOut_alpha,  # 2023-08-07 modify
+                'stockInTag_alpha': in_tag.stockIn_alpha.lower(),         # 2023-08-08 modify
                 # 'stockInTag_cnt': intag_print.count - intag_print.stockOut_temp_count,
                 'stockInTag_isPrinted': intag_print.isPrinted,
                 'stockInTag_isStockin': intag_print.isStockout,
+                'isIn': False,
             }
 
             _results.append(_obj)
@@ -922,6 +929,7 @@ def list_stockin_tag_print_data():
                 # 'stockInTag_cnt': intag_print.count - intag_print.stockOut_temp_count,
                 'stockInTag_isPrinted': intag_print.isPrinted,
                 'stockInTag_isStockin': intag_print.isStockin,
+                'stockInTag_rePrint': '入庫'
             }
 
             _results.append(_obj)
@@ -1019,7 +1027,8 @@ def list_stockout_data():
                 #'stockOutTag_cnt': outtag.count,
                 #'stockOutTag_cnt': _inTag.count * reagent.reag_scale,
                 #'stockOutTag_cnt': _inTag.count,
-                'stockOutTag_cnt_max': outtag.count,
+                #'stockOutTag_cnt_max': outtag.count,   #
+                'stockOutTag_cnt_max': _inTag.count * reagent.reag_scale,    # 2023-08-09 modify
                 'stockOutTag_cnt': outtag.count,
                 'stockOutTag_scale': reagent.reag_scale,
                 #'stockOutTag_unit': outtag.unit,             # 2023-01-13 mark

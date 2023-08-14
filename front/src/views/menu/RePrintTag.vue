@@ -40,9 +40,16 @@
                   預覽標籤
                 </v-btn>
               </v-toolbar>
+              <!-- 2023-07-21 add -->
+              <v-progress-linear
+                v-show="isLoading"
+                indeterminate
+                color="red"
+              />
 
             </template>
             <!-- 2023-07-20 -->
+            <!-- 2023-08-07 mark
             <template v-slot:[`item.stockInTag_alpha`]="{ item }">
               <v-text-field
                 v-model="item.stockInTag_alpha"
@@ -54,6 +61,7 @@
                 :disabled="currentUser.perm>2"
               ></v-text-field>
             </template>
+            -->
 
             <template v-slot:[`item.stockInTag_cnt`]="{ item }">
               <v-text-field
@@ -73,7 +81,8 @@
             </template>
 
             <template v-slot:no-data>
-              <strong><font color='red'>目前沒有資料</font></strong>
+              <!--<strong><font color='red'>目前沒有資料</font></strong>  2023-07-21 mark-->
+              <strong><font color='blue'>資料下載中...</font></strong>  <!--2023-07-21 add-->
             </template>
 
           </v-data-table>
@@ -192,11 +201,13 @@ export default {
       { text: '入(出)庫日期', sortable: true, value: 'stockInTag_Date', width: '90px' },
       { text: '入(出)庫人員', sortable: true, value: 'stockInTag_Employer', width: '10%' },
       { text: '批號', sortable: true, value: 'stockInTag_batch', width: '9%' },
-      { text: '字母', sortable: true, value: 'stockInTag_alpha', width: '5%' },
+      { text: '字母', sortable: false, value: 'stockInTag_alpha', width: '5%' },
       { text: '張數', sortable: false, value: 'stockInTag_cnt', width: '6%' },
     ],
 
     in_drafTags: 0,
+
+    isLoading: false,   // 2023-07-21 add
 
     desserts: [],
     temp_desserts: [],
@@ -257,8 +268,10 @@ export default {
         //this.desserts = Object.assign([], this.temp_desserts);
         this.desserts =  JSON.parse(JSON.stringify(this.temp_desserts));
 
+        this.isLoading = false;   //2023-07-21 add
+
         this.load_SingleTable_ok=false;
-        console.log("this.desserts: ", this.desserts)
+        //console.log("this.desserts: ", this.desserts)
         //this.getAlphaForRePrintTag();
       }
     },
@@ -279,19 +292,24 @@ export default {
               temp_arr =  JSON.parse(JSON.stringify(this.temp_desserts));
               console.log("step1 temp_arr: ", temp_arr)
               this.desserts = Object.assign([], temp_arr);
-              temp_arr=[];
-              temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));
+              //temp_arr=[];                                                                        // 2023-08-08 mark
+              //temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));                         // 2023-08-08 mark
               //temp_arr =  JSON.parse(JSON.stringify(this.selected));
-              console.log("step2 temp_arr: ", temp_arr)
-              //temp_arr = temp_arr.map((obj) => ({ ...obj, stockInTag_alpha: this.last_alpha }));
+              //console.log("step2 temp_arr: ", temp_arr)
+              //temp_arr = temp_arr.map((obj) => ({ ...obj, stockInTag_alpha: this.last_alpha }));  // 2023-08-08 mark
               //console.log("step3 temp_arr: ", temp_arr)
 
-              this.selected = Object.assign([], temp_arr);
-              console.log("step4 this.selected: ", this.selected)
+              //this.selected = Object.assign([], temp_arr);                                        // 2023-08-08 mark
+              //console.log("step4 this.selected: ", this.selected)
               //window.location.reload();
               this.reload=false;
             }
           }
+          // 2023-08-08 add
+          console.log("b, this.selected => ", this.selected)
+          this.selected = Object.assign([], this.temp_selected);
+          console.log("a, this.selected => ", this.selected)
+          //
         });
       },
       immediate: true,
@@ -329,8 +347,10 @@ export default {
     },
 
     listRePrintTagData() {
-      const path = '/listRePrintTagData';
       console.log("listRePrintTagData, Axios get data...")
+
+      this.isLoading = true;     //2023-07-21 add
+      const path = '/listRePrintTagData';
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
@@ -339,6 +359,7 @@ export default {
       })
       .catch((error) => {
         console.error(error);
+        this.isLoading = true;     //2023-07-21 add
         this.load_SingleTable_ok=false;
       });
     },

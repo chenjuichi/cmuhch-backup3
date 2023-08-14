@@ -90,8 +90,10 @@ def export_to_csv_for_stock_in_out():
         print("a data: ", _blocks)
 
         for obj in _blocks:
-            del obj['isIn']   # 2022-12-23 remove 'isIn' key
-        #print("aa excel print: ", _blocks)
+            del obj['isIn']                 # 2022-12-23 remove 'isIn' key
+            del obj['stockInTag_rePrint']   # 2023-08-10 remove 'stockInTag_rePrint' key
+            del obj['stockInTag_reagName']  # 2023-08-10 remove 'stockInTag_reagName' key
+        print("aa excel print: ", _blocks)
 
         # 查看當前工作目錄
         olddir = os.getcwd()

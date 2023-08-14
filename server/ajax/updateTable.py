@@ -772,7 +772,7 @@ def insert_badge():
   request_data = request.get_json()
 
   _blocks = request_data['blocks']
-  print("_blocks: ", _blocks)
+  #print("_blocks: ", _blocks)
   stockinIDs = [ sub['id'] for sub in _blocks ]
   print("data: ", stockinIDs)
 
@@ -794,23 +794,37 @@ def insert_badge():
     intagDates.append(intag['intag_date'])
     letters.append(intag['stockIn_alpha'])
 
+  selectMinLetter=''
+  selectMaxLetter=''
+  if letters:
+    selectMinLetter=min(letters)
+    selectMaxLetter=max(letters)
+
   print("letters: ", letters)
   i=0
+
   for reagentID in reagentIDs:
-    maxLetterObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True).order_by(InTag.stockIn_alpha.desc()).all()
-    myLetter=min(node.stockIn_alpha for node in maxLetterObjectsOrder)
-    t1=ord(letters[i])
-    t2=ord(myLetter)
-    print("t1, t2: ", t1, t2)
-    if (t1 > t2):
+    # 2023-08-07 add , InTag.count != 0
+    maxLetterObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True, InTag.count != 0).order_by(InTag.stockIn_alpha.desc()).all()
+    myMaxLetter=max(node.stockIn_alpha for node in maxLetterObjectsOrder)
+    # 2023-08-07 add , InTag.count != 0
+    minLetterObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True, InTag.count != 0).order_by(InTag.stockIn_alpha.desc()).all()
+    myMinLetter=min(node.stockIn_alpha for node in minLetterObjectsOrder)
+
+    t0=ord(letters[i])  #點選紀錄的字母
+    t2=ord(myMaxLetter) #最早批號日期的字母
+    t1=ord(myMinLetter) #最晚批號日期的字母
+    #print("t0, t2, t1: ", t0, t2, t1)
+
+    if ord(selectMinLetter) == t1:
+      return_message = ''
+      return_value = True
+    else:
       return_message = '有更早的在庫試劑...'
       return_value = False
-      #_results.append(letters[i])
+    #print("currentLetter, myMaxLetter, minLetter: ", letters[i], myMaxLetter, myMinLetter )
     i=i+1
-    print("myLetter, minLetter: ", myLetter)
   s.close()
-
-  print("return_value, return_message", return_value, return_message)
 
   return jsonify({
     'outputs': _results,

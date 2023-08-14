@@ -37,12 +37,14 @@
               -->
             </template>
             <template v-slot:[`item.stockOutTag_cnt`]="{ item }">
+              <!-- modify :max in the follow tag -->
               <v-text-field
                 v-model="item.stockOutTag_cnt"
 
                 type="number"
                 min=1
-                :max="item.stockOutTag_cnt"
+                :max="item.stockOutTag_cnt_max"
+
                 oninput="if(Number(this.value) > Number(this.max)) this.value = this.max;"
                 @input="getdata(item)"
                 :disabled="currentUser.perm>2"
@@ -102,7 +104,9 @@ import axios from 'axios';
 import Common from '../../mixin/common.js'
 
 //import SideBar from '../../components/RenderBarCode.vue';
-import SideBar from '../../components/RenderBarCode.vue';
+//import SideBar from '../../components/RenderBarCode.vue';
+import SideBar from '../../components/RenderBarCodeRePrintTag.vue';
+
 //import print from 'vue-print-nb';
 
 export default {
@@ -158,6 +162,7 @@ export default {
     //singleSelect: true,
     selected: [],
     temp_selected: [],
+    barCode_select: [],
 
     pagination: {},
 
@@ -247,29 +252,58 @@ export default {
           if (this.drawer) {
             console.log("disable scrollbar...");
             this.root.style.setProperty('--bar','hidden');
+            /*
+            let temp_arr=[];
+            temp_arr =  JSON.parse(JSON.stringify(this.temp_desserts));
+            this.desserts = Object.assign([], temp_arr);
+            temp_arr=[];
+            console.log("disable scrollbar, this.temp_selected", this.temp_selected);
+            temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));
+            //temp_arr = temp_arr.map((obj) => ({ ...obj, stockOutTag_alpha: this.last_alpha }));
+
+            this.selected = Object.assign([], temp_arr);
+            console.log("disable scrollbar, this.selected", this.selected);
+            */
+
             this.reload=true;
           } else {
             console.log("enable scrollbar...");
             this.root.style.setProperty('--bar','scroll');
             if (this.reload) {
               let temp_arr=[];
+              console.log("enable scrollbar, this.temp_selected", this.temp_selected);
               temp_arr =  JSON.parse(JSON.stringify(this.temp_desserts));
               this.desserts = Object.assign([], temp_arr);
-              temp_arr=[];
-              temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));
-              temp_arr = temp_arr.map((obj) => ({ ...obj, stockOutTag_alpha: this.last_alpha }));
+              //temp_arr=[];                                                                        //2023-08-08 mark
+              //temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));                         //2023-08-08 mark
+              //temp_arr = temp_arr.map((obj) => ({ ...obj, stockOutTag_alpha: this.last_alpha })); //2023-08-08 mark
 
-              this.selected = Object.assign([], temp_arr);
+              //this.selected = Object.assign([], temp_arr);                                        //2023-08-08 mark
+              //console.log("enable scrollbar, this.selected", this.selected);
+
               //window.location.reload();
               this.reload=false;
             }
           }
+          // 2023-08-08 add
+          console.log("b, this.selected => ", this.selected)
+          //新增 key:value
+          this.selected = this.temp_selected.map(object => {
+            return {...object, stockInTag_rePrint: '出庫' };
+          });
+          console.log("a, this.selected => ", this.selected)
+          //
         });
       },
       immediate: true,
     },
 
     selected(val) {
+      //if (val) {
+      //  console.log("see see, ", val, val[0]['id'], val[0]['stockOutTag_alpha'])
+      //  let index = this.temp_desserts.findIndex(p => p.id == val[0]['id']);
+      //  //this.temp_selected =  JSON.parse(JSON.stringify(this.temp_desserts[index]));
+      //}
       this.temp_selected =  JSON.parse(JSON.stringify(val));
     },
   },
@@ -608,6 +642,12 @@ export default {
 
     printSection() {
       console.log("click, printSection()...");
+
+      //this.selected.forEach(item=>{
+      //
+      //  item.stockOutTag_alpha=this.temp_desserts array1[item.key]
+      //})
+
       this.drawer=true;
       /*
       this.$router.push({

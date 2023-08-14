@@ -81,9 +81,12 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
+              <v-dialog v-model="dialogDelete" max-width="360px">
                 <v-card>
-                  <v-card-title class="text-h5">確定刪除這筆資料?</v-card-title>
+                  <v-card-title class="text-h5" align="center">
+                    確定刪除這筆資料?<br />
+                    (資料刪除後, 即為離職人員!)
+                  </v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="closeDelete">取消</v-btn>
@@ -201,6 +204,8 @@ export default {
     toster_pos_x: 1000,
     toster_pos_y: 400,
     toster_delay:3,
+
+    delete_confirm_string: "確定刪除這筆資料?" + "&nbsp;(資料刪除後, 即為離職人員!)",
 
 	  IDErrMsg: '',
     nameErrMsg: '',

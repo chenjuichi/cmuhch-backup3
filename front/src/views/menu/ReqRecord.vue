@@ -54,11 +54,18 @@
                   Excel
                 </v-btn>
               </v-toolbar>
+              <!-- 2023-07-21 add -->
+              <v-progress-linear
+                v-show="isLoading"
+                indeterminate
+                color="red"
+              />
+
           </template>
           <template v-slot:body.append>
               <tr style="height=60px important;">
                 <td></td>
-                <td colspan="8">
+                <td colspan="9">
                   <!-- 查詢 -->
                   <v-row>
                     <v-menu
@@ -128,7 +135,19 @@
           </template>
 
           <template v-slot:no-data>
-            <strong><font color='red'>目前沒有資料</font></strong>
+            <!--<strong><font color='red'>目前沒有資料</font></strong>  2023-07-21 mark-->
+            <strong><font color='blue'>資料下載中...</font></strong>  <!--2023-07-21 add-->
+            <!--
+            <div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-text"></div>
+            </div>
+            -->
           </template>
 
         </v-data-table>
@@ -228,6 +247,8 @@ export default {
         //itemsPerPage: 10,   //預設值, rows/per page
         //page: 1,
       },
+
+      isLoading: false,   // 2023-07-21 add
 
       desserts: [
       /*
@@ -380,6 +401,8 @@ export default {
       if (val) {
         this.desserts = Object.assign([], this.temp_desserts);
 
+        this.isLoading = false;   //2023-07-21 add
+
         this.load_SingleTable_ok=false;
       }
     },
@@ -422,8 +445,10 @@ export default {
     },
 
     listRequirements() {    //從後端讀取dataTable的資料
-      const path = '/listRequirements';
       console.log("listRequirements, Axios get data...")
+
+      this.isLoading = true;     //2023-07-21 add
+      const path = '/listRequirements';
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
@@ -432,6 +457,7 @@ export default {
       })
       .catch((error) => {
         console.error(error);
+        this.isLoading = true;     //2023-07-21 add
         this.load_SingleTable_ok=false;
       });
     },
@@ -578,5 +604,94 @@ div.v-toolbar__title {
 
 ::v-deep  .v-data-table >.v-data-table__wrapper > table > tbody > tr:last-child {
   background: #7DA79D;
+}
+
+::v-deep div.loader {
+  height: 20px;
+  width: 250px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+::v-deep div.loader-dot {
+  animation: loader-dot;
+  animation-timing-function: ease-in-out;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  background-color: black;
+  position:absolute;
+  border: 2px solid white;
+}
+
+::v-deep div.loader-dot:first-child {
+  background-color: #8cc759;
+  animation-delay: 0.5s;
+}
+
+::v-deep div.loader-dot:first-child(2) {
+  background-color: #8c6daf;
+  animation-delay: 0.4s;
+}
+
+::v-deep div.loader-dot:first-child(3) {
+  background-color: #ef5d74;
+  animation-delay: 0.3s;
+}
+
+::v-deep div.loader-dot:first-child(4) {
+  background-color: #f9a74b;
+  animation-delay: 0.2s;
+}
+
+::v-deep div.loader-dot:first-child(5) {
+  background-color: #60beeb;
+  animation-delay: 0.1s;
+}
+
+::v-deep div.loader-dot:first-child(6) {
+  background-color: #fbef5a;
+  animation-delay: 0s;
+}
+
+::v-deep div.loader-text {
+  position: absolute;
+  top: 200%;
+  left: 0;
+  right: 0;
+  width: 4rem;
+  margin: auto;
+}
+
+::v-deep div.loader-text:after {
+  content: "loading";
+  font-weight: bold;
+  animation-name: loading-text;
+  animation-duration: 3s;
+  animation-fill-mode: infinite;
+}
+
+@keyframes loader {
+  15% {
+    transform: translateX(0);
+  }
+
+  45% {
+    transform: translateX(230px);
+  }
+
+  65% {
+    transform: translateX(230px);
+  }
+
+  95% {
+    transform: translateX(0);
+  }
 }
 </style>

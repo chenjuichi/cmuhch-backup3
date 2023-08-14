@@ -103,26 +103,49 @@ export default {
       console.log("RenderBarCodeRePrintTag, formField()...");
 
       this.regFields=[];
+      //let index_alpha = 0;
+      //var i = ch.charCodeAt(index_alpha);
+
       let temp_len=this.fields.length;
       console.log("temp_len: ", temp_len);
+      console.log("this.fields: ", this.fields);
       for (let i=0; i < temp_len; i++) {
         console.log("temp_len, type: ", typeof(this.fields[temp_len-1][i]), this.fields[temp_len-1][i]);
         if (typeof(this.fields[temp_len-1][i]) !="undefined") {
           //console.log("RenderRePrintTag, tag obj: ", 'stockInTag_cnt' in this.fields[temp_len-1][i]);
-          if ('stockInTag_cnt' in this.fields[temp_len-1][i]) {   //入庫
+          //if ('stockInTag_cnt' in this.fields[temp_len-1][i]) {   //入庫
+          console.log("this.fields[temp_len-1][i].stockInTag_rePrint ", this.fields[temp_len-1][i].stockInTag_rePrint)
+          if (this.fields[temp_len-1][i].stockInTag_rePrint=='入庫') {  //2023-08-08 modify
             let temp_tags=this.fields[temp_len-1][i].stockInTag_cnt;
+            console.log("入庫, temp_tags: ", temp_tags)
             for (let j=0; j < temp_tags; j++) {
               this.fields[temp_len-1][i]['stockInTag_cnt']=1;
+              this.fields[temp_len-1][i]['stockInTag_rePrint']='入庫';  //2023-08-08 add
               //this.fields[temp_len-1][i]['stockInTag_alpha']=this.alpha;  //2023-01-03 add
               this.regFields.push(this.fields[temp_len-1][i]);
             }
+            // 2023-08-08 add the following block
+            //this.regFields = this.regFields.map(object => {
+            //  return {...object, stockInTag_rePrint: '入庫' };
+            //});
+            //
           } else {   //出庫
             let temp_tags=this.fields[temp_len-1][i].stockOutTag_cnt;
+            if (typeof(temp_tags) == "undefined") {
+              temp_tags=this.fields[temp_len-1][i].stockInTag_cnt;
+            }
+            console.log("出庫, temp_tags: ", temp_tags)
             for (let j=0; j < temp_tags; j++) {
               this.fields[temp_len-1][i]['stockOutTag_cnt']=1;
+              this.fields[temp_len-1][i]['stockInTag_rePrint']='出庫';  //2023-08-08 add
               //this.fields[temp_len-1][i]['stockOutTag_alpha']=this.alpha;  //2023-01-03 add
               this.regFields.push(this.fields[temp_len-1][i]);
             }
+            // 2023-08-08 add the following block
+            //this.regFields = this.regFields.map(object => {
+            //  return {...object, stockInTag_rePrint: '出庫' };
+            //});
+            //
           }
           //console.log("RenderBarCodeRePrintTag, this.alpha: ", this.alpha)
         }
@@ -131,7 +154,6 @@ export default {
 
 
       this.waiting_in_total_tags=this.regFields.length;
-
       console.log("this.regFields: ", this.regFields);
       /*
       let uniqueRegFields = [...new Set(this.regFields)];

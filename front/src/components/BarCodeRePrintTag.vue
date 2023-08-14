@@ -37,15 +37,21 @@
               LOT: {{ field.stockInTag_batch }}
             </div>
             <div class="word">
-              <span style="font-size: 12px; margin-left:20px; position: relative; top: -10px;">
-                {{ asrsDate }}: {{ field.stockInTag_Date }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <span v-if="field.stockInTag_rePrint=='入庫'" style="font-size: 12px; margin-left:20px; position: relative; top: -10px;">
+                入庫日期: {{ field.stockInTag_Date }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
-              <span style="font-size: 32px; position: relative; top: 15px; right:-20px;">
+              <span style="font-size: 12px; margin-left:20px; position: relative; top: -10px;" v-else>
+                領料日期: {{ field.stockInTag_Date }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+              <span style="font-size: 32px; position: relative; top: 15px; right:-50px;">
                 {{ field.stockInTag_alpha }}
               </span>
             </div>
-            <div style="font-size: 12px; font-weight:600; display: flex; justify-content: flex-start; margin-left:20px; position: relative; top: -15px;">
-              {{ asrsEmp }}: {{ field.stockInTag_Employer }}
+            <div v-if="field.stockInTag_rePrint=='入庫'" style="font-size: 12px; font-weight:600; display: flex; justify-content: flex-start; margin-left:20px; position: relative; top: -15px;">
+              入庫人員: {{ field.stockInTag_Employer }}
+            </div>
+            <div style="font-size: 12px; font-weight:600; display: flex; justify-content: flex-start; margin-left:20px; position: relative; top: -15px;" v-else>
+              領料人員: {{ field.stockInTag_Employer }}
             </div>
             <div style="font-size: 12px; display: flex; justify-content: flex-start; margin-left:20px; position: relative; top: -15px;">
               保存溫度: {{ field.stockInTag_reagTemp }}
@@ -108,8 +114,10 @@ export default {
       console.log("this.barcode_data[0]: ", this.barcode_data[0])
       //if ('stockInTag_cnt' in this.barcode_data[0]) {   //入庫
       //if (this.barcode_data[0]['stockInTag_rePrint'].includes('入')) {   //入庫, 2023-07-20 mark
-      if (this.barcode_data[0].hasOwnProperty('stockInTag_alpha')) {   //入庫, 2023-07-20 modify
-        console.log("入庫...")
+      /* 2023-08-08 mark
+      if ((this.barcode_data[0].hasOwnProperty('stockInTag_rePrint') && this.barcode_data[0].stockInTag_rePrint=='入庫') || (!this.barcode_data[0].hasOwnProperty('stockInTag_rePrint') && this.barcode_data[0].hasOwnProperty('stockInTag_alpha'))) {   //入庫, 2023-07-20 modify
+        this.asrs = true;
+        console.log("入庫...", this.asrs )
 
         //this.temp_barcode_data =  JSON.parse(JSON.stringify(this.barcode_data));
 
@@ -117,44 +125,69 @@ export default {
         //console.log("watch: ", this.temp_barcode_data, uniqueRegFields)
         //this.load_SingleTable_ok=false;
         //this.getLastAlphaForUniqueStockIn(uniqueRegFields);
+        this.temp_barcode_data =  JSON.parse(JSON.stringify(this.barcode_data));  //2023-08-08 add
 
-        this.asrs = true;
+        //this.asrs = true;
       } else {     //出庫
-        console.log("出庫...")
-        /*
+        this.asrs = false;
+        console.log("出庫...", this.asrs)
+      */
         let temp_len = this.barcode_data.length;
         this.temp_barcode_data= [];
         for (let i=0; i < temp_len; i++) {
-          let obj= {
-            //stockOutTag_InID: this.barcode_data[i].stockOutTag_InID,
-            stockInTag_reagID: this.barcode_data[i].stockIOutTag_reagID,
-            stockInTag_batch: this.barcode_data[i].stockOutTag_batch,
-            stockInTag_Date: this.barcode_data[i].stockOutTag_Out_Date,        //在列印條碼時, 此對應道出庫日期
-            stockInTag_Employer: this.barcode_data[i].stockOutTag_Employer,
-            stockInTag_reagTemp: this.barcode_data[i].stockOutTag_reagTemp,
-            stockInTag_alpha: this.barcode_data[i].stockOutTag_alpha,
-            stockInTag_cnt: this.barcode_data[i].stockOutTag_cnt,
-            stockInTag_reagName: this.barcode_data[i].stockOutTag_reagName,
+          let obj= {}
+          if (this.barcode_data[i].hasOwnProperty('stockOutTag_Employer')) {  //出庫
+            let objOut= {
+              //stockOutTag_InID: this.barcode_data[i].stockOutTag_InID,
+              stockInTag_reagID: this.barcode_data[i].stockOutTag_reagID,
+              stockInTag_batch: this.barcode_data[i].stockOutTag_batch,
+              stockInTag_Date: this.barcode_data[i].stockOutTag_Out_Date,        //在列印條碼時, 此對應道出庫日期
+              stockInTag_Employer: this.barcode_data[i].stockOutTag_Employer,
+              stockInTag_reagTemp: this.barcode_data[i].stockOutTag_reagTemp,
+              stockInTag_alpha: this.barcode_data[i].stockOutTag_alpha,
+              stockInTag_cnt: this.barcode_data[i].stockOutTag_cnt,
+              stockInTag_reagName: this.barcode_data[i].stockOutTag_reagName,
+              stockInTag_rePrint: this.barcode_data[i].stockInTag_rePrint,
+              isIn: false,
+            }
+            this.temp_barcode_data.push(objOut);
+          } else {  //入庫
+            let objIn= {
+              stockInTag_reagID: this.barcode_data[i].stockInTag_reagID,
+              stockInTag_batch: this.barcode_data[i].stockInTag_batch,
+              stockInTag_Date: this.barcode_data[i].stockInTag_Date,        //在列印條碼時, 此對應道出庫日期
+              stockInTag_Employer: this.barcode_data[i].stockInTag_Employer,
+              stockInTag_reagTemp: this.barcode_data[i].stockInTag_reagTemp,
+              stockInTag_alpha: this.barcode_data[i].stockInTag_alpha,
+              stockInTag_cnt: this.barcode_data[i].stockInTag_cnt,
+              stockInTag_reagName: this.barcode_data[i].stockInTag_reagName,
+              stockInTag_rePrint: this.barcode_data[i].stockInTag_rePrint,
+              isIn: true,
+            }
+            this.temp_barcode_data.push(objIn);
           }
-          this.temp_barcode_data.push(obj);
         }
+        //this.temp_barcode_data.push(obj);
 
-        let uniqueRegFields = [...new Set(this.temp_barcode_data)];
-        console.log("watch: ", this.temp_barcode_data, uniqueRegFields)
-        this.load_SingleTable_ok=false;
+        //let uniqueRegFields = [...new Set(this.temp_barcode_data)];     // 2023-08-08 mark
+        //console.log("watch: ", this.temp_barcode_data, uniqueRegFields)
+        //this.load_SingleTable_ok=false;   //2023-08-08 mark
         //this.getLastAlphaForUniqueStockOut(uniqueRegFields);
-        */
-        this.asrs = false;
+
+        //this.asrs = false;
+      /* 2023-08-08 mark
       }
-      this.temp_barcode_data =  JSON.parse(JSON.stringify(this.barcode_data));
+      */
+      //this.temp_barcode_data =  JSON.parse(JSON.stringify(this.barcode_data));  //2023-08-08 mark
 
       let uniqueRegFields = [...new Set(this.temp_barcode_data)];
       console.log("watch: ", this.temp_barcode_data, uniqueRegFields)
-
-      this.temp_barcode_data = this.temp_barcode_data.map(v => ({...v, isIn: this.asrs})) //新增object內的key(isIn), true: 入庫資料
+      // 2023-08-08 mark the following line
+      //this.temp_barcode_data = this.temp_barcode_data.map(v => ({...v, isIn: this.asrs})) //新增object內的key(isIn), true: 入庫資料
+      //
       console.log("----bar1, ", this.barcode_data);
       console.log("----bar2, ", this.temp_barcode_data);
-      this.load_SingleTable_ok=false;
+      //this.load_SingleTable_ok=false;
     },
 
     load_SingleTable_ok(val) {
@@ -304,7 +337,10 @@ export default {
       console.log("BarCodeRePrintTag, exportToCSV()...");
 
       let barcode_Desserts = Object.assign([], this.temp_barcode_data);
-
+      console.log("StockInTagPrint, exportToCSV, Axios post data..., ", this.temp_barcode_data, barcode_Desserts);
+      // 2023-08-10, modify the following block
+      //console.log("barcode_Desserts, temp_barcode_data: ", barcode_Desserts, this.temp_barcode_data);
+      /*
       let object_Desserts = this.temp_barcode_data.map(({
         stockInTag_reagID,
         stockInTag_batch,
@@ -313,6 +349,7 @@ export default {
         stockInTag_reagTemp,
         stockInTag_alpha,
         stockInTag_cnt,
+        stockInTag_rePrint,
         isIn,
         stockInTag_reagName,
       }) => ({
@@ -323,11 +360,25 @@ export default {
         stockInTag_reagTemp,
         stockInTag_alpha,
         stockInTag_cnt,
+        stockInTag_rePrint,
         isIn,
         //stockInTag_reagName,
         name1: stockInTag_reagName.length > 25 ? stockInTag_reagName.slice(0,25) : stockInTag_reagName,
         name2: stockInTag_reagName.length > 25 ? stockInTag_reagName.slice(25) : ' '
       }))
+      */
+
+      let object_Desserts = Object.assign([], this.temp_barcode_data);
+      //console.log("1. object_Desserts: ", object_Desserts);
+      ////delete object_Desserts.stockInTag_rePrint
+      ////console.log("2. object_Desserts: ", object_Desserts);
+      //add name1, name2 key/value
+      object_Desserts.forEach((item) => {
+        item.name1 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(0,25) : item.stockInTag_reagName;
+        item.name2 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(25) : ' '
+      })
+      //console.log("3. object_Desserts: ", object_Desserts);
+      // end block
       console.log("StockInTagPrint, exportToCSV, Axios post data..., ", this.temp_barcode_data, barcode_Desserts, object_Desserts);
 
       const path = '/exportToCSVForStockInOut';

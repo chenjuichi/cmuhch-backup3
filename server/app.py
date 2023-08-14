@@ -2,8 +2,8 @@ import socket
 import pathlib
 import json
 
-import threading  # 2022-12-31 add
-import logging    # 2022-12-31 add
+#import threading  # 2022-12-31 add, 2023-08-09 mark
+#import logging    # 2022-12-31 add, 2023-08-09 mark
 import ctypes     # 2022-12-31 add
 
 ##import wmi        # 2023-01-31 add
@@ -34,19 +34,24 @@ from ajax.excelTable import excelTable
 app = Flask(__name__)  # 初始化Flask物件
 
 #api = Api(app)
-hostName = socket.gethostname()
-local_ip = socket.getaddrinfo(hostName, None)
-temp_size = len(local_ip)
-for i in range(temp_size):
-    print("<AddressFamily: ", local_ip[i])
-
-host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
-print("<AddressFamily: ", local_ip[1][4])
-print('system Lan ip: ' + '\033[46m' + host_ip_for_wifi + '\033[0m')
-
+# 2023-08-09 mark the following block
+#hostName = socket.gethostname()
+#local_ip = socket.getaddrinfo(hostName, None)
+#temp_size = len(local_ip)
+#for i in range(temp_size):
+#    print("<AddressFamily: ", local_ip[i])
+#
+#host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
+#print("<AddressFamily: ", local_ip[1][4])
+#print('system Lan ip: ' + '\033[46m' + host_ip_for_wifi + '\033[0m')
+#
 # --------------------------
+
+hostName = socket.gethostname()             # 2023-08-09 unmark
+local_ip = socket.gethostbyname(hostName)   # get local ip address, 2023-08-09 add
+print('\n' + 'Lan ip: ' + '\033[46m' + local_ip + '\033[0m')  # 2023-08-09 add
+
 '''
-hostName = socket.gethostname()
 local_ip = socket.getaddrinfo(hostName, None)
 print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
 
@@ -54,14 +59,15 @@ host_ip_for_lan = local_ip[3][4][0]  # for 有線網卡
 host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
 print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
 '''
-# --------------------------
+# ---version: 2023-08-10 -----------------------
+print('Build:  ' + '\033[42m' + '2023-08-10' + '\033[0m' + '\n')  # 2023-08-09 add
 
-# host_ip = '192.168.0.12'    # for home #//////2/2-
+host_ip = local_ip     # 2023-08-09 add
+
+#host_ip = '192.168.0.12'    # for home #//////2/2-
 # host_ip = '10.108.249.107'  # for cmuhch #//////2/2-
-host_ip = '192.168.32.179'  # for zh  #//////2/2-
+# host_ip = '192.168.32.188'  # for zh  #//////2/2-
 # host_ip = '192.168.43.117'  # for mobile  #//////2/2-
-# host_ip = '192.168.200.171' # for pmc guest
-# host_ip = '192.168.51.203' # for pmc guest
 # host_ip = '10.108.249.100'  # for cmuhch 正式
 
 
@@ -94,7 +100,6 @@ app.config['MQTT_PASSWORD'] = ''
 # If your server supports TLS, set it True
 app.config['MQTT_TLS_ENABLED'] = False
 
-
 # 建立 MQTT Client 物件
 mqtt_client = Mqtt(app, connect_async=True)
 
@@ -109,7 +114,9 @@ app.register_blueprint(listTable)
 
 app.register_blueprint(excelTable)
 
+
 # --------------------------
+
 
 CORS(app, resources={r'/*': {'origins': '*'}})
 # CORS(app)
@@ -211,6 +218,7 @@ def mqtt_station():
     return jsonify({
         'status': myReturnMsg,
     })
+
 
 # --------------------------
 

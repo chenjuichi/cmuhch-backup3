@@ -178,6 +178,13 @@
                 </div>
               </div>
             </v-toolbar>
+            <!-- 2023-07-21 add -->
+            <v-progress-linear
+              v-show="isLoading"
+              indeterminate
+              color="red"
+            />
+
           </template>
 
           <template v-slot:item.stockInTag_grid="props">
@@ -265,7 +272,8 @@
           </template>
 
           <template v-slot:no-data>
-            <strong><font color='red'>目前沒有資料</font></strong>
+            <!--<strong><font color='red'>目前沒有資料</font></strong>  2023-07-21 mark-->
+            <strong><font color='blue'>資料下載中...</font></strong>  <!--2023-07-21 add-->
           </template>
         </v-data-table>
       </v-card>
@@ -411,6 +419,9 @@ export default {
 
     dessertsDisplayForSelect: [],
     dessertsDisplay: [],
+
+    isLoading: false,   // 2023-07-21 add
+
     desserts: [],
     temp_desserts: [],
 
@@ -627,6 +638,8 @@ export default {
         this.selectedEmployers = Object.assign([], this.itemsForEmployer);
         this.isAllSelected=true;
 
+        this.isLoading = false;   //2023-07-21 add
+
         this.load_SingleTable_ok=false;
         //this.listUsers();
       }
@@ -688,8 +701,10 @@ export default {
     },
 
     listInventorys() {    //從後端讀取dataTable的資料
-      const path = '/listInventorys';
       console.log("listInventorys, Axios get data...")
+
+      this.isLoading = true;     //2023-07-21 add
+      const path = '/listInventorys';
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
@@ -698,6 +713,7 @@ export default {
       })
       .catch((error) => {
         console.error(error);
+        this.isLoading = true;     //2023-07-21 add
         this.load_SingleTable_ok=false;
       });
     },

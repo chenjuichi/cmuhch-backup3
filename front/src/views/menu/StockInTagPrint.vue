@@ -282,15 +282,23 @@ export default {
               let temp_arr=[];
               temp_arr =  JSON.parse(JSON.stringify(this.temp_desserts));
               this.desserts = Object.assign([], temp_arr);
-              temp_arr=[];
-              temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));
-              temp_arr = temp_arr.map((obj) => ({ ...obj, stockInTag_alpha: this.last_alpha }));
+              //temp_arr=[];                                                                      //2023-08-08 mark
+              //temp_arr =  JSON.parse(JSON.stringify(this.temp_selected));                       //2023-08-08 mark
+              //temp_arr = temp_arr.map((obj) => ({ ...obj, stockInTag_alpha: this.last_alpha }));//2023-08-08 mark
 
-              this.selected = Object.assign([], temp_arr);
+              //this.selected = Object.assign([], temp_arr);
               //window.location.reload();
               this.reload=false;
             }
           }
+          // 2023-08-08 add
+          console.log("b, this.selected => ", this.selected)
+          //新增 key:value
+          this.selected = this.temp_selected.map(object => {
+            return {...object, stockInTag_rePrint: '入庫' };
+          });
+          console.log("a, this.selected => ", this.selected)
+          //
         });
       },
       immediate: true,

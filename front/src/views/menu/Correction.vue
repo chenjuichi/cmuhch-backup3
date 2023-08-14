@@ -54,11 +54,18 @@
                   Excel
                 </v-btn>
               </v-toolbar>
+              <!-- 2023-07-21 add -->
+              <v-progress-linear
+                v-show="isLoading"
+                indeterminate
+                color="red"
+              />
+
           </template>
           <template v-slot:body.append>
               <tr style="height=60px important;">
                 <td></td>
-                <td colspan="8">
+                <td colspan="13">
                   <!-- 查詢 -->
                   <v-row>
                     <v-menu
@@ -128,7 +135,8 @@
           </template>
 
           <template v-slot:no-data>
-            <strong><font color='red'>目前沒有資料</font></strong>
+            <!--<strong><font color='red'>目前沒有資料</font></strong>  2023-07-21 mark-->
+            <strong><font color='blue'>資料下載中...</font></strong>  <!--2023-07-21 add-->
           </template>
 
         </v-data-table>
@@ -230,6 +238,8 @@ export default {
         //page: 1,
       },
 
+      isLoading: false,   // 2023-07-21 add
+
       desserts: [ ],
 
       load_SingleTable_ok: false, //for get employer table data
@@ -314,6 +324,8 @@ export default {
       if (val) {
         this.desserts = Object.assign([], this.temp_desserts);
 
+        this.isLoading = false;   //2023-07-21 add
+
         this.load_SingleTable_ok=false;
       }
     },
@@ -357,8 +369,10 @@ export default {
     },
 
     listCorrections() {    //從後端讀取dataTable的資料
+      console.log("Correction, listCorrections(), Axios get data...")
+
+      this.isLoading = true;     //2023-07-21 add
       const path = '/listCorrections';
-      console.log("Correction, listCorrections, Axios get data...")
       axios.get(path)
       .then((res) => {
         this.temp_desserts = res.data.outputs;
@@ -367,6 +381,7 @@ export default {
       })
       .catch((error) => {
         console.error(error);
+        this.isLoading = true;     //2023-07-21 add
         this.load_SingleTable_ok=false;
       });
     },

@@ -109,6 +109,9 @@ import SideBar from '../../components/RenderBarCodeRePrintTag.vue';
 
 //import print from 'vue-print-nb';
 
+//import Loading from 'vue-loading-overlay';          // 2023-08-27 add
+//import 'vue-loading-overlay/dist/vue-loading.css';  // 2023-08-27 add
+
 export default {
   name: 'StockInTagPrint',
 
@@ -191,6 +194,10 @@ export default {
     last_date: '',        //2023-01-03 add
     todayForAlpha: '',    //2023-01-03 add
 
+    //isLoading: false,     // 2023-08-27   add
+    //isFullPage: false,    // 2023-08-27   add
+    redirectTimeout: null,  // 2023-08-27   add
+
     load_SingleTable_ok: false, //for get employer table data
     load_2thTable_ok: false,    //for get reagent table data
     load_3thTable_ok: false     // 2023-07-20
@@ -253,16 +260,16 @@ export default {
         this.desserts =  JSON.parse(JSON.stringify(this.temp_desserts));
 
         this.load_SingleTable_ok=false;
-        //this.insertAlphaForStockIn();       //2023-07-19 add
+        //this.insertAlphaForStockIn();       //2023-07-19 add, 2023-08-27 mark
         //this.getLastBatchAlphaForStockIn(); //2023-07-19 mark
       }
     },
     // 2023-07-20 add
     load_3thTable_ok(val) {
       if (val) {
-        this.tmp_selected
-        this.selected =  JSON.parse(JSON.stringify(this.tmp_selected));
-        this.drawer=true;
+        //this.tmp_selected
+        this.selected =  JSON.parse(JSON.stringify(this.tmp_selected)); // 2023-08-25 mark
+        this.drawer=true; //2023-08-27 ADD
 
         this.load_3thTable_ok=false;
       }
@@ -273,6 +280,7 @@ export default {
         this.$nextTick(() => {
           if (this.drawer) {
             console.log("disable scrollbar...");
+
             this.root.style.setProperty('--bar','hidden');
             this.reload=true;
           } else {
@@ -305,8 +313,10 @@ export default {
     },
 
     selected(val) {
-      console.log("selected: ", val)
+      //console.log("selected: ", val)
       this.temp_selected =  JSON.parse(JSON.stringify(val));
+      //this.insertAlphaForStockIn();       //2023-07-19 add
+
     },
   },
 
@@ -641,6 +651,7 @@ export default {
         this.tosterOK = true;   //true: 顯示錯誤訊息畫面
       });
     },
+
     // 2023-07-20 add
     insertAlphaForStockIn() {
       console.log("insertAlphaForStockIn, selected: ", this.selected);
@@ -656,6 +667,10 @@ export default {
         //this.temp_desserts = res.data.outputs;
         this.tmp_selected = res.data.outputs;
         console.log("Insert Alpha ok, records:", res.data.outputs);
+        // 2023-08-27 add the following block
+        //this.isLoading = true;
+        this.myLoop(10)
+        //
         this.load_3thTable_ok=true;
       })
       .catch((error) => {
@@ -667,7 +682,9 @@ export default {
     printSection() {
       console.log("click, printSection()...");
 
-      this.insertAlphaForStockIn();       //2023-07-19 add
+      this.insertAlphaForStockIn();       // 2023-07-19 add, 2023-08-25 mark
+
+      //this.drawer=true;                     // 2023-08-25 add, 2023-08-27 MARK
 
       //2023-01-04 ADD
       /*
@@ -704,6 +721,20 @@ export default {
       console.log("press permission Close Button...");
       this.$router.push('/navbar');
     },
+
+    myLoop(i) {
+      for (let i = 1; i < 10; i++) {
+        this.redirectTimeout=setTimeout(function timer() {
+          //console.log("hello world");
+        }, i * 500);
+      }
+    },
+  },
+
+  beforeDestroy() {
+    if (this.redirectTimeout) {
+      clearTimeout(this.redirectTimeout);
+    }
   },
 }
 </script>

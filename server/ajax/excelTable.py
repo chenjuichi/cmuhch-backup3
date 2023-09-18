@@ -74,18 +74,20 @@ def export_to_csv_for_stock_in_out():
     if return_value:
         for obj in _blocks:
 
-            print("excel print: ", obj)
+          print("excel print: ", obj)
 
-            if (obj['isIn']):
-                obj['stockInTag_Employer'] = '入庫人員: ' + \
-                    obj['stockInTag_Employer']
-                obj['stockInTag_Date'] = '入庫日期: ' + \
-                    obj['stockInTag_Date']
-            else:
-                obj['stockInTag_Employer'] = '領料人員: ' + \
-                    obj['stockInTag_Employer']
-                obj['stockInTag_Date'] = '領料日期: ' + \
-                    obj['stockInTag_Date']
+          if (obj['isIn']):
+              obj['stockInTag_Employer'] = '入庫人員: ' + \
+                  obj['stockInTag_Employer']
+              obj['stockInTag_Date'] = '入庫日期: ' + \
+                  obj['stockInTag_Date']
+          else:
+              obj['stockInTag_Employer'] = '領料人員: ' + \
+                  obj['stockInTag_Employer']
+              obj['stockInTag_Date'] = '領料日期: ' + \
+                  obj['stockInTag_Date']
+
+          obj['stockInTag_cnt'] = 1   # 2023-08-25 add
 
         print("a data: ", _blocks)
 

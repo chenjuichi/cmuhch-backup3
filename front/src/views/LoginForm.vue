@@ -158,7 +158,7 @@
         >
         </Toaster>
         <button @click="userLogin">登入</button>
-        <BR />  <h8> {{ 'Build 2023-08-10' }} </h8>
+        <BR />  <h8> {{ 'Build 2023-08-28' }} </h8>
       </div>
 
     </div>

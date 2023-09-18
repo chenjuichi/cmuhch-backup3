@@ -13,6 +13,8 @@ from database.tables import User, Reagent, Department, Supplier, Grid, Permissio
 
 from werkzeug.security import generate_password_hash
 
+from operator import itemgetter, attrgetter   # 2023-08-27  add
+
 updateTable = Blueprint('updateTable', __name__)
 
 
@@ -660,13 +662,14 @@ def update_stockin_by_printFlag():
 @updateTable.route("/insertAlphaForStockIn", methods=['POST'])
 def insert_alpha_for_stockin():
   print("insertAlphaForStockIn....")
-
+  #讀前端資料
   request_data = request.get_json()
-
   _blocks = request_data['blocks']
+  print("_blocks: ", _blocks)
 
+  #解析, 讀取並排序selected id資料(=stockinIDs)
   stockinIDs = [ sub['id'] for sub in _blocks ]
-  #stockinIDs = [932, 933, 934]
+  stockinIDs.sort()
   print("data: ", stockinIDs)
 
   s = Session()
@@ -675,80 +678,94 @@ def insert_alpha_for_stockin():
   reagentIDs = []
   batchs=[]
   intagDates=[]
+  #inTag_reagIDs=[]
 
+  #以selected id為key, 讀取入庫資料(=intags)
   intag_objects = s.query(InTag).filter(InTag.id.in_(stockinIDs))
   intags = [u.__dict__ for u in intag_objects]
-
+  #print("intags",intags)
   for intag in intags:
     #if (intag['isRemoved'] and intag['isStockin']):
     reagentIDs.append(intag['reagent_id'])
     batchs.append(intag['batch'])
     intagDates.append(intag['intag_date'])
+    # 2023-08-28 add
+    #reagent = s.query(Reagent).filter_by(id=intag['reagent_id']).first()
+    #inTag_reagIDs.append(reagent.reag_id)
 
+  #排序入庫的reagent_id資料(=reagentIDs)
   reagentIDs = list(dict.fromkeys(reagentIDs))
   reagentIDs.sort()
+  #入庫的批次資料(=batchs)
   batchs = list(dict.fromkeys(batchs))
-  batchs.sort()
+  #batchs.sort()
+  #排序入庫的入庫日期資料(=batchs)
   intagDates = list(dict.fromkeys(intagDates))
   intagDates.sort()
 
-##
-#  for reagentID in reagentIDs:
-#    maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
-#    print(max(node.stockIn_alpha for node in maxAlphaObjectsOrder))
-##
-
   i=1
-  j=0
   for reagentID in reagentIDs:
-    #myAlpha="A"
-    maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
-    myAlpha=max(node.stockIn_alpha for node in maxAlphaObjectsOrder)
-    #myAlpha=chr(ord(myAlpha) + 1)
+    #以入庫的reagent_id為key, 搜尋入庫資料中stockIn_alpha的最大值
+    # 2023-08-26 MODIFY
+    #maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
+    maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True).order_by(InTag.stockIn_alpha.asc()).all()
+    # 2023-08-31 update
+    #myAlpha=max(node.stockIn_alpha for node in maxAlphaObjectsOrder)
+    myCreateAt=max(node.create_at for node in maxAlphaObjectsOrder)
+    kks = [u.__dict__ for u in maxAlphaObjectsOrder]
+    #Find the index of a dict within a list, by matching the dict's value
+    _index = next((index for (index, d) in enumerate(kks) if d["create_at"] == myCreateAt), None)
+    myAlpha=kks[_index]['stockIn_alpha']
     print("myAlpha: ", myAlpha)
-    myReagID=_blocks[j]['stockInTag_reagID']
-    myReagName=_blocks[j]['stockInTag_reagName']
-    myReagTemp=_blocks[j]['stockInTag_reagTemp']
-    myEmployer=_blocks[j]['stockInTag_Employer']
 
-    for batch in batchs:
-      for intagDate in intagDates:
+    #以入庫日期及批次進行alpha更換
+    for intagDate in intagDates: # 2023-08-27 modify
+      for batch in batchs:
         _objects=s.query(InTag).filter_by(
           reagent_id=reagentID,
           batch=batch,
           intag_date=intagDate,
-          #isRemoved=True,
-          #isStockin=True
         ).all()
-        if _objects:
-          for myIntag in _objects:
-            myIntag.stockIn_alpha=myAlpha
-            s.query(InTag).filter(InTag.id == myIntag.id).update({'stockIn_alpha': myAlpha})
-            _obj = {
-                'id': myIntag.id,
-                'stockInTag_reagID': myReagID,
-                'stockInTag_reagName': myReagName,
-                'stockInTag_reagPeriod': myIntag.reag_period,  # 依2022-12-12操作教育訓練建議作修正
-                'stockInTag_reagTemp': myReagTemp,
-                'stockInTag_Date': myIntag.intag_date,  # 入庫日期
-                'stockInTag_Employer': myEmployer,
-                'stockInTag_batch': myIntag.batch,
-                'stockInTag_cnt': myIntag.count,
-                'stockInTag_alpha': myIntag.stockIn_alpha,
-                # 'stockInTag_cnt': myIntag.count - myIntag.stockOut_temp_count,
-                'stockInTag_isPrinted': myIntag.isPrinted,
-                'stockInTag_isStockin': myIntag.isStockin,
-            }
-            _results.append(_obj)
 
-            print(i,":", myIntag)
-            i=i+1
+        #_objects=[item for item in _blocks if item.get('stockInTag_reagID')==myIntag.id]
+
+        if _objects:
+          # 2023-08-27 MODIFY THE FOLLOWING BLOCK
           myAscii=ord(myAlpha)
           if myAscii==ord("Z"):
             myAlpha="A"
           else:
             myAlpha=chr(ord(myAlpha) + 1)
+          ###
+          for myIntag in _objects:
+            #myIntag.stockIn_alpha=myAlpha
+            s.query(InTag).filter(InTag.id == myIntag.id).update({'stockIn_alpha': myAlpha})
+            selectedItem=[item for item in _blocks if item.get('id')==myIntag.id]
+            _obj = {
+              'id': selectedItem[0]['id'],
+              'stockInTag_reagID': selectedItem[0]['stockInTag_reagID'],
+              'stockInTag_reagName': selectedItem[0]['stockInTag_reagName'],
+              'stockInTag_reagPeriod': selectedItem[0]['stockInTag_reagPeriod'],  # 依2022-12-12操作教育訓練建議作修正
+              'stockInTag_reagTemp': selectedItem[0]['stockInTag_reagTemp'],
+              'stockInTag_Date': selectedItem[0]['stockInTag_Date'],  # 入庫日期
+              'stockInTag_Employer': selectedItem[0]['stockInTag_Employer'],
+              'stockInTag_batch': selectedItem[0]['stockInTag_batch'],
+              'stockInTag_cnt': myIntag.count,
+              'stockInTag_alpha': myAlpha,
+              # 'stockInTag_cnt': myIntag.count - myIntag.stockOut_temp_count,
+              'stockInTag_isPrinted': selectedItem[0]['stockInTag_isPrinted'],
+              'stockInTag_isStockin': selectedItem[0]['stockInTag_isStockin'],
+            }
+            _results.append(_obj)
 
+            #print(i,":", myIntag)
+            print(i,":", _obj)
+            i=i+1
+          #myAscii=ord(myAlpha)
+          #if myAscii==ord("Z"):
+          #  myAlpha="A"
+          #else:
+          #  myAlpha=chr(ord(myAlpha) + 1)
 
   #update
   s.commit()
@@ -757,10 +774,13 @@ def insert_alpha_for_stockin():
 
   return_message = ''
   return_value = True   # true: 資料正確
+  #newlist = sorted(_results, key=attrgetter('id'))
+  newlist = sorted(_results, key=itemgetter('id'))   # 2023-08-25 add
 
   return jsonify({
     'status': return_value,
-    'outputs': _results
+    #'outputs': _results
+    'outputs': newlist
   })
 
 
@@ -787,12 +807,15 @@ def insert_badge():
 
   intag_objects = s.query(InTag).filter(InTag.id.in_(stockinIDs))
   intags = [u.__dict__ for u in intag_objects]
+  print("intags: ",intags)
 
   for intag in intags:
     reagentIDs.append(intag['reagent_id'])
     batchs.append(intag['batch'])
     intagDates.append(intag['intag_date'])
     letters.append(intag['stockIn_alpha'])
+
+  print("reagentIDs :", reagentIDs)
 
   selectMinLetter=''
   selectMaxLetter=''
@@ -809,12 +832,15 @@ def insert_badge():
     myMaxLetter=max(node.stockIn_alpha for node in maxLetterObjectsOrder)
     # 2023-08-07 add , InTag.count != 0
     minLetterObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True, InTag.count != 0).order_by(InTag.stockIn_alpha.desc()).all()
+    #minObjects = [u.__dict__ for u in minLetterObjectsOrder]
+    #print("最晚: ", minObjects)
+    #myMinLetter=min(node['stockIn_alpha'] for node in minObjects)
     myMinLetter=min(node.stockIn_alpha for node in minLetterObjectsOrder)
-
+    print("最晚: ", minLetterObjectsOrder)
     t0=ord(letters[i])  #點選紀錄的字母
     t2=ord(myMaxLetter) #最早批號日期的字母
     t1=ord(myMinLetter) #最晚批號日期的字母
-    #print("t0, t2, t1: ", t0, t2, t1)
+    print("sel, t0, t2(最早), t1(最晚): ",ord(selectMinLetter), selectMinLetter, t0, letters[i], t2, myMaxLetter, t1, myMinLetter)
 
     if ord(selectMinLetter) == t1:
       return_message = ''

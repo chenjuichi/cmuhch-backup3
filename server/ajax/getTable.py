@@ -5,6 +5,8 @@ from sqlalchemy import and_, or_, not_
 
 from flask_cors import CORS
 
+from operator import itemgetter   # 2023-08-25  add
+
 getTable = Blueprint('getTable', __name__)
 
 
@@ -396,10 +398,14 @@ def list_stockInData_by_Select():
     #end 狀況3
     s.close()
 
+    #print("2023-08-25, before sort: ", _results_for_stockOut)
+    newlist = sorted(_results_for_stockOut, key=itemgetter('stockIn_reagent_id')) # 2023-08-25 add
+
     return jsonify({
         'status': 'success',
         # 'outputs_for_supplier': _results_for_supplier,
-        'outputs_for_stockOut': _results_for_stockOut,
+        #'outputs_for_stockOut': _results_for_stockOut,
+        'outputs_for_stockOut': newlist,  # 2023-08-25 modify
     })
 
 

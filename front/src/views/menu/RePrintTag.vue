@@ -18,7 +18,7 @@
             :search="search"
             :custom-filter="filterOnlyCapsText"
             @item-selected="itemSelected"
-            :footer-props="{itemsPerPageText: '每頁的資料筆數'}"
+            :footer-props="{'itemsPerPageText': '每頁的資料筆數', 'items-per-page-options': [10, 30, 50]}"
           >
             <template v-slot:top>
               <v-toolbar flat>

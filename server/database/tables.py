@@ -496,8 +496,11 @@ class OutTag(BASE):
 # MySQL databases and tables are created using a UTF-8 with 3-bytes encoding.
 # To store 中文字, you need to use the utf8mb4 character set
 ###
+# 2023-08-25 modify
+#engine = create_engine(
+#    "mysql+pymysql://root:77974590@localhost:3306/cmuhch?charset=utf8mb4", echo=False)
 engine = create_engine(
-    "mysql+pymysql://root:77974590@localhost:3306/cmuhch?charset=utf8mb4", echo=False)
+    "mysql+pymysql://root:77974590@localhost:3306/cmuhch?charset=utf8mb4", echo=False, pool_size=20, max_overflow=0)
 # 將己連結的資料庫engine綁定到這個session
 Session = sessionmaker(bind=engine)
 

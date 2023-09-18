@@ -10,6 +10,8 @@ from database.tables import InTag, OutTag, Session
 
 from flask_cors import CORS
 
+from operator import itemgetter   # 2023-08-25  add
+
 listTable = Blueprint('listTable', __name__)
 
 
@@ -743,9 +745,12 @@ def list_stockout_tag_print_data():
 
     s.close()
     #print("_results: ", _results)
+    #newlist = sorted(_results, key=itemgetter('stockOutTag_reagID'))   # 2023-08-25 add
+
     return jsonify({
         'status': 'success',
         'outputs': _results
+        #'outputs': newlist    # 2023-08-25 modify
     })
 
 
@@ -935,9 +940,13 @@ def list_stockin_tag_print_data():
             _results.append(_obj)
 
     s.close()
+
+    #newlist = sorted(_results, key=itemgetter('stockInTag_reagID'))   # 2023-08-25 add
+
     return jsonify({
         'status': 'success',
         'outputs': _results
+        #'outputs': newlist # 2023-08-25 modify
     })
 
 

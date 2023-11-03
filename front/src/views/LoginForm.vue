@@ -158,7 +158,7 @@
         >
         </Toaster>
         <button @click="userLogin">登入</button>
-        <BR />  <h8> {{ 'Build 2023-08-28' }} </h8>
+        <BR />  <h8> {{ 'Build 2023-11-01' }} </h8>
       </div>
 
     </div>
@@ -270,6 +270,8 @@ export default {
   },
 
   created() {
+    console.log('%cLoginForm.vue create()...', 'background-color: yellow; font-size: larger;');
+
     /*
     let _host=window.location.host;
     _host = _host.slice(0, _host.lastIndexOf(":"));
@@ -338,12 +340,13 @@ export default {
     },
 
     'registerUser.empID': function (val) {
-      let isEmpIDRule = /^[A,D,N,T][0-9]{5}$/;
+      //let isEmpIDRule = /^[A,D,N,T][0-9]{5}$/;
+      let isEmpIDRule = /[0-9]{4}$/;
       console.log("1. user: ", val);
       this.empIDErrMsg = '';
       //let result = this.registerUser.empID.search(isEmpIDRule);
       let result = val.search(isEmpIDRule);
-            console.log("2. user: ", val);
+      console.log("2. user: ", val);
 
       //let len=this.editedItem.empID.length
       //let len=val.empID.length

@@ -648,6 +648,8 @@ export default {
   },
 
   created () {
+    console.log('%cReagent.vue create()...', 'background-color: yellow; font-size: larger;');
+
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     console.log("this.currentUser", this.currentUser)
     if (this.currentUser.perm < 1) {

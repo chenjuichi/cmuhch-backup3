@@ -111,7 +111,7 @@
     </v-row>
   </v-container>
 </v-app>
-</div>
+
 </template>
 
 <script>
@@ -296,7 +296,12 @@ export default {
       sw_on_str: '亮燈',
       sw_off_str: '熄燈',
       mqtt_topic:['station1','station2','station3',],
+      all_station: 1,             // 2023-10-31 add
+      all_layout: 1,              // 2023-10-31 add
+
       load_SingleTable_ok: false, //for get grids table data
+      load_6thTable_ok: false,    // 2023-11-1 add
+      load_7thTable_ok: false,    // 2023-11-1 add
     }
   },
 
@@ -310,18 +315,38 @@ export default {
     load_SingleTable_ok(val) {
       if (val) {
         this.load_SingleTable_ok=false;
-
         this.getTabsData();
-      } //end if condition
-    },  //end load_SingleTable_ok()
+      }
+    },
 
     tab_index(newValue, oldValue) {
       console.log("newValue, oldValue, tab_index: ",newValue, oldValue, this.tab_index);
       this.pre_topic=oldValue;
     },
+    // 2023-11-1 add these watches
+    load_6thTable_ok(val) {
+      console.log("load_6thTable_ok: ", val);
+
+      if (val) {
+        this.load_6thTable_ok=false;
+        this.mqttForAllStationOff();
+      }
+    },
+
+    load_7thTable_ok(val) {
+      console.log("load_7thTable_ok: ", val);
+
+      if (val) {
+        this.load_7thTable_ok=false;
+        this.mqttForAllStationHWOff();
+      }
+    },
+    //
   },
 
   created () {
+    console.log('%cGridsForLed.vue create()...', 'background-color: yellow; font-size: larger;');
+
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     if (this.currentUser.perm == 0 || this.currentUser.perm >1) {
       this.permDialog=true;
@@ -375,9 +400,11 @@ export default {
       this.selectedLamps.led5.push(obj);
     }
 
-    this.load_SingleTable_ok=false;
     this.initAxios();
 
+    this.mqttForAllStationHWOff();      // 2023-11-1 add
+
+    this.load_SingleTable_ok=false;
     this.listGrids();
   },
 
@@ -661,34 +688,36 @@ export default {
     },
 
     async mqttForStation(layout, range_begin, range_end) {
-        //let path='/mqtt/station1';
-        let path='/mqtt/station';
-        //let temp_layout=this.currentLedLayout.toString();
-        let temp_layout=layout.toString();
-        //let temp_pos=this.currentLedPos.toString();
-        console.log("station: " + this.currentIndex + this.mqtt_topic[this.tab_index] + this.tab_index)
-        console.log("station: " + this.mqtt_topic[this.tab_index] + "layout: " + temp_layout + " pos: " + range_begin + " , " + range_end)
-        let temp_sw= this.switchOnOff ? 'on' : 'off';
-        //let temp_sw= 'flash';
-        let payload= {
-          topic: this.mqtt_topic[this.tab_index],
-          layout: temp_layout,
-          pos_begin: range_begin,
-          pos_end: range_end,
-          msg: temp_sw,
-        };
+      console.log("mqttForStation...")
 
-        try {
-          let res = await axios.post(path, payload);
-          console.log("mqtt ok", res.data.status);
-        } catch (err) {
-          console.error(err)
-          console.log("通訊錯誤!");
-          this.snackbar_color='red accent-2';
-          this.snackbar=true;
-          this.snackbar_info= '通訊錯誤!';
-          this.snackbar_icon_color= '#adadad';
-        }
+      //let path='/mqtt/station1';
+      let path='/mqtt/station';
+      //let temp_layout=this.currentLedLayout.toString();
+      let temp_layout=layout.toString();
+      //let temp_pos=this.currentLedPos.toString();
+      console.log("station: " + this.currentIndex + this.mqtt_topic[this.tab_index] + this.tab_index)
+      console.log("station: " + this.mqtt_topic[this.tab_index] + "layout: " + temp_layout + " pos: " + range_begin + " , " + range_end)
+      let temp_sw= this.switchOnOff ? 'on' : 'off';
+      //let temp_sw= 'flash';
+      let payload= {
+        topic: this.mqtt_topic[this.tab_index],
+        layout: temp_layout,
+        pos_begin: range_begin,
+        pos_end: range_end,
+        msg: temp_sw,
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("mqtt ok", res.data.status);
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+      }
     },
 
     async mqttForStationOff() {
@@ -711,7 +740,7 @@ export default {
 
       try {
         let res = await axios.post(path, payload);
-        console.log("off led, mqtt ok", res.data.status);
+        console.log("Led has been powered off, mqtt ok", res.data.status);
       } catch (err) {
         console.error(err)
         console.log("通訊錯誤!");
@@ -721,7 +750,86 @@ export default {
         this.snackbar_icon_color= '#adadad';
       }
     },
+    // 2023-10-31 add the following methods
+    async mqttForAllStationHWOff() {
+      console.log("mqttForAllStationHWOff...");
 
+      let path='/mqtt/station';
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led by HW => " + "station: " + this.all_station)
+
+      let payload= {
+        topic: myTopic,
+        layout: '0',
+        pos_begin: '0',
+        pos_end: '0',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off by HW, mqtt ok", res.data.status);
+        if (this.all_station>=3) {
+          this.all_layout=1;
+          this.all_station=1;
+          this.mqttForAllStationOff();           // 2023-10-31 add
+        } else {
+          this.all_station = this.all_station + 1;
+          this.load_7thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_7thTable_ok=false;
+      }
+    },
+
+    async mqttForAllStationOff() {
+      console.log("mqttForAllStationOff...");
+
+      let path='/mqtt/station';
+      let temp_layout=this.all_layout;
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led => " + "station: " + this.all_station + " ,layout: " + this.all_layout)
+
+      let payload= {
+        topic: myTopic,
+        layout: temp_layout.toString(),
+        pos_begin: '1',
+        pos_end: '30',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off, mqtt ok", res.data.status);
+        if (this.all_layout>=5) {
+          this.all_layout=1;
+          if (this.all_station>=3) {
+            this.load_6thTable_ok=false;
+          } else {
+            this.all_station = this.all_station + 1;
+            this.load_6thTable_ok=true;
+          }
+        } else {
+          this.all_layout = this.all_layout + 1;
+          this.load_6thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_6thTable_ok=false;
+      }
+    },
+    //
     connectMQTT() {
       console.log("connectMQTT, tab index: ", this.tab_index);
 

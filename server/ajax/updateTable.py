@@ -657,6 +657,29 @@ def update_stockin_by_printFlag():
         'message': return_message,
     })
 
+# 2023-09-22 add
+@updateTable.route("/checkBatchForStockIn", methods=['POST'])
+def check_batch_for_stockin():
+  print("checkBatchForStockIn....")
+  #讀前端資料
+  request_data = request.get_json()
+  _block = request_data['block']
+  print("_block: ", _block)
+  return_value = True
+
+  s = Session()
+
+  reagent = s.query(Reagent).filter_by(reag_id=_block['stockInTag_reagID']).first()
+  intag_object = s.query(InTag).filter(InTag.reagent_id == reagent.id, InTag.intag_date == _block['stockInTag_Date'], InTag.batch == _block['stockInTag_batch']).all()
+  if intag_object:
+    return_value = False
+
+  s.close()
+  print("hi return_value: ", return_value)
+  return jsonify({
+    'status': return_value
+  })
+
 
 # 2023-07-19 add(modify the getLastBatchAlphaForStockIn function)
 @updateTable.route("/insertAlphaForStockIn", methods=['POST'])
@@ -694,8 +717,11 @@ def insert_alpha_for_stockin():
     #inTag_reagIDs.append(reagent.reag_id)
 
   #排序入庫的reagent_id資料(=reagentIDs)
+  #print("a: reagentIDs: ", reagentIDs)
+
   reagentIDs = list(dict.fromkeys(reagentIDs))
   reagentIDs.sort()
+  #print("b: reagentIDs: ", reagentIDs)
   #入庫的批次資料(=batchs)
   batchs = list(dict.fromkeys(batchs))
   #batchs.sort()
@@ -709,13 +735,18 @@ def insert_alpha_for_stockin():
     # 2023-08-26 MODIFY
     #maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True).order_by(InTag.stockIn_alpha.asc()).all()
     maxAlphaObjectsOrder = s.query(InTag).filter(InTag.reagent_id == reagentID, InTag.isRemoved == True, InTag.isStockin == True).order_by(InTag.stockIn_alpha.asc()).all()
-    # 2023-08-31 update
-    #myAlpha=max(node.stockIn_alpha for node in maxAlphaObjectsOrder)
-    myCreateAt=max(node.create_at for node in maxAlphaObjectsOrder)
-    kks = [u.__dict__ for u in maxAlphaObjectsOrder]
-    #Find the index of a dict within a list, by matching the dict's value
-    _index = next((index for (index, d) in enumerate(kks) if d["create_at"] == myCreateAt), None)
-    myAlpha=kks[_index]['stockIn_alpha']
+    #print("maxAlphaObjectsOrder: ",maxAlphaObjectsOrder)
+    # 2023-0-22 add if~else~
+    if maxAlphaObjectsOrder:
+      # 2023-08-31 update
+      #myAlpha=max(node.stockIn_alpha for node in maxAlphaObjectsOrder)
+      myCreateAt=max(node.create_at for node in maxAlphaObjectsOrder)
+      kks = [u.__dict__ for u in maxAlphaObjectsOrder]
+      #Find the index of a dict within a list, by matching the dict's value
+      _index = next((index for (index, d) in enumerate(kks) if d["create_at"] == myCreateAt), None)
+      myAlpha=kks[_index]['stockIn_alpha']
+    else:
+      myAlpha="Z"
     print("myAlpha: ", myAlpha)
 
     #以入庫日期及批次進行alpha更換

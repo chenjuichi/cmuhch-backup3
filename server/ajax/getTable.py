@@ -274,9 +274,9 @@ def list_stockInData_by_Select():
                 #'stockIn_reagent_Out_unit': reagent.reag_In_unit,
                 # 'stockIn_reagent_Out_cnt': _inTag.count,
                 # 'stockIn_reagent_Out_cnt': _inTag.count,
-                # 2023-06-02 modify
+                # 2023-06-02 modify, 2023-10-13 remove
                 'stockIn_reagent_Out_cnt': round(_inTag.count * reagent.reag_scale, 0), #領料數(在庫數 * 比例)
-                'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
+                #'stockIn_reagent_Out_cnt': _inTag.count * reagent.reag_scale, #領料數(在庫數 * 比例)
                 #'stockIn_reagent_Out_cnt': reagent.reag_stock * reagent.reag_scale, #領料數(在庫安全存量 * 比例)
           # 'stockIn_reagent_Out_cnt': 1,
                 'stockIn_id': _inTag.id,

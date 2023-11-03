@@ -139,7 +139,8 @@ def create_stockin():
     batch = (request_data['stockInTag_batch'] or '')
 
     print("2023-06-02 trace data: ", reagID, len(reagID), employer, date, cnt, reagPeriod, batch)
-
+    #default return value
+    last_id = 0
     return_value = True  # true: 資料正確, true
     return_message=''
     if reagID == "" or employer == "" or date == "" or cnt == "" or reagPeriod == "" or batch == "":
@@ -159,6 +160,18 @@ def create_stockin():
         return_value = False  # if the reagent data  does not exist
         return_message='錯誤! 找不到試劑 ' + reagID + ' 資料'
         print("2023-06-02 trace step3")
+    ### 2023-09-22 add the following block
+    else:
+      intag_object = s.query(InTag).filter(InTag.reagent_id == _reagent.id, InTag.intag_date==date, InTag.batch==batch).all()
+      if intag_object:
+        return_value = False
+        return_message='錯誤! 該筆資料重複 (試劑:' + reagID + ', 入庫日期:' + date + ', 批號:' + batch + ')'
+        print("trace step4")
+        #return jsonify({
+        #  'status': return_value,
+        #  'message': return_message
+        #})
+    ###
 
     print("return_value: ", return_value)
     if return_value:
@@ -180,8 +193,9 @@ def create_stockin():
     s.close()
 
     return jsonify({
-        'status': return_value,
-        'last_id': last_id,
+      'status': return_value,
+      'last_id': last_id,
+      'message': return_message,
     })
 
 
@@ -437,7 +451,134 @@ def add_stockout_item():
           print("b-3, myInCount ",myInCount)
           # 2023-06-02 modify
           #intag_item.count=myInCount
-          intag_item.count=round(myInCount, 2)
+          intag_item.count=round(myInCount, 3)      # 2023-10-13 modify 2位數改為3位數
+          break
+
+        if (myReturn<0):  #該筆入庫數量小於出庫數量(單位已轉換)
+          print("c, 該筆入庫數量小於出庫數量(單位已轉換)...")
+          intag_row.isRemoved=False
+          intag_item.isStockin=False
+          intag_item.count=0
+          temp_count=myReturn
+
+    s.commit()
+
+    s.close()
+
+    return jsonify({
+        'status': return_value,
+    })
+
+
+@createTable.route("/addStockOutItem_m", methods=['POST'])
+def add_stockout_item_m():
+    print("addStockOutItem_m....")
+    request_data = request.get_json()
+
+    _id = request_data['OutTagID']
+    _count = (request_data['OutTagCount'] or '')  #實際出庫數
+
+    return_value = True  # true: 資料正確, true
+    print("stockOut, 領料(試劑編號 及 實際出庫數): ", _id, _count)
+
+    s = Session()
+
+    outtag_item = s.query(OutTag).filter_by(id=_id).first()
+    intag_item = s.query(InTag).filter_by(id=outtag_item.intag_id).first()
+    _reagent = s.query(Reagent).filter_by(id=intag_item.reagent_id).first()
+
+    if (outtag_item.count != _count):   # 部分領料, 待出庫數 != 實際出庫數
+      #新增領料紀錄(isStockout=True)
+      print("A. 部分領料, 待出庫數 != 實際出庫數...")
+      new_outtag = OutTag(user_id=outtag_item.user_id, intag_id=outtag_item.intag_id,
+                          count=_count,
+                          #unit=outtag_item.unit,       # 2023-01-13 mark
+                          outtag_date=outtag_item.outtag_date,
+
+                          stockOut_alpha=outtag_item.stockOut_alpha,
+                          isStockout=True)
+      s.add(new_outtag)
+      #修改目前待領料紀錄(isPrinted=True)
+      outtag_item.count = outtag_item.count - _count
+
+      if (_reagent.reag_scale == 1):  #單位相同
+        print("狀況1, 部分領料, 出入庫單位相同")  #出入庫單位相同
+
+        tt = intag_item.count - _count
+        if (tt != 0):
+          intag_item.count=tt
+        else:
+          s.delete(intag_item)
+      else: #單位不相同
+        print("狀況2, 部分領料, 出入庫單位不同")  #出入庫單位不同
+        temp_count = _count * -1
+        temp_scale = _reagent.reag_scale
+        for intag_row in s.query(InTag):
+          if (not (intag_row.id==outtag_item.intag_id and intag_row.isRemoved and (not intag_row.isPrinted) and intag_row.isStockin)):
+            continue
+
+          myReturn=intag_row.count * temp_scale + temp_count   #入庫出庫單位轉換
+
+          if (myReturn==0): #該筆入庫數量與出庫數量相同(單位已轉換)
+            intag_row.isRemoved=False
+            intag_item.isStockin=False
+            intag_item.count=0
+            break
+
+          if (myReturn>0):  #該筆入庫數量大於出庫數量(單位已轉換)
+            myInCount=myReturn / _reagent.reag_scale
+
+            myInCount=math.floor(myInCount*1000)        # 取小數點3位
+            #myInCount=round(myInCount/1000, 0)         # 取整數, # 2023-07-12 modify
+            myInCount=round(myInCount/1000, 3)          # 2023-10-13 modify
+
+            intag_item.count=myInCount
+            break
+
+          if (myReturn<0):  #該筆入庫數量小於出庫數量(單位已轉換)
+            intag_row.isRemoved=False
+            intag_item.isStockin=False
+            intag_item.count=0
+            temp_count=myReturn
+    else:                               # 全部領料, 待出庫數 == 實際出庫數
+      print("B. 全部領料, 待出庫數 == 實際出庫數...")
+      outtag_item.count = _count
+      outtag_item.isPrinted = False
+      outtag_item.isStockout = True
+
+      print("狀況3/4, 全部領料, 出入庫單位相同/出入庫單位不同")  #出入庫單位相同
+
+      temp_count = _count * -1
+      temp_scale = _reagent.reag_scale
+      for intag_row in s.query(InTag):
+        if (not (intag_row.id==outtag_item.intag_id and intag_row.isRemoved and (not intag_row.isPrinted) and intag_row.isStockin)):
+          continue
+
+        myReturn = intag_row.count * temp_scale + temp_count   #入庫出庫單位轉換
+        print("在庫數: ", myReturn)
+
+        if (myReturn==0): #該筆入庫數量與出庫數量相同(單位已轉換)
+          print("a, 該筆入庫數量與出庫數量相同(單位已轉換)...")
+          intag_row.isRemoved=False
+          intag_item.isStockin=False
+          intag_item.count=0
+          break
+
+        if (myReturn>0):  #該筆入庫數量大於出庫數量(單位已轉換)
+          print("b, 該筆入庫數量大於出庫數量(單位已轉換)...", myReturn, temp_scale)
+          myInCount=myReturn / temp_scale
+          print("b-1, myInCount ",myInCount)
+          # 2023-06-02 modify
+          #myInCount=math.floor(myInCount*10)   # 取小數點1位
+          myInCount=math.floor(myInCount*1000)  # 取小數點3位
+          print("b-2, myInCount ",myInCount)
+
+          #myInCount=round(myInCount/1000, 0)         # 取整數, # 2023-07-12 modify
+          myInCount=round(myInCount/1000, 3)          # 2023-10-13 modify
+          print("b-3, myInCount ",myInCount)
+
+          #intag_item.count=round(myInCount, 2)
+          intag_item.count=myInCount                  # 2023-10-13 modify
           break
 
         if (myReturn<0):  #該筆入庫數量小於出庫數量(單位已轉換)

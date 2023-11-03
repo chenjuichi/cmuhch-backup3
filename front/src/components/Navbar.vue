@@ -208,9 +208,29 @@ export default {
         this.load_2thTable_ok=false;
       }
     },
+    // 2023-11-1 add these watches
+    load_6thTable_ok(val) {
+      console.log("load_6thTable_ok: ", val);
+
+      if (val) {
+        this.load_6thTable_ok=false;
+        this.mqttForAllStationOff();
+      }
+    },
+
+    load_7thTable_ok(val) {
+      console.log("load_7thTable_ok: ", val);
+
+      if (val) {
+        this.load_7thTable_ok=false;
+        this.mqttForAllStationHWOff();
+      }
+    },
+    //
   },
 
   created() {
+    console.log('%cNavbar.vue create()...', 'background-color: yellow; font-size: larger;');
     //disabled browser's back key
     //history.pushState(null, null, location.href);
     //window.onpopstate = function () {
@@ -222,9 +242,11 @@ export default {
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     console.log("current user:",this.currentUser);
 
-    this.load_SingleTable_ok=false;
     this.initAxios();
 
+    this.mqttForAllStationHWOff();      // 2023-11-1 add
+
+    this.load_SingleTable_ok=false;
     this.listStockInTagPrintCount();
   },
 
@@ -353,6 +375,12 @@ export default {
       isOnline: true,
       myTimer: '',            //在component內設定timer, timer的handle
 
+      mqtt_topic:['station1','station2','station3'], // 2023-11-1 add
+      all_station: 1,             // 2023-11-1 add
+      all_layout: 1,              // 2023-11-1 add
+      load_6thTable_ok: false,    // 2023-11-1 add
+      load_7thTable_ok: false,    // 2023-11-1 add
+
       load_SingleTable_ok: false, //for get stockin table data
       load_2thTable_ok: false,    //for get reagent table data
     };
@@ -461,7 +489,86 @@ export default {
 
       console.log("Application is ", this.isOnline);
     },
+    // 2023-10-31 add the following methods
+    async mqttForAllStationHWOff() {
+      console.log("mqttForAllStationHWOff...");
 
+      let path='/mqtt/station';
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led by HW => " + "station: " + this.all_station)
+
+      let payload= {
+        topic: myTopic,
+        layout: '0',
+        pos_begin: '0',
+        pos_end: '0',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off by HW, mqtt ok", res.data.status);
+        if (this.all_station>=3) {
+          this.all_layout=1;
+          this.all_station=1;
+          this.mqttForAllStationOff();           // 2023-10-31 add
+        } else {
+          this.all_station = this.all_station + 1;
+          this.load_7thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_7thTable_ok=false;
+      }
+    },
+
+    async mqttForAllStationOff() {
+      console.log("mqttForAllStationOff...");
+
+      let path='/mqtt/station';
+      let temp_layout=this.all_layout;
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led => " + "station: " + this.all_station + " ,layout: " + this.all_layout)
+
+      let payload= {
+        topic: myTopic,
+        layout: temp_layout.toString(),
+        pos_begin: '1',
+        pos_end: '30',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off, mqtt ok", res.data.status);
+        if (this.all_layout>=5) {
+          this.all_layout=1;
+          if (this.all_station>=3) {
+            this.load_6thTable_ok=false;
+          } else {
+            this.all_station = this.all_station + 1;
+            this.load_6thTable_ok=true;
+          }
+        } else {
+          this.all_layout = this.all_layout + 1;
+          this.load_6thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_6thTable_ok=false;
+      }
+    },
+    //
     fetchFunction() {
       return axios.get('/hello');
     },

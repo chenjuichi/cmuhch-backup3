@@ -606,6 +606,11 @@ export default {
     load_3thTable_ok: false,
 
     load_4thTable_ok: false,  //2023-04-14 add
+    load_6thTable_ok: false,  //2023-09-22 add
+
+    check_batch_ok: false,
+
+    check_reagent_have_grid: true,  //2023-10-31 add
   }),
 
   computed: {
@@ -791,13 +796,17 @@ export default {
     checkDataForSaveButton() {
       if (!!this.editedItem.stockInTag_reagID && !!this.editedItem.stockInTag_EmpID &&
           !!this.editedItem.stockInTag_batch &&
-          !this.errorShowForEmployer && !this.errorShowForReagName) {
+          !this.errorShowForEmployer && !this.errorShowForReagName
+          && this.check_reagent_have_grid  // 2023-10-31 add this condition
+         ) {
         //return this.snackbar ? true : false;
         if (this.snackbar)
           this.close();
           //return true;
+        console.log("button check 1")
         return false;
       } else {
+        console.log("button check 2")
         return true
       }
     },
@@ -937,6 +946,22 @@ export default {
       }
     },
 
+    load_6thTable_ok(val) {
+      console.log("load_6thTable_ok, val: ", val);
+
+      if (val) {
+        if (this.check_batch_ok) {
+          this.check_batch_ok=false;
+          this.tosterOK = false
+          this.save();
+        }
+        else {
+          this.tosterOK = true
+        }
+        this.load_6thTable_ok = false;
+      }
+    },
+
     autocomplete_search(val) {
       val && val !== this.autocomplete_select && this.querySelections(val)
     },
@@ -944,6 +969,8 @@ export default {
   },
 
   created () {
+    console.log('%cStockInTag.vue create()...', 'background-color: yellow; font-size: larger;');
+
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     if (this.currentUser.perm < 1) {
       this.permDialog=true;
@@ -1023,7 +1050,9 @@ export default {
       axios.post(path, payload)
       .then((res) => {
         console.log("GET ok, status: ", res.data.status);
+        this.check_reagent_have_grid=true;    // 2023-10-31 add
         if (!res.data.status) {
+          this.check_reagent_have_grid=false; // 2023-10-31 add
           this.snackbar=true;
           this.snackbar_color='red accent-2';
           this.snackbar_info= '資材暫無儲位資料, 請先設定儲位資料!';
@@ -1203,6 +1232,14 @@ export default {
     save() {
       console.log("click save button, editedIndex: ", this.editedIndex, this.editedItem);
 
+      //this.checkBatch()
+      //console.log("checkBatch, click save...", this.check_batch_ok)
+      //if (!this.check_batch_ok) {
+      //  this.check_batch_ok=true;
+      //  return;
+      //}
+      //console.log("checkBatch click save ok...")
+
       if (this.editedIndex == -1) {    //add
         console.log("click save, add")
         this.load_3thTable_ok=false;
@@ -1232,6 +1269,33 @@ export default {
       }
       this.close()
       */
+    },
+
+    // 2023-09-22 add
+    checkBatch() {
+      console.log("---checkBatch---, editdata:", this.editedItem);
+      //createStockIn
+      const path='/checkBatchForStockIn';
+      let payload= {
+        block: this.editedItem,
+      };
+      axios.post(path, payload)
+      .then(res => {
+        console.log("check batch for new StockIn data, status: ", res.data.status);
+
+        if (res.data.status) {
+          this.check_batch_ok = true;  //false: 關閉錯誤訊息畫面
+        } else {
+          this.check_batch_ok = false;   //true: 顯示錯誤訊息畫面
+        }
+        this.load_6thTable_ok=true;
+      })
+      .catch(err => {
+        console.error(err);
+        this.check_batch_ok = false;   //true: 顯示錯誤訊息畫面
+        this.load_6thTable_ok=false;
+      });
+
     },
 
     updateStockIn(object) {  //編輯 後端table資料
@@ -1297,17 +1361,28 @@ export default {
           console.log("HELLO_2 createStockIn, ", this.temp_editedItem);
           this.editedItem = Object.assign({}, this.defaultItem);
           //this.editedItem.id = res.data.last_id;
-          this.tosterOK = false;  //false: 關閉錯誤訊息畫面
+          //this.tosterOK = false;  //false: 關閉錯誤訊息畫面
 
           this.load_3thTable_ok=true;
         } else {
-          this.tosterOK = true;   //true: 顯示錯誤訊息畫面
+          //this.tosterOK = true;   //true: 顯示錯誤訊息畫面
+          this.snackbar=true;
+          this.snackbar_color='red accent-2';
+          //this.snackbar_info= '錯誤, 資材碼資料重複!';
+          this.snackbar_info= res.data.message;
+          this.snackbar_icon_color= '#adadad';
+
           this.load_3thTable_ok=false;
         }
       })
       .catch(err => {
         console.error(err);
-        this.tosterOK = true;   //true: 顯示錯誤訊息畫面
+        //this.tosterOK = true;   //true: 顯示錯誤訊息畫面
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+
         this.load_3thTable_ok=false;
       });
     },

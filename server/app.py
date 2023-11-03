@@ -62,7 +62,7 @@ host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
 print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
 '''
 # ---version: 2023-08-28 -----------------------
-print('Build:  ' + '\033[42m' + '2023-08-31' + '\033[0m' + '\n')  # 2023-08-09 add
+print('Build:  ' + '\033[42m' + '2023-11-01' + '\033[0m' + '\n')  # 2023-08-09 add
 
 host_ip = local_ip     # 2023-08-09 add
 
@@ -213,9 +213,11 @@ def mqtt_station():
 
     myReturnMsg = myTopic + ' success'
 
-    print("hello /mqtt/station: " + myTopic)
-    print('\033[46m' +  'message: ' + '\033[0m' +
-          myTopic + ' ' + myLayout +' '+ myPosBegin + ' ' + myPosEnd + ' ' + myMsg)
+    print("hello /mqtt/station: " + myTopic + " , welcome you!")
+    #print(type(myTopic))
+    print('\033[46m' + 'message: ' + '\033[0m' +
+          '\033[91m' + myTopic +
+          '\033[0m'  + ' ' + myLayout +' '+ myPosBegin + ' ' + myPosEnd + ' ' + myMsg)
 
     # 發布訊息主題myTopic
     MQTT_MSG = json.dumps(

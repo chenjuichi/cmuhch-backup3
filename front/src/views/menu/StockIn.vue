@@ -266,6 +266,9 @@ export default {
     currentLedRange_begin: 1,
     currentLedRange_end: 2,
 
+    all_station: 1,     // 2023-10-31 add
+    all_layout: 1,      // 2023-10-31 add
+
     current_unit: '',   //add
 
     pre_topic: 0,
@@ -299,6 +302,9 @@ export default {
     load_3thTable_ok: false,
     load_4thTable_ok: false,
     load_5thTable_ok: false,
+
+    load_6thTable_ok: false,    // 2023-11-1 add
+    load_7thTable_ok: false,    // 2023-11-1 add
   }),
 
   computed: {
@@ -377,9 +383,30 @@ export default {
           this.isEmptyRecord = true;    //2023-02-14 add
       }
     },
+    // 2023-11-1 add these watches
+    load_6thTable_ok(val) {
+      console.log("load_6thTable_ok: ", val);
+
+      if (val) {
+        this.load_6thTable_ok=false;
+        this.mqttForAllStationOff();
+      }
+    },
+
+    load_7thTable_ok(val) {
+      console.log("load_7thTable_ok: ", val);
+
+      if (val) {
+        this.load_7thTable_ok=false;
+        this.mqttForAllStationHWOff();
+      }
+    },
+    //
   },
 
   created () {
+    console.log('%cStockIn.vue create()...', 'background-color: yellow; font-size: larger;');
+
     this.currentUser = JSON.parse(localStorage.getItem("loginedUser"));
     if (this.currentUser.perm == 0) {
       this.permDialog=true;
@@ -387,17 +414,18 @@ export default {
     }
 
     this.pagination.itemsPerPage=this.currentUser.setting_items_per_page
-
-    this.load_SingleTable_ok=false;
+    //this.load_SingleTable_ok=false;     // 2023-10-30
     this.initAxios();
 
-    this.listStockInItems();
+    //this.listStockInItems();            // 2023-10-30
 
-    //this.initialize();
+    this.initialize();                    // 2023-10-30
   },
 
   methods: {
     initialize () {
+      this.mqttForAllStationHWOff();           // 2023-11-1 add
+
       this.load_SingleTable_ok=false;
       this.listStockInItems();
     },
@@ -544,12 +572,16 @@ export default {
     },
 
     async mqttForStationOff() {
+      console.log("mqttForStationOff...");
+
       let path='/mqtt/station';
-      let temp_layout='0';
-      let range_begin='0';
-      let range_end='0';
+      // 2023-10-31 modify the following block
       let temp_sw= 'off';
-      let myTopic=this.pre_topic;
+      let temp_layout=this.currentLedLayout;
+      let range_begin=this.currentLedRange_begin;
+      let range_end=this.currentLedRange_end;
+      let myTopic=this.mqtt_topic[parseInt(this.currentLedStation) - 1]
+      console.log("station: " +"layout: " + temp_layout + " begin: " + range_begin + " end: " + range_end, this.model, this.items[this.model])
       let payload= {
         topic: myTopic,
         layout: temp_layout,
@@ -557,10 +589,10 @@ export default {
         pos_end: range_end,
         msg: temp_sw,
       };
-
+      //
       try {
         let res = await axios.post(path, payload);
-        console.log("off led, mqtt ok", res.data.status);
+        console.log("Led has been powered off, mqtt ok", res.data.status);
         this.load_5thTable_ok=true;
       } catch (err) {
         console.error(err)
@@ -572,7 +604,86 @@ export default {
         this.load_5thTable_ok=false;
       }
     },
+    // 2023-10-31 add the following methods
+    async mqttForAllStationHWOff() {
+      console.log("mqttForAllStationHWOff...");
 
+      let path='/mqtt/station';
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led by HW => " + "station: " + this.all_station)
+
+      let payload= {
+        topic: myTopic,
+        layout: '0',
+        pos_begin: '0',
+        pos_end: '0',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off by HW, mqtt ok", res.data.status);
+        if (this.all_station>=3) {
+          this.all_layout=1;
+          this.all_station=1;
+          this.mqttForAllStationOff();           // 2023-10-31 add
+        } else {
+          this.all_station = this.all_station + 1;
+          this.load_7thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_7thTable_ok=false;
+      }
+    },
+
+    async mqttForAllStationOff() {
+      console.log("mqttForAllStationOff...");
+
+      let path='/mqtt/station';
+      let temp_layout=this.all_layout;
+      let myTopic=this.mqtt_topic[parseInt(this.all_station) - 1]
+      console.log("Get ready to turn off all stations led => " + "station: " + this.all_station + " ,layout: " + this.all_layout)
+
+      let payload= {
+        topic: myTopic,
+        layout: temp_layout.toString(),
+        pos_begin: '1',
+        pos_end: '30',
+        msg: 'off',
+      };
+
+      try {
+        let res = await axios.post(path, payload);
+        console.log("All stations led has been powered off, mqtt ok", res.data.status);
+        if (this.all_layout>=5) {
+          this.all_layout=1;
+          if (this.all_station>=3) {
+            this.load_6thTable_ok=false;
+          } else {
+            this.all_station = this.all_station + 1;
+            this.load_6thTable_ok=true;
+          }
+        } else {
+          this.all_layout = this.all_layout + 1;
+          this.load_6thTable_ok=true;
+        }
+      } catch (err) {
+        console.error(err)
+        console.log("通訊錯誤!");
+        this.snackbar_color='red accent-2';
+        this.snackbar=true;
+        this.snackbar_info= '通訊錯誤!';
+        this.snackbar_icon_color= '#adadad';
+        this.load_6thTable_ok=false;
+      }
+    },
+    //
     listActionClick_m(index) {
       if (this.items.length==0) {
         console.log("HELLO1...", index, this.items[index]);

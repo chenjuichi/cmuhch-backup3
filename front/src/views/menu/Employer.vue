@@ -68,6 +68,21 @@
                           ></v-select>
                         </v-col>
                       </v-row>
+
+                      <v-row  v-if="editedIndex != -1">
+                        <v-col cols="12" md="2"></v-col>
+                        <v-col cols="12" md="9">
+                          <v-subheader style="margin-bottom: 0; height: 18px; font-size: 18px;">
+                            <span style="font-weight: bold;">重設密碼預設值</span>
+                            <span style="font-weight: normal;">(a12345678)</span>
+                          </v-subheader>
+                          <v-radio-group v-model="password_reset" hide-details row style="margin-top: 0; position: relative; left: 15px;">
+                            <v-radio value="no" label="否"></v-radio>
+                            <v-radio value="yes" label="是"></v-radio>
+                          </v-radio-group>
+                        </v-col>
+                        <v-col cols="12" md="1"></v-col>
+                      </v-row>
                     </v-container>
                   </v-card-text>
 
@@ -231,15 +246,18 @@ export default {
       emp_id: '',
       emp_name: '',
       emp_dep: '',
+      password_reset: 'no',   //2023-12-07 add
     },
     defaultItem: {
       emp_id: '',
       emp_name: '',
       emp_dep: '',
+      password_reset: 'no',   //2023-12-07 add
     },
     load_SingleTable_ok: false, //for get employer table data
     load_2thTable_ok: false,    //for get department table data
     //temp_css: 'add_modalbox',
+    password_reset: 'no', // 預設值 'yes', 2023-12-07 add
   }),
 
   computed: {
@@ -410,6 +428,7 @@ export default {
 
       this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
+      this.editedItem['password_reset'] = 'no';   //2023-12-07 add
       this.dialog = true;
     },
 
@@ -511,7 +530,9 @@ export default {
         emp_id: object.emp_id,
         emp_name: object.emp_name,
         dep: object.emp_dep,
+        password_reset: this.password_reset,    //2023-12-07 add
       };
+      console.log("payload: ", payload);
       axios.post(path, payload)
       .then(res => {
         console.log("update user data status: ", res.data.status)

@@ -31,6 +31,7 @@ import RePrintTag from '../views/menu/RePrintTag.vue'
 import StorageRecord from '../views/menu/StorageRecord.vue'
 import Correction from '../views/menu/Correction.vue'
 
+import WebRTC from '../components/MyWebRTC.vue'   //2023-12-08 add
 
 Vue.use(VueRouter)
 
@@ -68,6 +69,8 @@ const routes = [
   { path: '/storageRec', name: 'StorageRecord', component: StorageRecord},
   { path: '/correction', name: 'Correction', component: Correction},
   //{ path: '/barcode', name: 'BarCode', component: BarCode}, //for test
+
+  //{ path: '/webrtc', name: 'WebRTC', component: WebRTC},    // 2023-12-08 add
 ]
 
 const router = new VueRouter({

@@ -123,6 +123,9 @@ def update_user():
 
     dep = (request_data['dep'] or '')  # convert null into empty string
 
+    _password_reset = request_data['password_reset']    # 2023-12-07 add
+    newPassword='a12345678'                             # 2023-12-07 add
+
     s = Session()
 
     department = s.query(Department).filter_by(dep_name=dep).first()
@@ -130,8 +133,20 @@ def update_user():
         return_value = False  # if the user's department does not exist
 
     if return_value:
-        s.query(User).filter(User.emp_id == _emp_id).update(
-            {"emp_name": _emp_name, "dep_id": department.id})
+        ### 2023-12-07 modify the following block
+        if _password_reset=='yes':
+          s.query(User).filter(User.emp_id == _emp_id).update(
+              { "emp_name": _emp_name,
+                "dep_id": department.id,
+                "password": generate_password_hash(
+                  newPassword, method='sha256')
+              })
+        else:
+          s.query(User).filter(User.emp_id == _emp_id).update(
+              { "emp_name": _emp_name,
+                "dep_id": department.id,
+              })
+        ###
         s.commit()
 
     s.close()

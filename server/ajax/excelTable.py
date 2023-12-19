@@ -76,7 +76,8 @@ def export_to_csv_for_stock_in_out():
 
           print("excel print: ", obj)
 
-          if (obj['isIn']):
+          #if (obj['isIn']):                          # 2023-12-7 modify
+          if (obj['stockInTag_rePrint']=='入庫'):     # 2023-12-7 modify
               obj['stockInTag_Employer'] = '入庫人員: ' + \
                   obj['stockInTag_Employer']
               obj['stockInTag_Date'] = '入庫日期: ' + \
@@ -150,9 +151,26 @@ def export_to_csv_for_stock_in_out():
           myFile = 'print.csv'
 
           os.chdir(myDir)         # 進入csv目錄
-          if os.path.isfile(mypath):  #目錄內, 目標檔案存在
-              os.remove(myFile)       #刪除目標檔案
 
+          ### 2023-12-7 modify the following block
+          temp_file_name = myFile.replace(".csv", "_temp.csv")
+          #if os.path.isfile(temp_file_name):
+          os.getcwd()
+          print("kk 當前工作目錄:%s" % os.getcwd())
+          if os.path.exists(temp_file_name):
+            os.remove(temp_file_name)       #刪除目標檔案
+
+          if os.path.isfile(mypath):  #目錄內, 目標檔案存在
+
+            try:
+                os.remove(myFile)
+            except PermissionError as e:
+                print(f"無法刪除檔案: {e}")
+                # 使用臨時檔案名稱
+                myFile = temp_file_name
+
+            #os.remove(myFile)       #刪除目標檔案
+          ###
           csvfile = open(myFile, 'w', newline='')
           try:
               fieldnames = ['name1', 'name2',

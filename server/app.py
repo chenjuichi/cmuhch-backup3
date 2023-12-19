@@ -1,24 +1,17 @@
 import socket
-import pathlib
 import json
 
-#import threading  # 2022-12-31 add, 2023-08-09 mark
-#import logging    # 2022-12-31 add, 2023-08-09 mark
 import ctypes     # 2022-12-31 add
 
-##import wmi        # 2023-01-31 add
-##c = wmi.WMI()     # 2023-01-31 add
 # --------------------------
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mqtt import Mqtt
 
-#from flask_restful import Api
+#from flask_socketio import SocketIO    # 2024-12-11 add
 
 # --------------------------
-
-#from database.tables import Session
 
 from ajax.getTable import getTable
 from ajax.createTable import createTable
@@ -29,53 +22,17 @@ from ajax.listTable import listTable
 
 from ajax.excelTable import excelTable
 
+#from ajax.webRTC import webRTC, init_app   # 2023-12-08 add
 
 # --------------------------
-
 
 app = Flask(__name__)  # 初始化Flask物件
 
-#api = Api(app)
-# 2023-08-09 mark the following block
-#hostName = socket.gethostname()
-#local_ip = socket.getaddrinfo(hostName, None)
-#temp_size = len(local_ip)
-#for i in range(temp_size):
-#    print("<AddressFamily: ", local_ip[i])
-#
-#host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
-#print("<AddressFamily: ", local_ip[1][4])
-#print('system Lan ip: ' + '\033[46m' + host_ip_for_wifi + '\033[0m')
-#
-# --------------------------
-
 hostName = socket.gethostname()             # 2023-08-09 unmark
 local_ip = socket.gethostbyname(hostName)   # get local ip address, 2023-08-09 add
-print('\n' + 'Lan ip: ' + '\033[46m' + local_ip + '\033[0m')  # 2023-08-09 add
-
-'''
-local_ip = socket.getaddrinfo(hostName, None)
-print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
-
-host_ip_for_lan = local_ip[3][4][0]  # for 有線網卡
-host_ip_for_wifi = local_ip[1][4][0]  # for 無線網卡
-print("system Lan ip:" + host_ip_for_lan, ", and wifi ip:" + host_ip_for_wifi)
-'''
-# ---version: 2023-08-28 -----------------------
-print('Build:  ' + '\033[42m' + '2023-11-01' + '\033[0m' + '\n')  # 2023-08-09 add
-
+print('\n' + 'Lan ip: ' + '\033[0m' + '\033[46m' + local_ip + '\033[0m')  # 2023-12-08 modify
+print('Build:  ' + '\033[0;37;42m' + '2023-12-11' + '\033[0m' + '\n')
 host_ip = local_ip     # 2023-08-09 add
-
-#host_ip = '192.168.0.12'    # for home #//////2/2-
-# host_ip = '10.108.249.107'  # for cmuhch #//////2/2-
-# host_ip = '192.168.32.188'  # for zh  #//////2/2-
-# host_ip = '192.168.43.117'  # for mobile  #//////2/2-
-# host_ip = '10.108.249.100'  # for cmuhch 正式
-
-
-# for test
-#drive = pathlib.Path.home().drive
-# print(drive)
 
 # this will prevent the screen saver or sleep.
 ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
@@ -87,9 +44,7 @@ ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
 ##SwitchDesktop = user32.SwitchDesktop
 ##DESKTOP_SWITCHDESKTOP = 0x0100
 
-
 # --------------------------
-
 
 app.config['MQTT_BROKER_URL'] = host_ip
 app.config['MQTT_BROKER_PORT'] = 1883
@@ -105,6 +60,9 @@ app.config['MQTT_TLS_ENABLED'] = False
 # 建立 MQTT Client 物件
 mqtt_client = Mqtt(app, connect_async=True)
 
+mqttTopic_for_reconnect = "reconnect"
+mqttTopic_for_online = "online"
+
 # --------------------------
 
 app.register_blueprint(getTable)
@@ -116,13 +74,14 @@ app.register_blueprint(listTable)
 
 app.register_blueprint(excelTable)
 
-
+###
+# -------------------------- 2023-12-08 add the following block
+#app.register_blueprint(webRTC, url_prefix='/webrtc')      # 使用絕對路徑, 並定義呼叫的url_prefix
+#init_app(app)     # 初始化 Socket.IO
 # --------------------------
-
+###
 
 CORS(app, resources={r'/*': {'origins': '*'}})
-# CORS(app)
-
 
 # --------------------------
 
@@ -140,6 +99,12 @@ def handle_mqtt_message(client, userdata, message):
     #print(data['payload'], " on line...")
     #print("=== MQTT ===")
     #
+    # 2023-11-21 add the following block
+    if message.topic == mqttTopic_for_reconnect:
+      print(f"Received message: {message.payload.decode()}")
+    if message.topic == mqttTopic_for_online:
+      print(f"Received message: {message.payload.decode()}")
+    #
 
 
 @mqtt_client.on_connect()
@@ -155,6 +120,7 @@ def on_connect(client, userdata, flags, rc):
 
 @mqtt_client.on_log()
 def handle_logging(client, userdata, level, buf):
+    #print("mqtt_client_log: ", client, userdata, level, buf)
     if level == 16:
         #print('MQTT_LOG_DEBUG: {}'.format(buf))
         pass  # MQTT_LOG_DEBUG
@@ -177,12 +143,6 @@ def hello():
     return jsonify(output)
 
 
-#@app.teardown_appcontext
-#def shutdown_session(exception=None):
-#  s = Session()
-#  s.remove()
-
-
 @app.route("/mqtt/stationA", methods=['POST'])
 def mqtt_stationA():
     request_data = request.get_json()
@@ -200,8 +160,6 @@ def mqtt_stationA():
     })
 
 
-# @app.route("/mqtt/station1", methods=['POST'])
-# def mqtt_station1():
 @app.route("/mqtt/station", methods=['POST'])
 def mqtt_station():
     request_data = request.get_json()
@@ -234,5 +192,5 @@ def mqtt_station():
 
 
 if __name__ == '__main__':
-    #    app.run(host='0.0.0.0', port=2020, debug=True)
-    app.run(host=host_ip, port=6060, debug=True)
+
+  app.run(host=host_ip, port=6060, debug=True)

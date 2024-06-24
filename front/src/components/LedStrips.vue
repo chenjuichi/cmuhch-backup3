@@ -76,7 +76,7 @@
     </v-col>
   </v-row>
 </v-app>
-</div>
+
 </template>
 
 <script>

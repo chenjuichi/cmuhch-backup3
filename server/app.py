@@ -1,6 +1,5 @@
 import socket
 import json
-
 import ctypes     # 2022-12-31 add
 
 # --------------------------
@@ -9,17 +8,13 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_mqtt import Mqtt
 
-#from flask_socketio import SocketIO    # 2024-12-11 add
-
 # --------------------------
 
 from ajax.getTable import getTable
 from ajax.createTable import createTable
 from ajax.updateTable import updateTable
 from ajax.deleteTable import deleteTable
-
 from ajax.listTable import listTable
-
 from ajax.excelTable import excelTable
 
 #from ajax.webRTC import webRTC, init_app   # 2023-12-08 add
@@ -31,18 +26,13 @@ app = Flask(__name__)  # 初始化Flask物件
 hostName = socket.gethostname()             # 2023-08-09 unmark
 local_ip = socket.gethostbyname(hostName)   # get local ip address, 2023-08-09 add
 print('\n' + 'Lan ip: ' + '\033[0m' + '\033[46m' + local_ip + '\033[0m')  # 2023-12-08 modify
-print('Build:  ' + '\033[0;37;42m' + '2023-12-11' + '\033[0m' + '\n')
+print('Build:  ' + '\033[0;37;42m' + '2024-03-27' + '\033[0m' + '\n')
 host_ip = local_ip     # 2023-08-09 add
 
 # this will prevent the screen saver or sleep.
 ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)
 # your code and operations
 # ctypes.windll.kernel32.SetThreadExecutionState(0x80000000) #set the setting back to normal
-
-##user32 = ctypes.windll.User32
-##OpenDesktop = user32.OpenDesktopA
-##SwitchDesktop = user32.SwitchDesktop
-##DESKTOP_SWITCHDESKTOP = 0x0100
 
 # --------------------------
 
@@ -69,9 +59,7 @@ app.register_blueprint(getTable)
 app.register_blueprint(updateTable)
 app.register_blueprint(deleteTable)
 app.register_blueprint(createTable)
-
 app.register_blueprint(listTable)
-
 app.register_blueprint(excelTable)
 
 ###
@@ -84,7 +72,6 @@ app.register_blueprint(excelTable)
 CORS(app, resources={r'/*': {'origins': '*'}})
 
 # --------------------------
-
 
 @mqtt_client.on_message()
 def handle_mqtt_message(client, userdata, message):
@@ -120,7 +107,6 @@ def on_connect(client, userdata, flags, rc):
 
 @mqtt_client.on_log()
 def handle_logging(client, userdata, level, buf):
-    #print("mqtt_client_log: ", client, userdata, level, buf)
     if level == 16:
         #print('MQTT_LOG_DEBUG: {}'.format(buf))
         pass  # MQTT_LOG_DEBUG
@@ -128,13 +114,12 @@ def handle_logging(client, userdata, level, buf):
         print('Error: {}'.format(buf))
     # pass
 
-
 # --------------------------
-
 
 @app.route("/")
 def helloWorld():
     return "Hello..."
+
 
 @app.route('/hello', methods=['GET'])
 def hello():
@@ -187,9 +172,7 @@ def mqtt_station():
         'status': myReturnMsg,
     })
 
-
 # --------------------------
-
 
 if __name__ == '__main__':
 

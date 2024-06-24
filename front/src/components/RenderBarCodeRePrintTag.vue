@@ -35,6 +35,11 @@ export default {
     alpha: {
       type: String,
       required: true,
+    },
+    //2024-03-27 add
+    flag: {
+      type: String,
+      required: true,
     }
   },
 
@@ -53,6 +58,7 @@ export default {
   watch: {
     sidebar(val) {
       this.fields.push(val);
+      console.log("watch...")
       console.log("sidebar:", val);
       console.log("fields:", this.fields);
     },
@@ -87,7 +93,7 @@ export default {
   },
 
   created () {
-    console.log("RenderBarCodeRePrintTag, created()...");
+    console.log("RenderBarCodeRePrintTag, created()..., sidebar: ", this.sidebar);
   },
 
   mounted() {
@@ -100,36 +106,55 @@ export default {
 
   methods: {
     formField() {
-      console.log("RenderBarCodeRePrintTag, formField()...");
+      console.log("RenderBarCodeRePrintTag, formField()...", this.fields);
 
       this.regFields=[];
-      //let index_alpha = 0;
-      //var i = ch.charCodeAt(index_alpha);
 
       let temp_len=this.fields.length;
-      console.log("temp_len: ", temp_len);
-      console.log("this.fields: ", this.fields);
-      for (let i=0; i < temp_len; i++) {
-        console.log("temp_len, type: ", typeof(this.fields[temp_len-1][i]), this.fields[temp_len-1][i]);
-        if (typeof(this.fields[temp_len-1][i]) !="undefined") {
-          //console.log("RenderRePrintTag, tag obj: ", 'stockInTag_cnt' in this.fields[temp_len-1][i]);
-          //if ('stockInTag_cnt' in this.fields[temp_len-1][i]) {   //入庫
-          console.log("this.fields[temp_len-1][i].stockInTag_rePrint ", this.fields[temp_len-1][i].stockInTag_rePrint)
-          if (this.fields[temp_len-1][i].stockInTag_rePrint=='入庫') {  //2023-08-08 modify
-            let temp_tags=this.fields[temp_len-1][i].stockInTag_cnt;
+      let temp_len2=this.fields[temp_len-1].length;
+      let temp_len3=temp_len-1;
+      let temp_len4=temp_len2-1;  //2024-03-27 add
+      console.log("formField(), temp_len, temp_len2, flag: ", temp_len, temp_len2, this.flag);
+      for (let ttt=0; ttt < temp_len; ttt++)
+        console.log("for loop: ", this.fields[ttt]);
+
+      console.log("this.fields, this.fields[temp_len3]: ", this.fields, this.fields[temp_len3]);
+      // 2024-01-11 modify this for statement
+      //for (let i=0; i < temp_len; i++) {
+      for (let i=0; i < temp_len2; i++) {
+      // end
+        // 2024-01-11 modify this if statement
+        //if (typeof(this.fields[temp_len-1][i]) !="undefined") {
+
+        console.log("temp_len2, i, this.fields[temp_len3][i]: ", temp_len2,  i, this.fields[temp_len3][i]);
+
+        if (typeof(this.fields[temp_len3][i]) !="undefined") {
+        // end
+          // 2024-01-11 modify this if statement
+          //if (this.fields[temp_len-1][i].stockInTag_rePrint=='入庫') {  //2023-08-08 modify
+          if (this.flag=='stockin' || (this.flag=='' && this.fields[temp_len3][i].stockInTag_rePrint=='入庫')) {
+          // end
+            // 2024-01-11 modify the following line
+            //let temp_tags=this.fields[temp_len-1][i].stockInTag_cnt;
+            let temp_tags=this.fields[temp_len3][i].stockInTag_cnt;
+            // end
             console.log("入庫, temp_tags: ", temp_tags)
             for (let j=0; j < temp_tags; j++) {
+              // 2024-01-11 modify the following block
+              /*
               this.fields[temp_len-1][i]['stockInTag_cnt']=1;
               this.fields[temp_len-1][i]['stockInTag_rePrint']='入庫';  //2023-08-08 add
               //this.fields[temp_len-1][i]['stockInTag_alpha']=this.alpha;  //2023-01-03 add
               this.regFields.push(this.fields[temp_len-1][i]);
+              */
+              this.fields[temp_len3][i]['stockInTag_cnt']=1;
+              this.fields[temp_len3][i]['stockInTag_rePrint']='入庫';
+              this.regFields.push(this.fields[temp_len3][i]);
+              // end
             }
-            // 2023-08-08 add the following block
-            //this.regFields = this.regFields.map(object => {
-            //  return {...object, stockInTag_rePrint: '入庫' };
-            //});
-            //
           } else {   //出庫
+            // 2024-01-11 modify the following block
+            /*
             let temp_tags=this.fields[temp_len-1][i].stockOutTag_cnt;
             if (typeof(temp_tags) == "undefined") {
               temp_tags=this.fields[temp_len-1][i].stockInTag_cnt;
@@ -141,27 +166,25 @@ export default {
               //this.fields[temp_len-1][i]['stockOutTag_alpha']=this.alpha;  //2023-01-03 add
               this.regFields.push(this.fields[temp_len-1][i]);
             }
-            // 2023-08-08 add the following block
-            //this.regFields = this.regFields.map(object => {
-            //  return {...object, stockInTag_rePrint: '出庫' };
-            //});
-            //
+            */
+            let temp_tags=this.fields[temp_len3][i].stockOutTag_cnt;
+            if (typeof(temp_tags) == "undefined") {
+              temp_tags=this.fields[temp_len3][i].stockInTag_cnt;
+            }
+            console.log("出庫, temp_tags: ", temp_tags)
+            for (let j=0; j < temp_tags; j++) {
+              this.fields[temp_len3][i]['stockOutTag_cnt']=1;
+              this.fields[temp_len3][i]['stockInTag_rePrint']='出庫';
+              this.regFields.push(this.fields[temp_len3][i]);
+            }
+            // end
           }
-          //console.log("RenderBarCodeRePrintTag, this.alpha: ", this.alpha)
         }
       }
       console.log("this.regFields: ", this.regFields);
 
-
       this.waiting_in_total_tags=this.regFields.length;
       console.log("this.regFields: ", this.regFields);
-      /*
-      let uniqueRegFields = [...new Set(this.regFields)];
-      console.log("uniqueRegFields: ", uniqueRegFields);
-      this.load_SingleTable_ok=false;
-      this.getLastAlphaForUniqueStockIn(uniqueRegFields);
-      */
-      //this.$emit('waitTags', this.waiting_in_total_tags);
     },
     /*
     getLastAlphaForUniqueStockIn(uniqueArray) {

@@ -63,7 +63,7 @@
 
           </template>
           <template v-slot:body.append>
-              <tr style="height=60px important;">
+              <tr style="height:60px important;">
                 <td></td>
                 <td colspan="8">
                   <!-- 查詢 -->

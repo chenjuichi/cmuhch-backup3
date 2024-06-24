@@ -91,8 +91,9 @@
       right
       app
     >
-
-    <SideBar :sidebar="selected" :drawer="drawer" :alpha="last_alpha" @waitTags="onWaitTags"></SideBar>
+    <!--2024-03-27 modify-->
+    <!--<SideBar :sidebar="selected" :drawer="drawer" :alpha="last_alpha" @waitTags="onWaitTags"></SideBar>-->
+    <SideBar :sidebar="selected" :drawer="drawer" :alpha="last_alpha" :flag="sidebar_flag" @waitTags="onWaitTags"></SideBar>
 
     </v-navigation-drawer>
 
@@ -143,6 +144,7 @@ export default {
   },
 
   data: () => ({
+    sidebar_flag: 'stockin',  //2024-03-27
     currentUser: {},
 
     total_tags: 0,

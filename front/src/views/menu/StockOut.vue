@@ -57,7 +57,7 @@
               <span class="stockout_str" style="display:table-cell; vertical-align:middle; font-weight: bold; font-size: 1em;">領料數量</span>
             </v-col>
 
-            <v-col cols="12" md="2" align="left" class="pl-0 mx-1" style="max-width:120px; width=120px;">
+            <v-col cols="12" md="2" align="left" class="pl-0 mx-1" style="max-width:120px; width:120px;">
               <vue-numeric-input
                 v-model="stockOutTag_cnt"
                 :min="1"
@@ -71,7 +71,7 @@
               </span>
             </v-col>
 
-            <v-col cols="12" md="1" align="right" class="pl-0 mx-1" style="max-width: 70px; width=120px; text-align: center; position:relative; top:-10px;">
+            <v-col cols="12" md="1" align="right" class="pl-0 mx-1" style="max-width: 70px; width:120px; text-align: center; position:relative; top:-10px;">
               <!--<img v-show="stockOutTag_reagID!=''" v-on:click="redirect_to_mqtt" :src="home_url" alt="Loading" style="height: 3vw;" v-bind:alt="pic">-->
               <img v-show="stockOutTag_reagID!=''" @click="redirect_to_mqtt" :src="home_url" alt="Loading" style="height: 3vw;">
             </v-col>

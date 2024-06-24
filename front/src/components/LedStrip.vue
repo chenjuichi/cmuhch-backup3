@@ -113,12 +113,23 @@
 
       <div class="container_tab1" style="width: 885px; padding: 0px 5px 0px 5px; border-radius: 10px; height:55px;">
         <div style="color: white; font-size: 14px; text-align: center;">
+          <!--2024-02-26 modify-->
+        <!--
           <p
             v-for="field in selectedLeds.led2"
             style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;"
             v-model="field.value">
             {{ field.value }}
           </p>
+        -->
+          <p
+            v-for="(field, index) in selectedLeds.led2"
+            :key="index"
+            style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;">
+            <span>{{ field.value }}</span>
+            <input type="text" v-bind:value="field.value" @input="updateValue(index, $event)">
+          </p>
+
         </div>
         <div
           class="dot"
@@ -211,12 +222,23 @@
 
       <div class="container_tab1" style="width: 885px; padding: 0px 5px 0px 5px; border-radius: 10px; height:55px;">
         <div style="color: white; font-size: 14px; text-align: center;">
+          <!--2024-02-26 modify-->
+          <!--
           <p
             v-for="field in selectedLeds.led3"
             style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;"
             v-model="field.value">
             {{ field.value }}
           </p>
+          -->
+          <p
+            v-for="(field, index) in selectedLeds.led3"
+            :key="index"
+            style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;">
+            <span>{{ field.value }}</span>
+            <input type="text" v-bind:value="field.value" @input="updateValue(index, $event)">
+          </p>
+
         </div>
         <div
           class="dot"
@@ -309,12 +331,23 @@
 
       <div class="container_tab1" style="width: 885px; padding: 0px 5px 0px 5px; border-radius: 10px; height:55px;">
         <div style="color: white; font-size: 14px; text-align: center;">
+          <!--2024-02-26 modify-->
+          <!--
           <p
             v-for="field in selectedLeds.led4"
             style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;"
             v-model="field.value">
             {{ field.value }}
           </p>
+          -->
+          <p
+            v-for="(field, index) in selectedLeds.led4"
+            :key="index"
+            style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;">
+            <span>{{ field.value }}</span>
+            <input type="text" v-bind:value="field.value" @input="updateValue(index, $event)">
+          </p>
+
         </div>
         <div
           class="dot"
@@ -406,12 +439,23 @@
 
       <div class="container_tab1" style="width: 885px; padding: 0px 5px 0px 5px; border-radius: 10px; height:55px;">
         <div style="color: white; font-size: 14px; text-align: center;">
+          <!--2024-02-26 modify-->
+          <!--
           <p
             v-for="field in selectedLeds.led5"
             style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;"
             v-model="field.value">
             {{ field.value }}
           </p>
+          -->
+          <p
+            v-for="(field, index) in selectedLeds.led5"
+            :key="index"
+            style="width: 25px; height: 25px; margin: 0px 2px 0px 2px; display:inline; float:left;">
+            <span>{{ field.value }}</span>
+            <input type="text" v-bind:value="field.value" @input="updateValue(index, $event)">
+          </p>
+
         </div>
         <div
           class="dot"

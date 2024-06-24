@@ -94,7 +94,7 @@ export default {
   },
 
   created() {
-    console.log("BarCodeRePrintTag, created()...");
+    console.log("BarCodeRePrintTag, created()..., barcode_data: ", this.barcode_data);
 
     this.initAxios();
   },
@@ -313,19 +313,7 @@ export default {
         this.load_2thTable_ok=false;
       });
     },
-    /*
-    assignLastAlphaForStockOut() {
-      let temp1_len=this.last_alpha_records.length;
-      let temp2_len=this.temp_barcode_data.length;
-      console.log("this.last_alpha_records", this.temp_barcode_data, this.last_alpha_records)
-      for (let i=0; i<temp1_len; i++) {
-        for (let j=0; j<temp2_len; j++) {
-          if (this.temp_barcode_data[j].stockOutTag_reagID==this.last_alpha_records[i].reagent_id)
-            this.temp_barcode_data[j].stockOutTag_alpha=this.last_alpha_records[i].lastAlpha;
-        }
-      }
-    },
-    */
+
     printBarcode() {
       console.log("BarCodeRePrintTag, printBarcode(), ", this.temp_barcode_data);
 
@@ -338,47 +326,19 @@ export default {
 
       let barcode_Desserts = Object.assign([], this.temp_barcode_data);
       console.log("StockInTagPrint, exportToCSV, Axios post data..., ", this.temp_barcode_data, barcode_Desserts);
-      // 2023-08-10, modify the following block
-      //console.log("barcode_Desserts, temp_barcode_data: ", barcode_Desserts, this.temp_barcode_data);
-      /*
-      let object_Desserts = this.temp_barcode_data.map(({
-        stockInTag_reagID,
-        stockInTag_batch,
-        stockInTag_Date,
-        stockInTag_Employer,
-        stockInTag_reagTemp,
-        stockInTag_alpha,
-        stockInTag_cnt,
-        stockInTag_rePrint,
-        isIn,
-        stockInTag_reagName,
-      }) => ({
-        stockInTag_reagID,
-        stockInTag_batch,
-        stockInTag_Date,
-        stockInTag_Employer,
-        stockInTag_reagTemp,
-        stockInTag_alpha,
-        stockInTag_cnt,
-        stockInTag_rePrint,
-        isIn,
-        //stockInTag_reagName,
-        name1: stockInTag_reagName.length > 25 ? stockInTag_reagName.slice(0,25) : stockInTag_reagName,
-        name2: stockInTag_reagName.length > 25 ? stockInTag_reagName.slice(25) : ' '
-      }))
-      */
 
       let object_Desserts = Object.assign([], this.temp_barcode_data);
-      //console.log("1. object_Desserts: ", object_Desserts);
-      ////delete object_Desserts.stockInTag_rePrint
-      ////console.log("2. object_Desserts: ", object_Desserts);
+
       //add name1, name2 key/value
       object_Desserts.forEach((item) => {
-        item.name1 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(0,25) : item.stockInTag_reagName;
-        item.name2 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(25) : ' '
+        // 2024-01-11 modify this the following block
+        //item.name1 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(0,25) : item.stockInTag_reagName;
+        item.name1 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(0,25).trim() : item.stockInTag_reagName;
+        //item.name2 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(25) : ' '
+        item.name2 = item.stockInTag_reagName.length > 25 ? item.stockInTag_reagName.slice(25, 50).trim() : ' ';
+        // end
       })
-      //console.log("3. object_Desserts: ", object_Desserts);
-      // end block
+
       console.log("StockInTagPrint, exportToCSV, Axios post data..., ", this.temp_barcode_data, barcode_Desserts, object_Desserts);
 
       const path = '/exportToCSVForStockInOut';

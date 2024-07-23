@@ -26,7 +26,7 @@ app = Flask(__name__)  # 初始化Flask物件
 hostName = socket.gethostname()             # 2023-08-09 unmark
 local_ip = socket.gethostbyname(hostName)   # get local ip address, 2023-08-09 add
 print('\n' + 'Lan ip: ' + '\033[0m' + '\033[46m' + local_ip + '\033[0m')  # 2023-12-08 modify
-print('Build:  ' + '\033[0;37;42m' + '2024-03-27' + '\033[0m' + '\n')
+print('Build:  ' + '\033[0;37;42m' + '2024-07-01' + '\033[0m' + '\n')
 host_ip = local_ip     # 2023-08-09 add
 
 # this will prevent the screen saver or sleep.

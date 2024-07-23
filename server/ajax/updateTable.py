@@ -83,8 +83,9 @@ def update_password():
 @updateTable.route("/updateSetting", methods=['POST'])
 def update_setting():
     print("updateSetting....")
+
     request_data = request.get_json()
-    userID = (request_data['empID'] or '')
+    userID = request_data['empID']
     newSetting = (request_data['setting'] or '')
 
     return_value = True  # true: 資料正確, 註冊成功

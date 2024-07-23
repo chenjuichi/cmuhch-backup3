@@ -2,6 +2,7 @@
   "name": "front02",
   "version": "0.1.0",
   "private": true,
+  "$schema": "./prettierrc.json",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
@@ -50,4 +51,7 @@
     "last 2 versions",
     "not dead"
   ]
+
+
+
 }

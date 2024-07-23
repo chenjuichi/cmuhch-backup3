@@ -1343,6 +1343,9 @@ def list_stock_records():
         #_grid = s.query(Grid).filter_by(id=item.grid_id).first()     # 2023-01-13 mark
         _grid = s.query(Grid).filter_by(id=_reagent.grid_id).first()  # 2023-01-13 add
 
+        if _grid is None:   #在庫數為0  # 2024-07-01 add
+          continue                     # 2024-07-01 add
+
         sup_name_data=''                        # 2023-04-25 add
         if _supplier is not None:               # 2023-04-25 add
           sup_name_data=_supplier.super_name    # 2023-04-25 add
@@ -1364,7 +1367,7 @@ def list_stock_records():
             'stkRecord_inStock_count': str(item.count),
             # 安全存量與在庫數量的單位
             'stkRecord_unit': _reagent.reag_In_unit,
-
+            # 2024-07-01 modify
             'stkRecord_grid': _grid.station + '站' + _grid.layout + '層' + _grid.pos + '格'
         }
 
